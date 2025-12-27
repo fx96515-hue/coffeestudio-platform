@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import hashlib
 import re
@@ -92,7 +92,7 @@ def _extract_structured_with_llm(
     }
     system = (
         "Du extrahierst strukturierte Kaffee-Entity-Infos aus einem Webseiten-Text. "
-        "Gib NUR valides JSON zurück (kein Markdown). "
+        "Gib NUR valides JSON zurÃ¼ck (kein Markdown). "
         "Nichts erfinden. Unbekannt => null. "
         f"Entity-Typ: {entity_type}. "
         "Wenn der Text nicht passt: alles null."
@@ -176,21 +176,21 @@ def enrich_entity(
         if extracted:
             if entity_type == "cooperative":
                 if extracted.get("region") and not getattr(entity, "region", None):
-                    entity.region = str(extracted["region"])[:255]
+                    setattr(entity, "region", str(extracted["region"])[:255])
                     updated_fields.append("region")
                 if extracted.get("varieties") and not getattr(
                     entity, "varieties", None
                 ):
-                    entity.varieties = str(extracted["varieties"])[:255]
+                    setattr(entity, "varieties", str(extracted["varieties"])[:255])
                     updated_fields.append("varieties")
                 if extracted.get("certifications") and not getattr(
                     entity, "certifications", None
                 ):
-                    entity.certifications = str(extracted["certifications"])[:255]
+                    setattr(entity, "certifications", str(extracted["certifications"])[:255])
                     updated_fields.append("certifications")
             else:
                 if extracted.get("city") and not getattr(entity, "city", None):
-                    entity.city = str(extracted["city"])[:255]
+                    setattr(entity, "city", str(extracted["city"])[:255])
                     updated_fields.append("city")
 
             if extracted.get("contact_email") and not getattr(
@@ -253,3 +253,7 @@ def enrich_entity(
             "entity_id": entity_id,
             "url": target_url,
         }
+
+
+
+

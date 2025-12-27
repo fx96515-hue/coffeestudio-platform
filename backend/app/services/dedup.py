@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Any
@@ -55,8 +55,7 @@ def suggest_duplicates(
     if entity_type == "cooperative":
         items: list[Any] = db.query(Cooperative).all()
     else:
-        items = db.query(Roaster).all()  # type: ignore[assignment]
-
+        items = db.query(Roaster).all()
     # group by domain when possible (strong signal)
     by_domain: dict[str, list[Any]] = {}
     no_domain: list[Any] = []
@@ -109,3 +108,4 @@ def suggest_duplicates(
         }
         for p in pairs
     ]
+

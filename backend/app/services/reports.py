@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from datetime import datetime, timezone
 from typing import Dict, List, Optional
@@ -76,12 +76,12 @@ def generate_daily_report(db: Session) -> tuple[str, Dict]:
     )
 
     md_lines: List[str] = []
-    md_lines.append(f"# CoffeeStudio Tagesreport (UTC) — {now.date().isoformat()}")
+    md_lines.append(f"# CoffeeStudio Tagesreport (UTC) â€” {now.date().isoformat()}")
     md_lines.append("")
 
     # Market
     md_lines.append("## Markt & Preise")
-    md_lines.append(f"- USD→EUR: {_fmt_obs(latest.get('FX:USD_EUR'))}")
+    md_lines.append(f"- USDâ†’EUR: {_fmt_obs(latest.get('FX:USD_EUR'))}")
     md_lines.append(f"- Coffee C (USD/lb): {_fmt_obs(latest.get('COFFEE_C:USD_LB'))}")
     md_lines.append(
         f"- Fracht 40ft (USD): {_fmt_obs(latest.get('FREIGHT:USD_PER_40FT'))}"
@@ -89,15 +89,15 @@ def generate_daily_report(db: Session) -> tuple[str, Dict]:
     md_lines.append("")
 
     # Coops
-    md_lines.append("## Kooperativen Peru — Top 10")
+    md_lines.append("## Kooperativen Peru â€” Top 10")
     if not coops:
-        md_lines.append("- (keine Einträge)")
+        md_lines.append("- (keine EintrÃ¤ge)")
     else:
         for c in coops:
             score = f"{c.total_score:.1f}" if c.total_score is not None else "-"
             conf = f"{c.confidence:.2f}" if c.confidence is not None else "-"
             md_lines.append(
-                f"- **{c.name}** ({c.region or 'Region n/a'}) — Score: {score}, Confidence: {conf}"
+                f"- **{c.name}** ({c.region or 'Region n/a'}) â€” Score: {score}, Confidence: {conf}"
             )
             if c.next_action:
                 md_lines.append(f"  - Next Action: {c.next_action}")
@@ -105,7 +105,7 @@ def generate_daily_report(db: Session) -> tuple[str, Dict]:
                 md_lines.append(
                     "  - Offene Daten: "
                     + (
-                        c.requested_data[:140] + "…"
+                        c.requested_data[:140] + "â€¦"
                         if len(c.requested_data) > 140
                         else c.requested_data
                     )
@@ -113,9 +113,9 @@ def generate_daily_report(db: Session) -> tuple[str, Dict]:
     md_lines.append("")
 
     # Roasters
-    md_lines.append("## Röster Deutschland — Auszug")
+    md_lines.append("## RÃ¶ster Deutschland â€” Auszug")
     if not roasters:
-        md_lines.append("- (keine Einträge)")
+        md_lines.append("- (keine EintrÃ¤ge)")
     else:
         for r in roasters:
             flags = []
@@ -131,13 +131,13 @@ def generate_daily_report(db: Session) -> tuple[str, Dict]:
     # Actions (very conservative default)
     md_lines.append("## Empfohlene Aktionen")
     md_lines.append(
-        "- 1) Fehlende Marktdaten ergänzen (FX/C-Preis/Fracht) → verbessert Margenberechnungen"
+        "- 1) Fehlende Marktdaten ergÃ¤nzen (FX/C-Preis/Fracht) â†’ verbessert Margenberechnungen"
     )
     md_lines.append(
         "- 2) Top-3 Kooperativen: Kontaktdaten verifizieren + Muster/Lots anfragen"
     )
     md_lines.append(
-        "- 3) 3–5 passende Röster identifizieren und Gespräch anbahnen (Peru-/Direct-Trade-Fokus)"
+        "- 3) 3â€“5 passende RÃ¶ster identifizieren und GesprÃ¤ch anbahnen (Peru-/Direct-Trade-Fokus)"
     )
 
     payload: Dict = {
@@ -147,8 +147,8 @@ def generate_daily_report(db: Session) -> tuple[str, Dict]:
                 None
                 if latest[k] is None
                 else {
-                    "value": latest[k].value,
-                    "observed_at": latest[k].observed_at.isoformat(),
+                    "value": (latest[k].value if latest[k] is not None else None),
+                    "observed_at": (latest[k].observed_at.isoformat() if latest[k] is not None else None),
                 }
             )
             for k in market_keys
@@ -176,3 +176,5 @@ def generate_daily_report(db: Session) -> tuple[str, Dict]:
     }
 
     return "\n".join(md_lines), payload
+
+
