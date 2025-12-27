@@ -32,12 +32,10 @@ class DedupPair:
 
 def _score(a_name: str, b_name: str) -> float:
     # token-based fuzzy score (0..100)
-    return float(
-        max(
-            fuzz.token_set_ratio(a_name or "", b_name or ""),
-            fuzz.token_sort_ratio(a_name or "", b_name or ""),
-        )
-    )
+    return float(max(
+        fuzz.token_set_ratio(a_name or "", b_name or ""),
+        fuzz.token_sort_ratio(a_name or "", b_name or ""),
+    ))
 
 
 def suggest_duplicates(
@@ -55,9 +53,9 @@ def suggest_duplicates(
         raise ValueError("entity_type must be cooperative|roaster")
 
     if entity_type == "cooperative":
-        items = db.query(Cooperative).all()
+        items: list[Any] = db.query(Cooperative).all()
     else:
-        items = db.query(Roaster).all()
+        items = db.query(Roaster).all()  # type: ignore[assignment]
 
     # group by domain when possible (strong signal)
     by_domain: dict[str, list[Any]] = {}
@@ -79,11 +77,7 @@ def suggest_duplicates(
             for j in range(i + 1, len(group)):
                 a, b = group[i], group[j]
                 s = _score(a.name, b.name)
-                pairs.append(
-                    DedupPair(
-                        a.id, b.id, a.name, b.name, max(s, 98.0), f"same_domain:{dom}"
-                    )
-                )
+                pairs.append(DedupPair(a.id, b.id, a.name, b.name, max(s, 98.0), f"same_domain:{dom}"))
 
     # Name-based duplicates (simple blocking by first letter)
     buckets: dict[str, list[Any]] = {}
@@ -98,9 +92,7 @@ def suggest_duplicates(
                 a, b = group[i], group[j]
                 s = _score(a.name, b.name)
                 if s >= threshold:
-                    pairs.append(
-                        DedupPair(a.id, b.id, a.name, b.name, s, "name_similarity")
-                    )
+                    pairs.append(DedupPair(a.id, b.id, a.name, b.name, s, "name_similarity"))
 
     # sort + cut
     pairs.sort(key=lambda p: p.score, reverse=True)

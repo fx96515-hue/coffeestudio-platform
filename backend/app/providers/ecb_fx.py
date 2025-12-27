@@ -70,7 +70,7 @@ def fetch_ecb_fx(base: str, quote: str, timeout_s: float = 20.0) -> Optional[FxQ
         if not ccy or not rate:
             continue
         try:
-            rates[ccy.upper()] = float(rate)
+            rates[ccy.upper()] = float(rate_str)
         except Exception:
             continue
 
@@ -86,12 +86,12 @@ def fetch_ecb_fx(base: str, quote: str, timeout_s: float = 20.0) -> Optional[FxQ
         return None
 
     # Convert base->quote via EUR: (EUR->quote) / (EUR->base)
-    rate = eur_to_quote / eur_to_base
+    rate_value: float = eur_to_quote / eur_to_base
 
     return FxQuote(
         base=base,
         quote=quote,
-        rate=rate,
+        rate=rate_value,
         observed_at=observed_at,
         source_url=ECB_DAILY_XML,
         raw_text=xml_text,

@@ -1,4 +1,3 @@
-﻿import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import List
 
@@ -51,8 +50,6 @@ class Settings(BaseSettings):
             hh, mm = part.split(":")
             out.append((int(hh), int(mm)))
         return out
-settings = Settings(
-    DATABASE_URL=os.getenv("DATABASE_URL", "postgresql+psycopg://coffeestudio:coffeestudio@db:5432/coffeestudio"),
-    REDIS_URL=os.getenv("REDIS_URL", "redis://redis:6379/0"),
-    JWT_SECRET=os.getenv("JWT_SECRET", "change_me_in_env"),
-)
+
+
+settings = Settings()  # type: ignore[call-arg]

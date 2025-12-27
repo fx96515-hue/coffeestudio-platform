@@ -1,3 +1,4 @@
+from datetime import datetime
 from sqlalchemy import String, Integer, Text, DateTime, JSON, UniqueConstraint, Index
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -18,13 +19,9 @@ class WebExtract(Base, TimestampMixin):
     entity_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
 
     url: Mapped[str] = mapped_column(String(1000), nullable=False)
-    status: Mapped[str] = mapped_column(
-        String(32), nullable=False, default="ok"
-    )  # ok|failed
+    status: Mapped[str] = mapped_column(String(32), nullable=False, default="ok")  # ok|failed
 
-    retrieved_at: Mapped[DateTime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True, index=True
-    )
+    retrieved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, index=True)
     content_text: Mapped[str | None] = mapped_column(Text, nullable=True)
     content_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
     lang: Mapped[str | None] = mapped_column(String(16), nullable=True)
