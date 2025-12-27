@@ -1,5 +1,5 @@
-from datetime import datetime
-from sqlalchemy import String, Text, Float, DateTime, Integer, ForeignKey, Index, JSON
+﻿from datetime import datetime
+from sqlalchemy import String, Text, Float, DateTime, ForeignKey, Index, JSON
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.session import Base
@@ -42,3 +42,4 @@ class CuppingResult(Base, TimestampMixin):
 
 
 Index("ix_cupping_score", CuppingResult.sca_score)
+

@@ -1,11 +1,8 @@
-from datetime import datetime
+﻿from datetime import datetime
 from sqlalchemy import String, Text, Float, JSON, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy.sql import func
-
 from app.db.session import Base
 from app.models.common import TimestampMixin
-
 
 class Cooperative(Base, TimestampMixin):
     __tablename__ = "cooperatives"
@@ -35,3 +32,4 @@ class Cooperative(Base, TimestampMixin):
     last_scored_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     meta: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+

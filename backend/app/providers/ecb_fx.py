@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -70,7 +70,7 @@ def fetch_ecb_fx(base: str, quote: str, timeout_s: float = 20.0) -> Optional[FxQ
         if not ccy or not rate:
             continue
         try:
-            rates[ccy.upper()] = float(rate_str)
+            rates[ccy.upper()] = float(rate)
         except Exception:
             continue
 
@@ -96,3 +96,4 @@ def fetch_ecb_fx(base: str, quote: str, timeout_s: float = 20.0) -> Optional[FxQ
         source_url=ECB_DAILY_XML,
         raw_text=xml_text,
     )
+
