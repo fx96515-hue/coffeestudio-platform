@@ -174,32 +174,27 @@ def enrich_entity(
 
         updated_fields: list[str] = []
         if extracted:
-            if entity_type == "cooperative":
-                if extracted.get("region") and not getattr(entity, "region", None):
-                    setattr(entity, "region", str(extracted["region"])[:255])
+            # Use isinstance checks for proper type narrowing
+            if isinstance(entity, Cooperative):
+                if extracted.get("region") and not entity.region:
+                    entity.region = str(extracted["region"])[:255]
                     updated_fields.append("region")
-                if extracted.get("varieties") and not getattr(
-                    entity, "varieties", None
-                ):
-                    setattr(entity, "varieties", str(extracted["varieties"])[:255])
+                if extracted.get("varieties") and not entity.varieties:
+                    entity.varieties = str(extracted["varieties"])[:255]
                     updated_fields.append("varieties")
-                if extracted.get("certifications") and not getattr(
-                    entity, "certifications", None
-                ):
-                    setattr(entity, "certifications", str(extracted["certifications"])[:255])
+                if extracted.get("certifications") and not entity.certifications:
+                    entity.certifications = str(extracted["certifications"])[:255]
                     updated_fields.append("certifications")
-            else:
-                if extracted.get("city") and not getattr(entity, "city", None):
-                    setattr(entity, "city", str(extracted["city"])[:255])
+            elif isinstance(entity, Roaster):
+                if extracted.get("city") and not entity.city:
+                    entity.city = str(extracted["city"])[:255]
                     updated_fields.append("city")
 
-            if extracted.get("contact_email") and not getattr(
-                entity, "contact_email", None
-            ):
+            if extracted.get("contact_email") and not entity.contact_email:
                 entity.contact_email = str(extracted["contact_email"])[:320]
                 updated_fields.append("contact_email")
 
-            if extracted.get("website") and not getattr(entity, "website", None):
+            if extracted.get("website") and not entity.website:
                 entity.website = _normalize_url(str(extracted["website"]))[:500]
                 updated_fields.append("website")
 

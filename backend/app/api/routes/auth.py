@@ -1,5 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+import structlog
 
 from app.api.deps import get_current_user
 from app.core.security import verify_password, create_access_token, hash_password
@@ -11,15 +14,34 @@ from app.core.config import settings
 from email_validator import validate_email, EmailNotValidError
 
 router = APIRouter()
+logger = structlog.get_logger(__name__)
+
+# Rate limiter instance
+limiter = Limiter(key_func=get_remote_address)
 
 
 @router.post("/login", response_model=TokenResponse)
-def login(payload: LoginRequest, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")  # Max 5 login attempts per minute
+def login(request: Request, payload: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == payload.email).first()
     if not user or not verify_password(payload.password, user.password_hash):
+        # Log failure with minimal info to prevent user enumeration via logs
+        logger.warning(
+            "auth.login_failed",
+            email=payload.email,
+            ip=request.client.host if request.client else "unknown",
+            user_agent=request.headers.get("user-agent", "unknown")
+        )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
         )
+    
+    logger.info(
+        "auth.login_success",
+        email=user.email,
+        role=user.role,
+        ip=request.client.host if request.client else "unknown"
+    )
     token = create_access_token(sub=user.email, role=user.role)
     return TokenResponse(access_token=token)
 
@@ -31,7 +53,8 @@ def me(user: User = Depends(get_current_user)):
 
 # Dev-only bootstrap: creates admin if empty.
 @router.post("/dev/bootstrap")
-def dev_bootstrap(db: Session = Depends(get_db)):
+@limiter.limit("10/hour")  # Limit bootstrap attempts
+def dev_bootstrap(request: Request, db: Session = Depends(get_db)):
     if db.query(User).count() > 0:
         return {"status": "skipped"}
 

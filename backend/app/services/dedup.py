@@ -53,13 +53,13 @@ def suggest_duplicates(
         raise ValueError("entity_type must be cooperative|roaster")
 
     if entity_type == "cooperative":
-        items: list[Any] = db.query(Cooperative).all()
+        items_list: list[Cooperative] | list[Roaster] = db.query(Cooperative).all()
     else:
-        items = db.query(Roaster).all()
+        items_list = db.query(Roaster).all()
     # group by domain when possible (strong signal)
     by_domain: dict[str, list[Any]] = {}
     no_domain: list[Any] = []
-    for it in items:
+    for it in items_list:
         dom = _domain(getattr(it, "website", None))
         if dom:
             by_domain.setdefault(dom, []).append(it)

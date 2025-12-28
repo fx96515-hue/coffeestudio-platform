@@ -57,11 +57,7 @@ def fetch_ecb_fx(base: str, quote: str, timeout_s: float = 20.0) -> Optional[FxQ
     dt_str = time_node.attrib.get("time")
     try:
         if not dt_str:
-            continue
-        if not dt_str:
-            continue
-        if not dt_str:
-            continue
+            raise ValueError("dt_str is None or empty")
         observed_at = datetime.fromisoformat(dt_str).replace(tzinfo=timezone.utc)
     except Exception:
         observed_at = datetime.now(timezone.utc)

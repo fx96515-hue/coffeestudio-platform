@@ -1,35 +1,85 @@
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
+from jose import JWTError, ExpiredSignatureError
+import structlog
 
 from app.core.security import decode_token
 from app.db.session import get_db
 from app.models.user import User
 
+logger = structlog.get_logger(__name__)
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
 def get_current_user(
-    db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)
+    request: Request,
+    db: Session = Depends(get_db),
+    token: str = Depends(oauth2_scheme)
 ) -> User:
+    """Get current authenticated user with detailed error handling and logging."""
     try:
         payload = decode_token(token)
-    except Exception:
+    except ExpiredSignatureError:
+        logger.warning(
+            "auth.token_expired",
+            ip=request.client.host if request.client else "unknown",
+            user_agent=request.headers.get("user-agent", "unknown")
+        )
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentifizierung fehlgeschlagen",  # Generic message to prevent info disclosure
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    except JWTError as e:
+        logger.warning(
+            "auth.invalid_token",
+            error=str(e),
+            ip=request.client.host if request.client else "unknown"
+        )
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentifizierung fehlgeschlagen",  # Generic message to prevent info disclosure
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    except Exception as e:
+        logger.error(
+            "auth.unexpected_error",
+            error=str(e),
+            exc_info=True
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Authentifizierungsfehler"
         )
 
     user = db.query(User).filter(User.email == payload.get("sub")).first()
     if not user or not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Inactive user"
+        logger.warning(
+            "auth.inactive_user",
+            email=payload.get("sub"),
+            exists=user is not None,
+            active=user.is_active if user else False
         )
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Inaktiver Benutzer",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    
     return user
 
 
 def require_role(*roles: str):
     def _check(user: User = Depends(get_current_user)) -> User:
         if user.role not in roles:
+            logger.warning(
+                "auth.insufficient_role",
+                user_email=user.email,
+                user_role=user.role,
+                required_roles=list(roles)
+            )
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient role"
             )
