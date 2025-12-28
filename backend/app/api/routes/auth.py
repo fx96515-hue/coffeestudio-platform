@@ -25,12 +25,12 @@ limiter = Limiter(key_func=get_remote_address)
 def login(request: Request, payload: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == payload.email).first()
     if not user or not verify_password(payload.password, user.password_hash):
+        # Log failure with minimal info to prevent user enumeration via logs
         logger.warning(
             "auth.login_failed",
             email=payload.email,
             ip=request.client.host if request.client else "unknown",
-            user_agent=request.headers.get("user-agent", "unknown"),
-            user_exists=user is not None
+            user_agent=request.headers.get("user-agent", "unknown")
         )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"

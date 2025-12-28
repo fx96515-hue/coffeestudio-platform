@@ -29,7 +29,7 @@ def get_current_user(
         )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token abgelaufen",
+            detail="Authentifizierung fehlgeschlagen",  # Generic message to prevent info disclosure
             headers={"WWW-Authenticate": "Bearer"}
         )
     except JWTError as e:
@@ -40,7 +40,7 @@ def get_current_user(
         )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Ungültiger Token",
+            detail="Authentifizierung fehlgeschlagen",  # Generic message to prevent info disclosure
             headers={"WWW-Authenticate": "Bearer"}
         )
     except Exception as e:

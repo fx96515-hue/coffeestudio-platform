@@ -20,26 +20,29 @@ class CooperativeCreate(BaseModel):
     @field_validator('name')
     @classmethod
     def name_safe(cls, v: str) -> str:
-        """Prevent potentially dangerous input in names."""
+        """Basic input sanitization for names."""
         if not v:
             raise ValueError('Name darf nicht leer sein')
-        dangerous = ['drop', 'delete', 'insert', 'update', '--', ';', '<script>', '<iframe>']
-        v_lower = v.lower()
-        for kw in dangerous:
-            if kw in v_lower:
-                raise ValueError(f'Ungültige Zeichen im Namen: "{kw}" ist nicht erlaubt')
+        # Basic length and character checks - database layer uses parameterized queries for SQL injection protection
+        if len(v) > 255:
+            raise ValueError('Name ist zu lang (max. 255 Zeichen)')
+        # Prevent obvious XSS attempts
+        if '<script' in v.lower() or '<iframe' in v.lower() or 'javascript:' in v.lower():
+            raise ValueError('Ungültige Zeichen im Namen')
         return v
     
     @field_validator('website')
     @classmethod
     def website_valid(cls, v: Optional[str]) -> Optional[str]:
-        """Basic website URL validation."""
+        """Validate website URL format."""
         if v and v.strip():
             v = v.strip()
-            # Must start with http:// or https://
+            # Must be a valid http/https URL
             if not (v.startswith('http://') or v.startswith('https://')):
-                # Auto-prepend https:// if missing
-                v = 'https://' + v
+                raise ValueError('Website muss mit http:// oder https:// beginnen')
+            # Basic URL validation - prevent javascript: and other dangerous protocols
+            if 'javascript:' in v.lower() or 'data:' in v.lower() or 'file:' in v.lower():
+                raise ValueError('Ungültiges URL-Protokoll')
         return v if v else None
 
 
@@ -61,28 +64,31 @@ class CooperativeUpdate(BaseModel):
     @field_validator('name')
     @classmethod
     def name_safe(cls, v: Optional[str]) -> Optional[str]:
-        """Prevent potentially dangerous input in names."""
+        """Basic input sanitization for names."""
         if v is None:
             return v
         if not v.strip():
             raise ValueError('Name darf nicht leer sein')
-        dangerous = ['drop', 'delete', 'insert', 'update', '--', ';', '<script>', '<iframe>']
-        v_lower = v.lower()
-        for kw in dangerous:
-            if kw in v_lower:
-                raise ValueError(f'Ungültige Zeichen im Namen: "{kw}" ist nicht erlaubt')
+        # Basic length and character checks - database layer uses parameterized queries for SQL injection protection
+        if len(v) > 255:
+            raise ValueError('Name ist zu lang (max. 255 Zeichen)')
+        # Prevent obvious XSS attempts
+        if '<script' in v.lower() or '<iframe' in v.lower() or 'javascript:' in v.lower():
+            raise ValueError('Ungültige Zeichen im Namen')
         return v
     
     @field_validator('website')
     @classmethod
     def website_valid(cls, v: Optional[str]) -> Optional[str]:
-        """Basic website URL validation."""
+        """Validate website URL format."""
         if v and v.strip():
             v = v.strip()
-            # Must start with http:// or https://
+            # Must be a valid http/https URL
             if not (v.startswith('http://') or v.startswith('https://')):
-                # Auto-prepend https:// if missing
-                v = 'https://' + v
+                raise ValueError('Website muss mit http:// oder https:// beginnen')
+            # Basic URL validation - prevent javascript: and other dangerous protocols
+            if 'javascript:' in v.lower() or 'data:' in v.lower() or 'file:' in v.lower():
+                raise ValueError('Ungültiges URL-Protokoll')
         return v if v else None
 
 
