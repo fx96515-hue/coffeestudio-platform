@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   // Must be a valid email; avoid .local/.test (EmailStr rejects these).
-  const [email, setEmail] = useState("admin@coffeestudio.com");
-  const [password, setPassword] = useState("adminadmin");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 

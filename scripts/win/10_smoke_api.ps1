@@ -1,11 +1,20 @@
 param(
-  [string]$Base = "http://api.localhost",
-  [string]$Email = "admin@coffeestudio.com",
-  [string]$Password = "adminadmin"
+  [string]$Base = "http://api.localhost"
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+
+# Credentials aus Umgebungsvariablen lesen
+$Email = $env:SMOKE_TEST_EMAIL
+$Password = $env:SMOKE_TEST_PASSWORD
+
+if (-not $Email -or -not $Password) {
+  # Fallback auf Standardwerte für lokale Entwicklung
+  Write-Warning "SMOKE_TEST_EMAIL und SMOKE_TEST_PASSWORD nicht gesetzt. Verwende Standard-Credentials für lokale Entwicklung."
+  $Email = "admin@coffeestudio.com"
+  $Password = "adminadmin"
+}
 
 # Avoid proxy surprises for localhost domains
 $env:NO_PROXY="localhost,127.0.0.1,::1,.localhost,api.localhost,ui.localhost"
