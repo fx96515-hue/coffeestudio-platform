@@ -1,7 +1,7 @@
 ﻿from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from sqlalchemy.orm import Session
 
@@ -140,19 +140,21 @@ def generate_daily_report(db: Session) -> tuple[str, Dict]:
         "- 3) 3â€“5 passende RÃ¶ster identifizieren und GesprÃ¤ch anbahnen (Peru-/Direct-Trade-Fokus)"
     )
 
+    # Build market dict with proper null checks
+    market_dict: Dict[str, Optional[Dict[str, Any]]] = {}
+    for k in market_keys:
+        obs = latest.get(k)
+        if obs is not None:
+            market_dict[k] = {
+                "value": obs.value,
+                "observed_at": obs.observed_at.isoformat(),
+            }
+        else:
+            market_dict[k] = None
+    
     payload: Dict = {
         "generated_at": now.isoformat(),
-        "market": {
-            k: (
-                None
-                if latest[k] is None
-                else {
-                    "value": (latest[k].value if latest[k] is not None else None),
-                    "observed_at": (latest[k].observed_at.isoformat() if latest[k] is not None else None),
-                }
-            )
-            for k in market_keys
-        },
+        "market": market_dict,
         "top_coops": [
             {
                 "id": c.id,
