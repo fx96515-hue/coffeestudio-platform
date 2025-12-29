@@ -2,11 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
-from app.api.deps import require_role
+from app.api.deps import require_role, get_current_user
 from app.db.session import get_db
 from app.models.roaster import Roaster
+from app.models.user import User
 from app.schemas.roaster import RoasterCreate, RoasterOut, RoasterUpdate
 from app.core.export import DataExporter
+from app.core.audit import AuditLogger
 
 router = APIRouter()
 
@@ -22,12 +24,22 @@ def list_roasters(
 def create_roaster(
     payload: RoasterCreate,
     db: Session = Depends(get_db),
-    _=Depends(require_role("admin", "analyst")),
+    user: User = Depends(require_role("admin", "analyst")),
 ):
     r = Roaster(**payload.model_dump())
     db.add(r)
     db.commit()
     db.refresh(r)
+    
+    # Log creation for audit trail
+    AuditLogger.log_create(
+        db=db,
+        user=user,
+        entity_type="roaster",
+        entity_id=r.id,
+        entity_data=payload.model_dump()
+    )
+    
     return r
 
 
@@ -48,27 +60,62 @@ def update_roaster(
     roaster_id: int,
     payload: RoasterUpdate,
     db: Session = Depends(get_db),
-    _=Depends(require_role("admin", "analyst")),
+    user: User = Depends(require_role("admin", "analyst")),
 ):
     r = db.query(Roaster).filter(Roaster.id == roaster_id).first()
     if not r:
         raise HTTPException(status_code=404, detail="Not found")
+    
+    # Capture old data for audit log
+    old_data = {k: getattr(r, k) for k in payload.model_dump(exclude_unset=True).keys()}
+    
     for k, v in payload.model_dump(exclude_unset=True).items():
         setattr(r, k, v)
     db.commit()
     db.refresh(r)
+    
+    # Log update for audit trail
+    AuditLogger.log_update(
+        db=db,
+        user=user,
+        entity_type="roaster",
+        entity_id=roaster_id,
+        old_data=old_data,
+        new_data=payload.model_dump(exclude_unset=True)
+    )
+    
     return r
 
 
 @router.delete("/{roaster_id}")
 def delete_roaster(
-    roaster_id: int, db: Session = Depends(get_db), _=Depends(require_role("admin"))
+    roaster_id: int, 
+    db: Session = Depends(get_db), 
+    user: User = Depends(require_role("admin"))
 ):
     r = db.query(Roaster).filter(Roaster.id == roaster_id).first()
     if not r:
         raise HTTPException(status_code=404, detail="Not found")
+    
+    # Capture data before deletion for audit log
+    entity_data = {
+        "name": r.name,
+        "city": r.city,
+        "website": r.website,
+    }
+    
     db.delete(r)
     db.commit()
+    
+    # Log deletion for audit trail
+    AuditLogger.log_delete(
+        db=db,
+        user=user,
+        entity_type="roaster",
+        entity_id=roaster_id,
+        entity_data=entity_data
+    )
+    
     return {"status": "deleted"}
 
 

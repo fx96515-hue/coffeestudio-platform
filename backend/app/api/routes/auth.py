@@ -6,6 +6,7 @@ import structlog
 
 from app.api.deps import get_current_user
 from app.core.security import verify_password, create_access_token, hash_password
+from app.core.audit import AuditLogger
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.auth import LoginRequest, TokenResponse, UserOut
@@ -26,11 +27,21 @@ def login(request: Request, payload: LoginRequest, db: Session = Depends(get_db)
     user = db.query(User).filter(User.email == payload.email).first()
     if not user or not verify_password(payload.password, user.password_hash):
         # Log failure with minimal info to prevent user enumeration via logs
+        ip_address = request.client.host if request.client else "unknown"
+        user_agent = request.headers.get("user-agent", "unknown")
         logger.warning(
             "auth.login_failed",
             email=payload.email,
-            ip=request.client.host if request.client else "unknown",
-            user_agent=request.headers.get("user-agent", "unknown")
+            ip=ip_address,
+            user_agent=user_agent
+        )
+        AuditLogger.log_auth_event(
+            email=payload.email,
+            event_type="login_failed",
+            ip_address=ip_address,
+            user_agent=user_agent,
+            success=False,
+            reason="Invalid credentials"
         )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
@@ -38,20 +49,39 @@ def login(request: Request, payload: LoginRequest, db: Session = Depends(get_db)
     
     # Check if user account is active
     if not user.is_active:
+        ip_address = request.client.host if request.client else "unknown"
+        user_agent = request.headers.get("user-agent", "unknown")
         logger.warning(
             "auth.inactive_user_login_attempt",
             email=user.email,
-            ip=request.client.host if request.client else "unknown"
+            ip=ip_address
+        )
+        AuditLogger.log_auth_event(
+            email=user.email,
+            event_type="login_failed",
+            ip_address=ip_address,
+            user_agent=user_agent,
+            success=False,
+            reason="Inactive account"
         )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
         )
     
+    ip_address = request.client.host if request.client else "unknown"
+    user_agent = request.headers.get("user-agent", "unknown")
     logger.info(
         "auth.login_success",
         email=user.email,
         role=user.role,
-        ip=request.client.host if request.client else "unknown"
+        ip=ip_address
+    )
+    AuditLogger.log_auth_event(
+        email=user.email,
+        event_type="login_success",
+        ip_address=ip_address,
+        user_agent=user_agent,
+        success=True
     )
     token = create_access_token(sub=user.email, role=user.role)
     return TokenResponse(access_token=token)
