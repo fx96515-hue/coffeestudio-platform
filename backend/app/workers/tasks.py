@@ -51,7 +51,7 @@ def refresh_market():
                 meta={"base": fx.base, "quote": fx.quote},
             )
             ingested.append(
-                {"key": obs.key, "observed_at": obs.observed_at.isoformat()}
+                {"key": obs.key, "observed_at": obs.observed_at.isoformat()}  # type: ignore[attr-defined]
             )
 
         # --- Coffee: ICE Arabica (Stooq KC.F close) ---
@@ -70,7 +70,7 @@ def refresh_market():
                 meta={"symbol": kc.symbol},
             )
             ingested.append(
-                {"key": obs.key, "observed_at": obs.observed_at.isoformat()}
+                {"key": obs.key, "observed_at": obs.observed_at.isoformat()}  # type: ignore[attr-defined]
             )
 
         log.info("market_refresh", status="ok", ingested=len(ingested))

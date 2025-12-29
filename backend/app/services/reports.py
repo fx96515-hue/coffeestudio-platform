@@ -30,7 +30,7 @@ def _fmt_obs(o: Optional[MarketObservation]) -> str:
     val = f"{o.value:g}"
     unit = f" {o.unit}" if o.unit else ""
     cur = f" {o.currency}" if o.currency else ""
-    ts = o.observed_at.astimezone(timezone.utc).isoformat()
+    ts = o.observed_at.astimezone(timezone.utc).isoformat()  # type: ignore[attr-defined]
     return f"{val}{unit}{cur} (t={ts})"
 
 
@@ -147,7 +147,7 @@ def generate_daily_report(db: Session) -> tuple[str, Dict]:
         if obs is not None:
             market_dict[k] = {
                 "value": obs.value,
-                "observed_at": obs.observed_at.isoformat(),
+                "observed_at": obs.observed_at.isoformat(),  # type: ignore[attr-defined]
             }
         else:
             market_dict[k] = None
