@@ -153,7 +153,7 @@ def enrich_entity(
             db.add(we)
 
         we.status = "ok"
-        we.retrieved_at = now  # type: ignore[assignment]
+        we.retrieved_at = now
         we.content_text = text
         we.content_hash = chash
         we.meta = meta
@@ -177,17 +177,17 @@ def enrich_entity(
             # Use isinstance checks for proper type narrowing
             if isinstance(entity, Cooperative):
                 if extracted.get("region") and not entity.region:
-                    entity.region = str(extracted["region"])[:255]  # type: ignore[union-attr]
+                    entity.region = str(extracted["region"])[:255]
                     updated_fields.append("region")
                 if extracted.get("varieties") and not entity.varieties:
-                    entity.varieties = str(extracted["varieties"])[:255]  # type: ignore[union-attr]
+                    entity.varieties = str(extracted["varieties"])[:255]
                     updated_fields.append("varieties")
                 if extracted.get("certifications") and not entity.certifications:
-                    entity.certifications = str(extracted["certifications"])[:255]  # type: ignore[union-attr]
+                    entity.certifications = str(extracted["certifications"])[:255]
                     updated_fields.append("certifications")
             elif isinstance(entity, Roaster):
                 if extracted.get("city") and not entity.city:
-                    entity.city = str(extracted["city"])[:255]  # type: ignore[union-attr]
+                    entity.city = str(extracted["city"])[:255]
                     updated_fields.append("city")
 
             if extracted.get("contact_email") and not entity.contact_email:
@@ -198,7 +198,7 @@ def enrich_entity(
                 entity.website = _normalize_url(str(extracted["website"]))[:500]
                 updated_fields.append("website")
 
-            entity.last_verified_at = now  # type: ignore[assignment]
+            entity.last_verified_at = now
             updated_fields.append("last_verified_at")
             db.add(entity)
 
