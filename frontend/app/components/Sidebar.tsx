@@ -6,6 +6,11 @@ import React from "react";
 
 const items: { href: string; label: string; badge?: string }[] = [
   { href: "/dashboard", label: "Dashboard" },
+  { href: "/peru-sourcing", label: "Peru Sourcing" },
+  { href: "/german-sales", label: "German Sales" },
+  { href: "/shipments", label: "Shipments" },
+  { href: "/deals", label: "Deals & Margins" },
+  { href: "/analytics", label: "Analytics & ML" },
   { href: "/cooperatives", label: "Kooperativen" },
   { href: "/roasters", label: "Röstereien" },
   { href: "/news", label: "Marktradar" },
