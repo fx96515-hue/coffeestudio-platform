@@ -22,7 +22,8 @@ limiter = Limiter(
 app.state.limiter = limiter
 
 
-# Custom rate limit handler with proper type signature
+# Custom rate limit handler
+# Note: exc is typed as Exception for FastAPI compatibility but will be RateLimitExceeded
 async def rate_limit_exceeded_handler(request: Request, exc: Exception) -> Response:
     return JSONResponse(
         status_code=429,
