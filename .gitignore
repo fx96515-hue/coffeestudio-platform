@@ -10,9 +10,6 @@ __pycache__/
 venv/
 ENV/
 *.egg-info/
-.coverage
-coverage.xml
-htmlcov/
 
 # --- Node / Next ---
 node_modules/
