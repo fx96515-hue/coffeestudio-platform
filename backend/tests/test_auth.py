@@ -1,4 +1,3 @@
-import pytest
 from app.models.user import User
 from app.core.security import hash_password
 

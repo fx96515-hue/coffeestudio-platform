@@ -1,4 +1,3 @@
-import pytest
 from app.models.cooperative import Cooperative
 
 

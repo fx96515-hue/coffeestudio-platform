@@ -1,4 +1,3 @@
-import pytest
 from app.models.roaster import Roaster
 
 

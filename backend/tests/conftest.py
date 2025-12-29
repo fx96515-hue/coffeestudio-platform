@@ -20,8 +20,6 @@ os.environ.setdefault("BOOTSTRAP_ADMIN_PASSWORD", "test_admin_password")
 from app.db.session import get_db, Base
 from app.main import app
 from app.models.user import User
-from app.models.cooperative import Cooperative
-from app.models.roaster import Roaster
 from app.core.security import hash_password, create_access_token
 
 # Test database setup with in-memory SQLite
