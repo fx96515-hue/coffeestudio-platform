@@ -1,14 +1,25 @@
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
 from prometheus_fastapi_instrumentator import Instrumentator
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+from sqlalchemy.exc import IntegrityError, OperationalError
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.api.router import api_router
 from app.core.config import settings
 from app.core.logging import setup_logging
+from app.core.error_handlers import (
+    validation_exception_handler,
+    http_exception_handler,
+    integrity_error_handler,
+    operational_error_handler,
+    generic_exception_handler,
+)
+from app.middleware import InputValidationMiddleware, SecurityHeadersMiddleware
 
 setup_logging()
 
@@ -32,6 +43,17 @@ async def rate_limit_exceeded_handler(request: Request, exc: Exception) -> Respo
 
 
 app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
+
+# Add comprehensive error handlers
+app.add_exception_handler(RequestValidationError, validation_exception_handler)  # type: ignore[arg-type]
+app.add_exception_handler(StarletteHTTPException, http_exception_handler)  # type: ignore[arg-type]
+app.add_exception_handler(IntegrityError, integrity_error_handler)  # type: ignore[arg-type]
+app.add_exception_handler(OperationalError, operational_error_handler)  # type: ignore[arg-type]
+app.add_exception_handler(Exception, generic_exception_handler)
+
+# Add security middleware
+app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(InputValidationMiddleware)
 
 app.add_middleware(
     CORSMiddleware,

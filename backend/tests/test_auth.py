@@ -21,7 +21,9 @@ def test_login_invalid_password(client, test_user):
         "password": "wrong_password"
     })
     assert response.status_code == 401
-    assert "Invalid credentials" in response.json()["detail"]
+    data = response.json()
+    assert "error" in data
+    assert "Invalid credentials" in data["error"]["message"]
 
 
 def test_login_invalid_email(client):
@@ -31,7 +33,9 @@ def test_login_invalid_email(client):
         "password": "any_password"
     })
     assert response.status_code == 401
-    assert "Invalid credentials" in response.json()["detail"]
+    data = response.json()
+    assert "error" in data
+    assert "Invalid credentials" in data["error"]["message"]
 
 
 def test_login_inactive_user(client, db):
