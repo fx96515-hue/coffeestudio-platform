@@ -5,6 +5,7 @@ from jose import JWTError, ExpiredSignatureError
 import structlog
 
 from app.core.security import decode_token
+from app.core.audit import AuditLogger
 from app.db.session import get_db
 from app.models.user import User
 
@@ -79,6 +80,13 @@ def require_role(*roles: str):
                 user_email=user.email,
                 user_role=user.role,
                 required_roles=list(roles)
+            )
+            # Log permission denial for audit trail
+            AuditLogger.log_permission_denied(
+                user=user,
+                action="access",
+                resource_type="endpoint",
+                required_role=",".join(roles)
             )
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient role"

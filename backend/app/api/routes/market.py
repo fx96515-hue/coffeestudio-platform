@@ -3,11 +3,13 @@ from sqlalchemy.orm import Session
 
 from celery.result import AsyncResult
 
-from app.api.deps import require_role
+from app.api.deps import require_role, get_current_user
 from app.db.session import get_db
 from app.models.market import MarketObservation
+from app.models.user import User
 from app.schemas.market import MarketObservationCreate, MarketObservationOut
 from app.workers.celery_app import celery
+from app.core.audit import AuditLogger
 
 router = APIRouter()
 
@@ -31,12 +33,22 @@ def list_observations(
 def create_observation(
     payload: MarketObservationCreate,
     db: Session = Depends(get_db),
-    _=Depends(require_role("admin", "analyst")),
+    user: User = Depends(require_role("admin", "analyst")),
 ):
     obs = MarketObservation(**payload.model_dump())
     db.add(obs)
     db.commit()
     db.refresh(obs)
+    
+    # Log creation for audit trail
+    AuditLogger.log_create(
+        db=db,
+        user=user,
+        entity_type="market_observation",
+        entity_id=obs.id,
+        entity_data=payload.model_dump()
+    )
+    
     return obs
 
 
