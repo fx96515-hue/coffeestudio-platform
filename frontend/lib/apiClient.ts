@@ -43,6 +43,40 @@ export type Communication = {
   occurred_at: string;
 };
 
+export type MarginCalcResponse = {
+  computed_at: string;
+  inputs: Record<string, any>;
+  outputs: Record<string, any>;
+};
+
+export type MarginRun = {
+  id: number;
+  lot_id: number;
+  profile: string;
+  computed_at: string;
+  inputs: Record<string, any>;
+  outputs: Record<string, any>;
+};
+
+export type OutreachEmail = {
+  subject: string;
+  body: string;
+  template_used?: string;
+  language?: string;
+};
+
+export type OutreachResponse = {
+  status: string;
+  email: OutreachEmail;
+};
+
+export type LandedCostResponse = {
+  status: string;
+  inputs: Record<string, any>;
+  fx: Record<string, any>;
+  breakdown_eur: Record<string, any>;
+};
+
 // Shipments API
 export const shipmentsAPI = {
   list: async (params?: { status?: string; limit?: number }) => {
@@ -116,14 +150,14 @@ export const marginsAPI = {
     selling_currency?: string;
     fx_usd_to_eur?: number;
   }) => {
-    return apiFetch<any>("/margins/calc", {
+    return apiFetch<MarginCalcResponse>("/margins/calc", {
       method: "POST",
       body: JSON.stringify(data),
     });
   },
   
   getRunsForLot: async (lotId: number) => {
-    return apiFetch<any[]>(`/margins/lots/${lotId}/runs`);
+    return apiFetch<MarginRun[]>(`/margins/lots/${lotId}/runs`);
   },
 };
 
@@ -137,7 +171,7 @@ export const outreachAPI = {
     counterpart_name?: string;
     refine_with_llm?: boolean;
   }) => {
-    return apiFetch<{ status: string; email: any }>("/outreach/generate", {
+    return apiFetch<OutreachResponse>("/outreach/generate", {
       method: "POST",
       body: JSON.stringify(data),
     });
@@ -157,7 +191,7 @@ export const logisticsAPI = {
     duty_pct?: number;
     vat_pct?: number;
   }) => {
-    return apiFetch<any>("/logistics/landed-cost", {
+    return apiFetch<LandedCostResponse>("/logistics/landed-cost", {
       method: "POST",
       body: JSON.stringify(data),
     });

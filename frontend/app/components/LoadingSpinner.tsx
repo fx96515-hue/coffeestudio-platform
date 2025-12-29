@@ -1,15 +1,21 @@
 export default function LoadingSpinner({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
-  const sizeClasses = {
-    sm: "w-4 h-4 border-2",
-    md: "w-8 h-8 border-3",
-    lg: "w-12 h-12 border-4",
+  const sizeMap = {
+    sm: { width: 16, height: 16, borderWidth: 2 },
+    md: { width: 32, height: 32, borderWidth: 3 },
+    lg: { width: 48, height: 48, borderWidth: 4 },
   };
 
+  const { width, height, borderWidth } = sizeMap[size];
+
   return (
-    <div className="flex items-center justify-center">
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div
-        className={`${sizeClasses[size]} border-blue-500 border-t-transparent rounded-full animate-spin`}
         style={{
+          width,
+          height,
+          border: `${borderWidth}px solid rgba(87, 134, 255, 0.3)`,
+          borderTop: `${borderWidth}px solid rgba(87, 134, 255, 0.9)`,
+          borderRadius: "50%",
           animation: "spin 0.8s linear infinite",
         }}
       />

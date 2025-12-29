@@ -17,12 +17,23 @@ type Lot = {
   expected_cupping_score?: number | null;
 };
 
+type LotForm = {
+  cooperative_id: string;
+  name: string;
+  crop_year: string;
+  incoterm: string;
+  price_per_kg: string;
+  currency: string;
+  weight_kg: string;
+  expected_cupping_score: string;
+};
+
 export default function LotsPage() {
   const [lots, setLots] = useState<Lot[]>([]);
   const [err, setErr] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [statusFilter, setStatusFilter] = useState("");
-  const [form, setForm] = useState<any>({
+  const [form, setForm] = useState<LotForm>({
     cooperative_id: "",
     name: "",
     crop_year: "",
@@ -46,7 +57,7 @@ export default function LotsPage() {
     setErr(null);
     setCreating(true);
     try {
-      const payload: any = {
+      const payload: Partial<Lot> = {
         cooperative_id: Number(form.cooperative_id),
         name: String(form.name || "").trim(),
         incoterm: form.incoterm || null,

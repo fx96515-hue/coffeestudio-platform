@@ -4,10 +4,28 @@ import { useState } from "react";
 import KpiCard from "../components/KpiCard";
 import Badge from "../components/Badge";
 
+type MarginForm = {
+  purchase_price_per_kg: string;
+  purchase_currency: string;
+  landed_costs_per_kg: string;
+  roast_and_pack_costs_per_kg: string;
+  yield_factor: string;
+  selling_price_per_kg: string;
+  selling_currency: string;
+};
+
+type MarginResult = {
+  totalCostPerKgGreen: string;
+  totalCostPerKgRoasted: string;
+  marginPerKg: string;
+  marginPct: string;
+  breakeven: string;
+};
+
 export default function MarginAnalysisPage() {
   const [calculating, setCalculating] = useState(false);
-  const [result, setResult] = useState<any>(null);
-  const [form, setForm] = useState({
+  const [result, setResult] = useState<MarginResult | null>(null);
+  const [form, setForm] = useState<MarginForm>({
     purchase_price_per_kg: "5.50",
     purchase_currency: "USD",
     landed_costs_per_kg: "0.80",
