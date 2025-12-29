@@ -98,7 +98,7 @@ def delete_source(
     # Capture data before deletion for audit log
     entity_data = {
         "name": s.name,
-        "url": s.url if hasattr(s, 'url') else None,
+        "url": s.url,
     }
     
     db.delete(s)

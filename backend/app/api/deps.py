@@ -81,10 +81,11 @@ def require_role(*roles: str):
                 user_role=user.role,
                 required_roles=list(roles)
             )
-            # Log permission denial for audit trail
+            # Log permission denial for audit trail with specific role requirements
+            action = f"role_check_failed_requires:{','.join(roles)}"
             AuditLogger.log_permission_denied(
                 user=user,
-                action="access",
+                action=action,
                 resource_type="endpoint",
                 required_role=",".join(roles)
             )
