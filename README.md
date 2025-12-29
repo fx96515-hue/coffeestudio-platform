@@ -100,6 +100,31 @@ make smoke
 - JWT via `Authorization: Bearer ...`
 - Passwörter gehasht (`pbkdf2_sha256`)
 - CORS restriktiv konfigurierbar
+- Rate Limiting (SlowAPI)
+- Input validation (Pydantic)
+
+## Testing
+
+Comprehensive test suite with **39 passing tests** and **56% code coverage**.
+
+### Backend Tests
+
+```bash
+cd backend
+pip install -r requirements-dev.txt
+pytest tests/ -v
+```
+
+**With coverage:**
+```bash
+pytest tests/ --cov=app --cov-report=html
+```
+
+See [TESTING.md](TESTING.md) for complete testing documentation.
+
+### Security
+
+See [SECURITY.md](SECURITY.md) for comprehensive security documentation.
 
 ## Status & Roadmap
 
