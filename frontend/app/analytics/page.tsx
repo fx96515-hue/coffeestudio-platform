@@ -187,15 +187,18 @@ export default function AnalyticsDashboard() {
             >
               <div style={{ fontWeight: "700", marginBottom: "8px" }}>Prediction Result</div>
               <div style={{ fontSize: "24px", fontWeight: "800", marginBottom: "8px" }}>
-                ${freightMutation.data.predicted_cost.toLocaleString()}
+                ${freightMutation.data.predicted_cost_usd.toLocaleString()}
               </div>
               <div style={{ fontSize: "13px", color: "var(--muted)" }}>
                 Confidence: {(freightMutation.data.confidence_score * 100).toFixed(1)}%
               </div>
-              {freightMutation.data.confidence_interval && (
+              <div style={{ fontSize: "13px", color: "var(--muted)", marginTop: "4px" }}>
+                Range: ${freightMutation.data.confidence_interval_low.toLocaleString()} - $
+                {freightMutation.data.confidence_interval_high.toLocaleString()}
+              </div>
+              {freightMutation.data.similar_historical_shipments > 0 && (
                 <div style={{ fontSize: "13px", color: "var(--muted)", marginTop: "4px" }}>
-                  Range: ${freightMutation.data.confidence_interval.lower.toLocaleString()} - $
-                  {freightMutation.data.confidence_interval.upper.toLocaleString()}
+                  Based on {freightMutation.data.similar_historical_shipments} similar shipments
                 </div>
               )}
             </div>
@@ -319,14 +322,23 @@ export default function AnalyticsDashboard() {
             >
               <div style={{ fontWeight: "700", marginBottom: "8px" }}>Prediction Result</div>
               <div style={{ fontSize: "24px", fontWeight: "800", marginBottom: "8px" }}>
-                ${priceMutation.data.predicted_price.toFixed(2)}/kg
+                ${priceMutation.data.predicted_price_usd_per_kg.toFixed(2)}/kg
               </div>
               <div style={{ fontSize: "13px", color: "var(--muted)" }}>
                 Confidence: {(priceMutation.data.confidence_score * 100).toFixed(1)}%
               </div>
+              <div style={{ fontSize: "13px", color: "var(--muted)", marginTop: "4px" }}>
+                Range: ${priceMutation.data.confidence_interval_low.toFixed(2)} - $
+                {priceMutation.data.confidence_interval_high.toFixed(2)}/kg
+              </div>
               {priceMutation.data.price_trend && (
                 <div style={{ fontSize: "13px", color: "var(--muted)", marginTop: "4px" }}>
                   Trend: {priceMutation.data.price_trend}
+                </div>
+              )}
+              {priceMutation.data.market_comparison && (
+                <div style={{ fontSize: "13px", color: "var(--muted)", marginTop: "4px" }}>
+                  {priceMutation.data.market_comparison}
                 </div>
               )}
             </div>

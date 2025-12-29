@@ -11,7 +11,7 @@ import {
 export function useFreightPrediction() {
   return useMutation({
     mutationFn: async (data: FreightPredictionRequest) => {
-      return await apiFetch<FreightPredictionResponse>("/ml/predict/freight", {
+      return await apiFetch<FreightPredictionResponse>("/ml/predict-freight", {
         method: "POST",
         body: JSON.stringify(data),
       });
@@ -23,39 +23,81 @@ export function useFreightPrediction() {
 export function usePricePrediction() {
   return useMutation({
     mutationFn: async (data: PricePredictionRequest) => {
-      return await apiFetch<PricePredictionResponse>("/ml/predict/price", {
+      // Map frontend field names to backend API
+      const backendRequest = {
+        origin_country: data.origin.includes(",") ? data.origin.split(",")[0] : data.origin,
+        origin_region: data.origin.includes(",") ? data.origin.split(",")[1]?.trim() : null,
+        variety: data.variety,
+        process_method: data.process,
+        quality_grade: data.grade,
+        cupping_score: data.cupping_score,
+        certifications: data.certifications,
+        forecast_date: data.forecast_date,
+      };
+      return await apiFetch<PricePredictionResponse>("/ml/predict-coffee-price", {
         method: "POST",
-        body: JSON.stringify(data),
+        body: JSON.stringify(backendRequest),
       });
     },
   });
 }
 
-// Fetch historical freight data
+// Fetch freight cost trend
+export function useFreightCostTrend(params?: { route?: string; months_back?: number }) {
+  const searchParams = new URLSearchParams();
+  if (params?.route) searchParams.set("route", params.route);
+  if (params?.months_back) searchParams.set("months_back", String(params.months_back));
+
+  return useQuery({
+    queryKey: ["freight-cost-trend", params],
+    queryFn: async () => {
+      const data = await apiFetch<any>(`/ml/freight-cost-trend?${searchParams.toString()}`);
+      return data;
+    },
+    enabled: !!params?.route,
+  });
+}
+
+// Fetch historical freight data (legacy endpoint for backward compat)
 export function useFreightHistory(params?: { route?: string; months?: number }) {
   const searchParams = new URLSearchParams();
   if (params?.route) searchParams.set("route", params.route);
-  if (params?.months) searchParams.set("months", String(params.months));
+  if (params?.months) searchParams.set("months_back", String(params.months));
 
   return useQuery({
     queryKey: ["freight-history", params],
     queryFn: async () => {
-      const data = await apiFetch<any[]>(`/ml/freight-history?${searchParams.toString()}`);
+      const data = await apiFetch<any>(`/ml/freight-cost-trend?${searchParams.toString()}`);
       return data;
     },
+    enabled: !!params?.route,
   });
 }
 
 // Fetch historical price data
 export function usePriceHistory(params?: { origin?: string; months?: number }) {
   const searchParams = new URLSearchParams();
-  if (params?.origin) searchParams.set("origin", params.origin);
-  if (params?.months) searchParams.set("months", String(params.months));
+  if (params?.origin) searchParams.set("origin_region", params.origin);
+  if (params?.months) searchParams.set("months_ahead", String(params.months));
 
   return useQuery({
     queryKey: ["price-history", params],
     queryFn: async () => {
-      const data = await apiFetch<any[]>(`/ml/price-history?${searchParams.toString()}`);
+      const data = await apiFetch<any>(`/ml/forecast-price-trend?${searchParams.toString()}`);
+      return data;
+    },
+  });
+}
+
+// List ML models
+export function useMLModels(modelType?: string) {
+  const params = new URLSearchParams();
+  if (modelType) params.set("model_type", modelType);
+
+  return useQuery({
+    queryKey: ["ml-models", modelType],
+    queryFn: async () => {
+      const data = await apiFetch<any[]>(`/ml/models?${params.toString()}`);
       return data;
     },
   });

@@ -136,13 +136,12 @@ export interface FreightPredictionRequest {
 }
 
 export interface FreightPredictionResponse {
-  predicted_cost: number;
+  predicted_cost_usd: number;
+  confidence_interval_low: number;
+  confidence_interval_high: number;
   confidence_score: number;
-  confidence_interval: {
-    lower: number;
-    upper: number;
-  };
-  model_version: string;
+  factors_considered: string[];
+  similar_historical_shipments: number;
 }
 
 export interface PricePredictionRequest {
@@ -156,10 +155,12 @@ export interface PricePredictionRequest {
 }
 
 export interface PricePredictionResponse {
-  predicted_price: number;
+  predicted_price_usd_per_kg: number;
+  confidence_interval_low: number;
+  confidence_interval_high: number;
   confidence_score: number;
+  market_comparison: string;
   price_trend: string;
-  forecast_period: string;
 }
 
 // News
