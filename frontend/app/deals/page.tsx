@@ -248,7 +248,7 @@ export default function DealsDashboard() {
                     borderRadius: "12px",
                   }}
                 >
-                  Enter values and click "Calculate Margin" to see results
+                  Enter values and click &quot;Calculate Margin&quot; to see results
                 </div>
               )}
             </div>
