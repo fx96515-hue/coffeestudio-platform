@@ -35,12 +35,12 @@ export default function CooperativesPage() {
 
   const rows = useMemo(() => {
     const items = data?.items ?? [];
-    const qq = q.trim().toLowerCase();
+    const searchQuery = q.trim().toLowerCase();
     let filtered = items;
     
-    if (qq) {
+    if (searchQuery) {
       filtered = filtered.filter((c) =>
-        [c.name, c.region ?? "", c.country ?? "", c.website ?? ""].join(" ").toLowerCase().includes(qq),
+        [c.name, c.region ?? "", c.country ?? "", c.website ?? ""].join(" ").toLowerCase().includes(searchQuery),
       );
     }
     

@@ -8,7 +8,7 @@ export default function LoadingSpinner({ size = "md" }: { size?: "sm" | "md" | "
   const { width, height, borderWidth } = sizeMap[size];
 
   return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }} role="status" aria-label="Loading">
       <div
         style={{
           width,
@@ -19,13 +19,15 @@ export default function LoadingSpinner({ size = "md" }: { size?: "sm" | "md" | "
           animation: "spin 0.8s linear infinite",
         }}
       />
-      <style jsx>{`
-        @keyframes spin {
-          to {
-            transform: rotate(360deg);
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          @keyframes spin {
+            to {
+              transform: rotate(360deg);
+            }
           }
-        }
-      `}</style>
+        `
+      }} />
     </div>
   );
 }

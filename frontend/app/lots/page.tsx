@@ -120,36 +120,36 @@ export default function LotsPage() {
           <div className="panelTitle" style={{ marginBottom: 12 }}>Create New Lot</div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, marginTop: 12 }}>
           <div>
-            <label className="muted" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>Cooperative ID</label>
-            <input className="input" placeholder="cooperative_id" value={form.cooperative_id} onChange={(e) => setForm({ ...form, cooperative_id: e.target.value })} />
+            <label htmlFor="cooperative-id" className="muted" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>Cooperative ID</label>
+            <input id="cooperative-id" className="input" placeholder="cooperative_id" value={form.cooperative_id} onChange={(e) => setForm({ ...form, cooperative_id: e.target.value })} />
           </div>
           <div>
-            <label className="muted" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>Lot Name</label>
-            <input className="input" placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+            <label htmlFor="lot-name" className="muted" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>Lot Name</label>
+            <input id="lot-name" className="input" placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
           </div>
           <div>
-            <label className="muted" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>Crop Year</label>
-            <input className="input" placeholder="2024" value={form.crop_year} onChange={(e) => setForm({ ...form, crop_year: e.target.value })} />
+            <label htmlFor="crop-year" className="muted" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>Crop Year</label>
+            <input id="crop-year" className="input" placeholder="2024" value={form.crop_year} onChange={(e) => setForm({ ...form, crop_year: e.target.value })} />
           </div>
           <div>
-            <label className="muted" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>Incoterm</label>
-            <input className="input" placeholder="FOB/CIF" value={form.incoterm} onChange={(e) => setForm({ ...form, incoterm: e.target.value })} />
+            <label htmlFor="incoterm" className="muted" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>Incoterm</label>
+            <input id="incoterm" className="input" placeholder="FOB/CIF" value={form.incoterm} onChange={(e) => setForm({ ...form, incoterm: e.target.value })} />
           </div>
           <div>
-            <label className="muted" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>Price/kg</label>
-            <input className="input" placeholder="5.50" value={form.price_per_kg} onChange={(e) => setForm({ ...form, price_per_kg: e.target.value })} />
+            <label htmlFor="price-per-kg" className="muted" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>Price/kg</label>
+            <input id="price-per-kg" className="input" placeholder="5.50" value={form.price_per_kg} onChange={(e) => setForm({ ...form, price_per_kg: e.target.value })} />
           </div>
           <div>
-            <label className="muted" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>Currency</label>
-            <input className="input" placeholder="USD" value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })} />
+            <label htmlFor="currency" className="muted" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>Currency</label>
+            <input id="currency" className="input" placeholder="USD" value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })} />
           </div>
           <div>
-            <label className="muted" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>Weight (kg)</label>
-            <input className="input" placeholder="18000" value={form.weight_kg} onChange={(e) => setForm({ ...form, weight_kg: e.target.value })} />
+            <label htmlFor="weight-kg" className="muted" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>Weight (kg)</label>
+            <input id="weight-kg" className="input" placeholder="18000" value={form.weight_kg} onChange={(e) => setForm({ ...form, weight_kg: e.target.value })} />
           </div>
           <div>
-            <label className="muted" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>Expected SCA Score</label>
-            <input className="input" placeholder="84" value={form.expected_cupping_score} onChange={(e) => setForm({ ...form, expected_cupping_score: e.target.value })} />
+            <label htmlFor="expected-sca" className="muted" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>Expected SCA Score</label>
+            <input id="expected-sca" className="input" placeholder="84" value={form.expected_cupping_score} onChange={(e) => setForm({ ...form, expected_cupping_score: e.target.value })} />
           </div>
         </div>
         <button

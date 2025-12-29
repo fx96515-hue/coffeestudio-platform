@@ -12,35 +12,63 @@ export type ModalProps = {
 
 export default function Modal({ isOpen, onClose, title, children, size = "md" }: ModalProps) {
   useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
     if (isOpen) {
       document.body.style.overflow = "hidden";
+      document.addEventListener("keydown", handleKeyDown);
     } else {
       document.body.style.overflow = "unset";
     }
+
     return () => {
       document.body.style.overflow = "unset";
+      document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isOpen]);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
-  const sizeClasses = {
-    sm: "max-w-md",
-    md: "max-w-2xl",
-    lg: "max-w-4xl",
-    xl: "max-w-6xl",
-  };
+  const sizeStyles = {
+    sm: { maxWidth: "28rem" },
+    md: { maxWidth: "42rem" },
+    lg: { maxWidth: "56rem" },
+    xl: { maxWidth: "72rem" },
+  } as const;
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ backgroundColor: "rgba(0, 0, 0, 0.7)" }}
+      style={{
+        position: "fixed",
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+        zIndex: 50,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 16,
+        backgroundColor: "rgba(0, 0, 0, 0.7)",
+      }}
       onClick={onClose}
     >
       <div
-        className={`panel ${sizeClasses[size]} w-full max-h-[90vh] overflow-y-auto`}
-        style={{ padding: "24px" }}
+        className="panel"
+        style={{
+          padding: "24px",
+          width: "100%",
+          maxHeight: "90vh",
+          overflowY: "auto",
+          ...sizeStyles[size],
+        }}
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
       >
         {title && (
           <div className="rowBetween" style={{ marginBottom: 16 }}>
@@ -49,6 +77,7 @@ export default function Modal({ isOpen, onClose, title, children, size = "md" }:
               className="btn"
               onClick={onClose}
               style={{ padding: "6px 12px" }}
+              aria-label="Close modal"
             >
               ✕
             </button>

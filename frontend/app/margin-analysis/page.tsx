@@ -37,15 +37,34 @@ export default function MarginAnalysisPage() {
 
   const handleCalculate = async () => {
     setCalculating(true);
+    setResult(null);
     try {
-      // Mock calculation for now - would call backend API
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
+      // Validate inputs
       const purchase = parseFloat(form.purchase_price_per_kg);
       const landed = parseFloat(form.landed_costs_per_kg);
       const roast = parseFloat(form.roast_and_pack_costs_per_kg);
       const yieldFactor = parseFloat(form.yield_factor);
       const selling = parseFloat(form.selling_price_per_kg);
+      
+      // Validation checks
+      if (isNaN(purchase) || purchase <= 0) {
+        throw new Error("Purchase price must be a positive number");
+      }
+      if (isNaN(landed) || landed < 0) {
+        throw new Error("Landed costs must be zero or positive");
+      }
+      if (isNaN(roast) || roast < 0) {
+        throw new Error("Roast & pack costs must be zero or positive");
+      }
+      if (isNaN(yieldFactor) || yieldFactor <= 0 || yieldFactor > 1) {
+        throw new Error("Yield factor must be between 0 and 1");
+      }
+      if (isNaN(selling) || selling <= 0) {
+        throw new Error("Selling price must be a positive number");
+      }
+      
+      // Mock calculation for now - would call backend API
+      await new Promise(resolve => setTimeout(resolve, 500));
       
       const totalCostPerKgGreen = purchase + landed;
       const totalCostPerKgRoasted = (totalCostPerKgGreen / yieldFactor) + roast;
@@ -59,6 +78,8 @@ export default function MarginAnalysisPage() {
         marginPct: marginPct.toFixed(1),
         breakeven: totalCostPerKgRoasted.toFixed(2),
       });
+    } catch (error: any) {
+      alert(error.message || "Invalid input values");
     } finally {
       setCalculating(false);
     }
@@ -79,11 +100,12 @@ export default function MarginAnalysisPage() {
           
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <div>
-              <label className="muted" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>
+              <label htmlFor="purchase-price" className="muted" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>
                 Purchase Price per kg
               </label>
               <div className="row gap">
                 <input
+                  id="purchase-price"
                   className="input"
                   type="number"
                   step="0.01"
@@ -104,10 +126,11 @@ export default function MarginAnalysisPage() {
             </div>
 
             <div>
-              <label className="muted" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>
+              <label htmlFor="landed-costs" className="muted" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>
                 Landed Costs per kg (freight, insurance, handling)
               </label>
               <input
+                id="landed-costs"
                 className="input"
                 type="number"
                 step="0.01"
@@ -117,10 +140,11 @@ export default function MarginAnalysisPage() {
             </div>
 
             <div>
-              <label className="muted" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>
+              <label htmlFor="roast-costs" className="muted" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>
                 Roast & Pack Costs per kg
               </label>
               <input
+                id="roast-costs"
                 className="input"
                 type="number"
                 step="0.01"
@@ -130,10 +154,11 @@ export default function MarginAnalysisPage() {
             </div>
 
             <div>
-              <label className="muted" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>
+              <label htmlFor="yield-factor" className="muted" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>
                 Yield Factor (green to roasted, e.g., 0.84 = 16% loss)
               </label>
               <input
+                id="yield-factor"
                 className="input"
                 type="number"
                 step="0.01"
@@ -143,11 +168,12 @@ export default function MarginAnalysisPage() {
             </div>
 
             <div>
-              <label className="muted" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>
+              <label htmlFor="selling-price" className="muted" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>
                 Selling Price per kg (roasted)
               </label>
               <div className="row gap">
                 <input
+                  id="selling-price"
                   className="input"
                   type="number"
                   step="0.01"
@@ -165,6 +191,10 @@ export default function MarginAnalysisPage() {
                   <option>USD</option>
                 </select>
               </div>
+            </div>
+
+            <div className="muted" style={{ fontSize: 12 }}>
+              Note: Calculation assumes same currency for all values. Currency conversion not applied.
             </div>
 
             <button
@@ -190,8 +220,8 @@ export default function MarginAnalysisPage() {
               />
               <KpiCard
                 label="Total Cost (Roasted)"
-                value={`${result.totalCostPerKgRoasted} ${form.selling_currency}/kg`}
-                hint="After yield loss & roasting"
+                value={`${result.totalCostPerKgRoasted} ${form.purchase_currency}/kg`}
+                hint="After yield loss & roasting (same currency as purchase, no FX conversion)"
               />
               <KpiCard
                 label="Margin per kg"

@@ -62,20 +62,43 @@ export default function DataTable<T extends Record<string, any>>({
       <table className="table">
         <thead>
           <tr>
-            {columns.map((col) => (
-              <th
-                key={col.key}
-                onClick={() => col.sortable !== false && handleSort(col.key)}
-                style={{ cursor: col.sortable !== false ? "pointer" : "default" }}
-              >
-                {col.label}
-                {sortKey === col.key && (
-                  <span style={{ marginLeft: 4 }}>
-                    {sortDir === "asc" ? "↑" : "↓"}
-                  </span>
-                )}
-              </th>
-            ))}
+            {columns.map((col) => {
+              const isSortable = col.sortable !== false;
+              const isSortedColumn = sortKey === col.key;
+              const ariaSort =
+                isSortable && isSortedColumn
+                  ? sortDir === "asc"
+                    ? "ascending"
+                    : "descending"
+                  : isSortable
+                  ? "none"
+                  : undefined;
+
+              return (
+                <th
+                  key={col.key}
+                  onClick={() => isSortable && handleSort(col.key)}
+                  onKeyDown={(event) => {
+                    if (!isSortable) return;
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      handleSort(col.key);
+                    }
+                  }}
+                  style={{ cursor: isSortable ? "pointer" : "default" }}
+                  role={isSortable ? "button" : undefined}
+                  aria-sort={ariaSort as React.AriaAttributes["aria-sort"]}
+                  tabIndex={isSortable ? 0 : undefined}
+                >
+                  {col.label}
+                  {isSortedColumn && (
+                    <span style={{ marginLeft: 4 }}>
+                      {sortDir === "asc" ? "↑" : "↓"}
+                    </span>
+                  )}
+                </th>
+              );
+            })}
           </tr>
         </thead>
         <tbody>

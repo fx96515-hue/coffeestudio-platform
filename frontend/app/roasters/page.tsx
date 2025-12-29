@@ -50,7 +50,11 @@ export default function RoastersPage() {
 
   const cities = useMemo(() => {
     const items = data?.items ?? [];
-    const uniqueCities = new Set(items.map(r => r.city).filter((c): c is string => Boolean(c)));
+    const uniqueCities = new Set(
+      items
+        .map((r) => r.city)
+        .filter((c): c is string => c != null && c !== "")
+    );
     return Array.from(uniqueCities).sort();
   }, [data]);
 
@@ -83,6 +87,9 @@ export default function RoastersPage() {
           <Link className="btn" href="/ops">
             Discovery
           </Link>
+          <button className="btn btnPrimary" onClick={() => alert("Feature coming soon: Create new roaster contact")}>
+            + New Contact
+          </button>
         </div>
       </div>
 
@@ -128,7 +135,7 @@ export default function RoastersPage() {
                     )}
                   </td>
                   <td>
-                    <Badge>Lead</Badge>
+                    <Badge tone="neutral">-</Badge>
                   </td>
                   <td>
                     <Link className="link" href={`/roasters/${r.id}`} style={{ fontSize: 12 }}>
