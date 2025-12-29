@@ -25,8 +25,10 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         # Referrer policy
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         
-        # Content Security Policy (basic)
-        response.headers["Content-Security-Policy"] = (
+        # Content Security Policy (stricter for production)
+        # Note: In development, we allow 'unsafe-inline' and 'unsafe-eval' for debugging.
+        # For production, remove these and use nonces or hashes for inline scripts.
+        csp_policy = (
             "default-src 'self'; "
             "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
             "style-src 'self' 'unsafe-inline'; "
@@ -34,6 +36,9 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             "font-src 'self' data:; "
             "connect-src 'self'"
         )
+        # TODO: For production, use stricter CSP:
+        # csp_policy = "default-src 'self'; script-src 'self'; style-src 'self'; ..."
+        response.headers["Content-Security-Policy"] = csp_policy
         
         # Strict Transport Security (for HTTPS)
         if request.url.scheme == "https":

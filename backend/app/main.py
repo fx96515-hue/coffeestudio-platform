@@ -52,8 +52,13 @@ app.add_exception_handler(OperationalError, operational_error_handler)  # type: 
 app.add_exception_handler(Exception, generic_exception_handler)
 
 # Add security middleware
-app.add_middleware(SecurityHeadersMiddleware)
-app.add_middleware(InputValidationMiddleware)
+# Note: Middleware execution order matters in FastAPI
+# Middleware added first executes last on the way out (response)
+# Middleware added last executes first on the way in (request)
+# So: InputValidation -> CORS -> Security Headers (on request)
+#     Security Headers -> CORS -> InputValidation (on response)
+app.add_middleware(SecurityHeadersMiddleware)  # Applied last to responses
+app.add_middleware(InputValidationMiddleware)  # Applied first to requests
 
 app.add_middleware(
     CORSMiddleware,

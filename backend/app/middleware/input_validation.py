@@ -71,16 +71,23 @@ class InputValidationMiddleware(BaseHTTPMiddleware):
         if request.method in ["POST", "PUT", "PATCH"]:
             try:
                 if "application/json" in request.headers.get("content-type", ""):
-                    body = await request.json()
-                    if not self._validate_dict(body):
-                        return JSONResponse(
-                            status_code=400,
-                            content={
-                                "detail": "Invalid input detected. Request contains potentially malicious content."
-                            }
-                        )
+                    # Read the body as bytes to avoid consuming the stream
+                    body_bytes = await request.body()
+                    if body_bytes:
+                        try:
+                            body = __import__('json').loads(body_bytes)
+                            if not self._validate_dict(body):
+                                from app.core.error_handlers import ErrorResponse
+                                return ErrorResponse.format_error(
+                                    error_code="MALICIOUS_INPUT",
+                                    message="Invalid input detected. Request contains potentially malicious content.",
+                                    status_code=400
+                                )
+                        except Exception:
+                            # If JSON parsing fails, let FastAPI handle it
+                            pass
             except Exception:
-                # If we can't parse the body, let FastAPI handle it
+                # If we can't read the body, let FastAPI handle it
                 pass
 
         response: Response = await call_next(request)
