@@ -101,6 +101,15 @@ make smoke
 - Passwörter gehasht (`pbkdf2_sha256`)
 - CORS restriktiv konfigurierbar
 
+## Status & Roadmap
+
+📊 **Siehe [STATUS.md](./STATUS.md)** für:
+- Aktueller Status aller Features
+- Was kommt als Nächstes (4-Phasen-Roadmap)
+- Implementation Backlog
+- Vorschläge & Empfehlungen
+- Produktivsetzung (Production Readiness: 60%)
+
 ## Nächste Schritte
 - Vollständige Provider (ICO/ICE/Fracht)
 - Multi-Tenant / Mandantenfähigkeit (optional)
