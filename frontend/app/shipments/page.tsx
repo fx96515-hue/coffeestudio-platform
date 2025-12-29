@@ -25,7 +25,7 @@ export default function ShipmentsDashboard() {
   const shipment3Departure = new Date(today);
   shipment3Departure.setDate(today.getDate() - 60);
   const shipment3Eta = new Date(today);
-  shipment3Eta.setDate(today.getDate() - 54);
+  shipment3Eta.setDate(today.getDate() - 55);
   const shipment3Arrival = new Date(today);
   shipment3Arrival.setDate(today.getDate() - 55);
   

@@ -127,6 +127,7 @@ export interface CreateDealRequest {
 }
 
 export interface UpdateDealRequest {
+  origin_country?: string;
   origin_region?: string;
   variety?: string;
   process_method?: string;
