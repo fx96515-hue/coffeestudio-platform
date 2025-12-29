@@ -1,7 +1,6 @@
 """ML model management service."""
 
 from typing import Any
-from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 

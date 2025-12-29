@@ -4,7 +4,7 @@ import os
 from datetime import date, timedelta
 from typing import Any
 import pandas as pd
-from sqlalchemy import select, func
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.ml.freight_model import FreightCostModel
@@ -122,7 +122,7 @@ class FreightPredictionService:
                 "factors_considered": factors,
                 "similar_historical_shipments": len(similar_shipments),
             }
-        except Exception as e:
+        except Exception:
             # Fallback to simple average if model fails
             if similar_shipments:
                 avg_cost = sum(s.freight_cost_usd for s in similar_shipments) / len(
@@ -225,14 +225,14 @@ class FreightPredictionService:
             }
 
         # Group by month
-        monthly_data = {}
+        monthly_data: dict[str, list[float]] = {}
         for record in historical:
             month_key = record.departure_date.strftime("%Y-%m")
             if month_key not in monthly_data:
                 monthly_data[month_key] = []
             monthly_data[month_key].append(record.freight_cost_usd)
 
-        trend_data = []
+        trend_data: list[dict[str, Any]] = []
         for month, costs in sorted(monthly_data.items()):
             trend_data.append({"month": month, "average_cost": sum(costs) / len(costs)})
 
@@ -240,12 +240,14 @@ class FreightPredictionService:
 
         # Simple trend detection
         if len(trend_data) >= 2:
+            first_half = trend_data[: len(trend_data) // 2]
+            second_half = trend_data[len(trend_data) // 2 :]
             first_half_avg = sum(
-                t["average_cost"] for t in trend_data[: len(trend_data) // 2]
-            ) / len(trend_data[: len(trend_data) // 2])
+                float(t["average_cost"]) for t in first_half
+            ) / len(first_half)
             second_half_avg = sum(
-                t["average_cost"] for t in trend_data[len(trend_data) // 2 :]
-            ) / len(trend_data[len(trend_data) // 2 :])
+                float(t["average_cost"]) for t in second_half
+            ) / len(second_half)
 
             if second_half_avg > first_half_avg * 1.1:
                 trend = "increasing"

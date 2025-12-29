@@ -10,7 +10,6 @@ from app.schemas.ml_predictions import (
     FreightPrediction,
     TransitTimeRequest,
     TransitTimePrediction,
-    FreightCostTrendRequest,
     FreightCostTrend,
     CoffeePricePredictionRequest,
     CoffeePricePrediction,

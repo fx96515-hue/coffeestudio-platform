@@ -1,7 +1,6 @@
 """Data collection service for ML training data."""
 
 from typing import Any
-from datetime import date
 from sqlalchemy.orm import Session
 
 from app.models.freight_history import FreightHistory

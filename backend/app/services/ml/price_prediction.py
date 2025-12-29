@@ -1,7 +1,7 @@
 """Coffee price prediction service using ML models."""
 
 import os
-from datetime import date, timedelta
+from datetime import date
 from typing import Any
 import pandas as pd
 from sqlalchemy import select
