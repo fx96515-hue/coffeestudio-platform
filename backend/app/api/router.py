@@ -3,7 +3,7 @@ from fastapi import APIRouter
 from app.api.routes import auth, cooperatives, roasters, health, discovery
 from app.api.routes import sources, market, reports, lots, margins
 from app.api.routes import enrich, dedup, news, logistics, outreach, regions
-from app.api.routes import kb, cuppings
+from app.api.routes import kb, cuppings, peru_sourcing
 
 api_router = APIRouter()
 api_router.include_router(health.router, tags=["health"])
@@ -26,3 +26,4 @@ api_router.include_router(logistics.router, prefix="/logistics", tags=["logistic
 api_router.include_router(outreach.router, prefix="/outreach", tags=["outreach"])
 api_router.include_router(kb.router, prefix="/kb", tags=["kb"])
 api_router.include_router(cuppings.router, prefix="/cuppings", tags=["cuppings"])
+api_router.include_router(peru_sourcing.router, prefix="/peru", tags=["peru-sourcing"])
