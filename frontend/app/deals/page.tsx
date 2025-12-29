@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useDeals, useCalculateMargin } from "../hooks/useDeals";
-import { MarginCalcRequest } from "../types";
+import { MarginCalcRequest, Deal } from "../types";
 import PieChart from "../charts/PieChart";
 
 export default function DealsDashboard() {
@@ -26,7 +26,7 @@ export default function DealsDashboard() {
   // Calculate overview stats (using lots as deals for now)
   const stats = {
     total: deals.length,
-    totalValue: deals.reduce((sum, d: any) => sum + (d.value_eur || 0), 0),
+    totalValue: deals.reduce((sum, d) => sum + ((d as any).value_eur || 0), 0),
     avgMargin: 15.5, // Placeholder
   };
 
@@ -83,7 +83,7 @@ export default function DealsDashboard() {
         </div>
         <div className="panel card">
           <div className="cardLabel">Active Lots</div>
-          <div className="cardValue">{deals.filter((d: any) => d.status !== "completed").length}</div>
+          <div className="cardValue">{deals.filter((d) => (d as any).status !== "completed").length}</div>
           <div className="cardHint">In progress</div>
         </div>
       </div>
@@ -217,7 +217,7 @@ export default function DealsDashboard() {
                   >
                     <div style={{ fontWeight: "700", marginBottom: "12px" }}>Margin Results</div>
                     <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                      {Object.entries(calculateMargin.data.outputs).map(([key, value]: [string, any]) => (
+                      {Object.entries(calculateMargin.data.outputs).map(([key, value]) => (
                         <div key={key} style={{ display: "flex", justifyContent: "space-between" }}>
                           <span style={{ fontSize: "13px", color: "var(--muted)" }}>
                             {key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}
@@ -281,24 +281,24 @@ export default function DealsDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {deals.map((lot: any) => (
+                {deals.map((lot) => (
                   <tr key={lot.id}>
-                    <td style={{ fontWeight: "600" }}>{lot.reference || `LOT-${lot.id}`}</td>
-                    <td>{lot.origin || "–"}</td>
-                    <td>{lot.variety || "–"}</td>
-                    <td>{lot.process || "–"}</td>
-                    <td>{lot.grade || "–"}</td>
-                    <td>{lot.weight_kg?.toLocaleString() || "–"}</td>
+                    <td style={{ fontWeight: "600" }}>{(lot as any).reference || `LOT-${lot.id}`}</td>
+                    <td>{(lot as any).origin || "–"}</td>
+                    <td>{(lot as any).variety || "–"}</td>
+                    <td>{(lot as any).process || "–"}</td>
+                    <td>{(lot as any).grade || "–"}</td>
+                    <td>{(lot as any).weight_kg?.toLocaleString() || "–"}</td>
                     <td>
-                      {lot.cupping_score ? (
-                        <span className="badge badgeOk">{lot.cupping_score}</span>
+                      {(lot as any).cupping_score ? (
+                        <span className="badge badgeOk">{(lot as any).cupping_score}</span>
                       ) : (
                         "–"
                       )}
                     </td>
                     <td>
                       <span className="badge">
-                        {lot.status || "active"}
+                        {(lot as any).status || "active"}
                       </span>
                     </td>
                     <td>

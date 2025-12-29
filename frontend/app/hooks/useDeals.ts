@@ -1,6 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "../../lib/api";
-import { DealFilters, MarginCalcRequest, MarginCalcResult, Paged } from "../types";
+import { 
+  DealFilters, 
+  MarginCalcRequest, 
+  MarginCalcResult, 
+  Paged, 
+  Deal, 
+  MarginRun,
+  CreateDealRequest,
+  UpdateDealRequest
+} from "../types";
 
 // Fetch Deals with filters (using lots as base for now)
 export function useDeals(filters?: DealFilters & { limit?: number; page?: number }) {
@@ -21,7 +30,7 @@ export function useDeals(filters?: DealFilters & { limit?: number; page?: number
     queryKey: ["deals", filters],
     queryFn: async () => {
       // Using lots endpoint as deals base
-      const data = await apiFetch<Paged<any>>(`/lots?${params.toString()}`);
+      const data = await apiFetch<Paged<Deal>>(`/lots?${params.toString()}`);
       return data;
     },
   });
@@ -32,7 +41,7 @@ export function useDeal(id: number) {
   return useQuery({
     queryKey: ["deal", id],
     queryFn: async () => {
-      const data = await apiFetch<any>(`/lots/${id}`);
+      const data = await apiFetch<Deal>(`/lots/${id}`);
       return data;
     },
     enabled: !!id,
@@ -64,7 +73,7 @@ export function useSaveMarginRun() {
       data: MarginCalcRequest;
       profile?: string;
     }) => {
-      return await apiFetch<any>(`/margins/lots/${lotId}/runs?profile=${profile}`, {
+      return await apiFetch<MarginRun>(`/margins/lots/${lotId}/runs?profile=${profile}`, {
         method: "POST",
         body: JSON.stringify(data),
       });
@@ -80,7 +89,7 @@ export function useMarginRuns(lotId: number) {
   return useQuery({
     queryKey: ["margin-runs", lotId],
     queryFn: async () => {
-      const data = await apiFetch<any[]>(`/margins/lots/${lotId}/runs`);
+      const data = await apiFetch<MarginRun[]>(`/margins/lots/${lotId}/runs`);
       return data;
     },
     enabled: !!lotId,
@@ -91,8 +100,8 @@ export function useMarginRuns(lotId: number) {
 export function useCreateDeal() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (data: Partial<any>) => {
-      return await apiFetch<any>("/lots", {
+    mutationFn: async (data: CreateDealRequest) => {
+      return await apiFetch<Deal>("/lots", {
         method: "POST",
         body: JSON.stringify(data),
       });
@@ -107,8 +116,8 @@ export function useCreateDeal() {
 export function useUpdateDeal() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: Partial<any> }) => {
-      return await apiFetch<any>(`/lots/${id}`, {
+    mutationFn: async ({ id, data }: { id: number; data: UpdateDealRequest }) => {
+      return await apiFetch<Deal>(`/lots/${id}`, {
         method: "PATCH",
         body: JSON.stringify(data),
       });

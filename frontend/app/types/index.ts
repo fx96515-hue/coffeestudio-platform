@@ -49,6 +49,7 @@ export interface Roaster {
   contact_email: string | null;
   contact_phone: string | null;
   sales_fit_score: number | null;
+  overall_score: number | null;
   contact_status: string | null;
   last_contact_date: string | null;
   next_followup_date: string | null;
@@ -109,6 +110,36 @@ export interface Deal {
   updated_at: string;
 }
 
+// Deal/Lot creation and update types
+export interface CreateDealRequest {
+  origin_country: string;
+  origin_region?: string;
+  variety: string;
+  process_method: string;
+  quality_grade?: string;
+  cupping_score?: number;
+  weight_kg: number;
+  price_per_kg?: number;
+  currency?: string;
+  certifications?: string[];
+  harvest_date?: string;
+  status?: string;
+}
+
+export interface UpdateDealRequest {
+  origin_region?: string;
+  variety?: string;
+  process_method?: string;
+  quality_grade?: string;
+  cupping_score?: number;
+  weight_kg?: number;
+  price_per_kg?: number;
+  currency?: string;
+  certifications?: string[];
+  harvest_date?: string;
+  status?: string;
+}
+
 export interface MarginCalcRequest {
   purchase_price_per_kg: number;
   purchase_currency: string;
@@ -124,6 +155,16 @@ export interface MarginCalcResult {
   computed_at: string;
   inputs: Record<string, any>;
   outputs: Record<string, any>;
+}
+
+// Margin Run type
+export interface MarginRun {
+  id: number;
+  lot_id: number;
+  profile: string;
+  inputs: MarginCalcRequest;
+  outputs: MarginCalcResult;
+  created_at: string;
 }
 
 // ML Predictions
@@ -161,6 +202,41 @@ export interface PricePredictionResponse {
   confidence_score: number;
   market_comparison: string;
   price_trend: string;
+}
+
+// ML Model types
+export interface MLModel {
+  id: number;
+  model_type: string;
+  name: string;
+  version: string;
+  accuracy?: number;
+  created_at: string;
+  last_trained?: string;
+  status: string;
+}
+
+export interface FreightCostTrend {
+  route: string;
+  data_points: Array<{
+    date: string;
+    cost_usd: number;
+  }>;
+  trend: string;
+  average_cost: number;
+}
+
+export interface PriceTrend {
+  origin_region: string;
+  data_points: Array<{
+    date: string;
+    price_usd_per_kg: number;
+  }>;
+  trend: string;
+  forecast?: Array<{
+    date: string;
+    predicted_price: number;
+  }>;
 }
 
 // News

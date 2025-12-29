@@ -4,6 +4,31 @@ import { useState } from "react";
 import { format, differenceInDays } from "date-fns";
 
 export default function ShipmentsDashboard() {
+  // Helper function to format date for API (YYYY-MM-DD)
+  const formatDate = (date: Date) => date.toISOString().split("T")[0];
+  
+  const today = new Date();
+  
+  // Shipment 1: departed 15 days ago, arrives in 20 days
+  const shipment1Departure = new Date(today);
+  shipment1Departure.setDate(today.getDate() - 15);
+  const shipment1Eta = new Date(today);
+  shipment1Eta.setDate(today.getDate() + 20);
+  
+  // Shipment 2: departed 10 days ago, arrives in 25 days
+  const shipment2Departure = new Date(today);
+  shipment2Departure.setDate(today.getDate() - 10);
+  const shipment2Eta = new Date(today);
+  shipment2Eta.setDate(today.getDate() + 25);
+  
+  // Shipment 3: departed 60 days ago, arrived 55 days ago (completed)
+  const shipment3Departure = new Date(today);
+  shipment3Departure.setDate(today.getDate() - 60);
+  const shipment3Eta = new Date(today);
+  shipment3Eta.setDate(today.getDate() - 54);
+  const shipment3Arrival = new Date(today);
+  shipment3Arrival.setDate(today.getDate() - 55);
+  
   // Mock shipments data - in real implementation, this would come from an API
   const mockShipments = [
     {
@@ -11,8 +36,8 @@ export default function ShipmentsDashboard() {
       reference: "SHP-2024-001",
       origin_port: "Callao, Peru",
       destination_port: "Hamburg, Germany",
-      departure_date: "2024-01-15",
-      eta: "2024-02-20",
+      departure_date: formatDate(shipment1Departure),
+      eta: formatDate(shipment1Eta),
       status: "in_transit",
       carrier: "Maersk Line",
       container_number: "MSCU1234567",
@@ -25,8 +50,8 @@ export default function ShipmentsDashboard() {
       reference: "SHP-2024-002",
       origin_port: "Callao, Peru",
       destination_port: "Rotterdam, Netherlands",
-      departure_date: "2024-01-20",
-      eta: "2024-02-25",
+      departure_date: formatDate(shipment2Departure),
+      eta: formatDate(shipment2Eta),
       status: "in_transit",
       carrier: "MSC",
       container_number: "MSCU7654321",
@@ -39,9 +64,9 @@ export default function ShipmentsDashboard() {
       reference: "SHP-2024-003",
       origin_port: "Callao, Peru",
       destination_port: "Hamburg, Germany",
-      departure_date: "2023-12-01",
-      eta: "2024-01-05",
-      actual_arrival: "2024-01-06",
+      departure_date: formatDate(shipment3Departure),
+      eta: formatDate(shipment3Eta),
+      actual_arrival: formatDate(shipment3Arrival),
       status: "arrived",
       carrier: "Hapag-Lloyd",
       container_number: "HLCU9876543",
