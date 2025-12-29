@@ -1,6 +1,4 @@
-"use client";
-
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { apiFetch } from "../../lib/api";
 import Badge from "../components/Badge";
@@ -31,7 +29,8 @@ type LotForm = {
 export default function LotsPage() {
   const [lots, setLots] = useState<Lot[]>([]);
   const [err, setErr] = useState<string | null>(null);
-  const [creating, setCreating] = useState(false);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusFilter, setStatusFilter] = useState("");
   const [form, setForm] = useState<LotForm>({
     cooperative_id: "",
@@ -55,7 +54,7 @@ export default function LotsPage() {
 
   async function createLot() {
     setErr(null);
-    setCreating(true);
+    setIsSubmitting(true);
     try {
       const payload: Partial<Lot> = {
         cooperative_id: Number(form.cooperative_id),
@@ -73,13 +72,21 @@ export default function LotsPage() {
 
       await apiFetch<Lot>("/lots", { method: "POST", body: JSON.stringify(payload) });
       setForm({ cooperative_id: "", name: "", crop_year: "", incoterm: "FOB", price_per_kg: "", currency: "USD", weight_kg: "", expected_cupping_score: "" });
+      setShowCreateForm(false);
       load();
     } catch (e: any) {
       setErr(e.message);
     } finally {
-      setCreating(false);
+      setIsSubmitting(false);
     }
   }
+
+  const filteredLots = useMemo(() => {
+    if (!statusFilter) return lots;
+    // Note: Lots don't have status in the current schema, so this is placeholder
+    // In a real implementation, you'd filter based on actual status field
+    return lots;
+  }, [lots, statusFilter]);
 
   return (
     <div className="page">
@@ -100,15 +107,15 @@ export default function LotsPage() {
             <option value="in_transit">In Transit</option>
             <option value="delivered">Delivered</option>
           </select>
-          <button className="btn btnPrimary" onClick={() => setCreating(!creating)}>
-            {creating ? "Cancel" : "+ New Lot"}
+          <button className="btn btnPrimary" onClick={() => setShowCreateForm(!showCreateForm)}>
+            {showCreateForm ? "Cancel" : "+ New Lot"}
           </button>
         </div>
       </div>
 
       {err && <div style={{ color: "crimson", marginBottom: 16 }}>{err}</div>}
 
-      {creating && (
+      {showCreateForm && (
         <div className="panel" style={{ padding: 18, marginBottom: 18 }}>
           <div className="panelTitle" style={{ marginBottom: 12 }}>Create New Lot</div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, marginTop: 12 }}>
@@ -147,11 +154,11 @@ export default function LotsPage() {
         </div>
         <button
           onClick={createLot}
-          disabled={creating}
+          disabled={isSubmitting}
           className="btn btnPrimary"
           style={{ marginTop: 12 }}
         >
-          {creating ? "Creating..." : "Create Lot"}
+          {isSubmitting ? "Creating..." : "Create Lot"}
         </button>
         <div className="muted" style={{ fontSize: 12, marginTop: 8 }}>
           Note: Get cooperative_id from the Peru Sourcing page.
@@ -164,7 +171,7 @@ export default function LotsPage() {
           <div className="panelTitle">Coffee Lots</div>
         </div>
         
-        {lots.length === 0 ? (
+        {filteredLots.length === 0 ? (
           <div className="empty" style={{ padding: 32 }}>
             No lots available. Create your first lot to start tracking shipments.
           </div>
@@ -184,7 +191,7 @@ export default function LotsPage() {
                 </tr>
               </thead>
               <tbody>
-                {lots.map((l) => (
+                {filteredLots.map((l) => (
                   <tr key={l.id}>
                     <td className="mono">{l.id}</td>
                     <td>
