@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { format, differenceInDays } from "date-fns";
 
 export default function ShipmentsDashboard() {
@@ -92,7 +91,7 @@ export default function ShipmentsDashboard() {
           </div>
         </div>
         <div className="actions">
-          <button className="btn btnPrimary">Add Shipment</button>
+          <button type="button" className="btn btnPrimary">Add Shipment</button>
         </div>
       </div>
 
@@ -206,12 +205,12 @@ export default function ShipmentsDashboard() {
                   <div style={{ marginBottom: "12px" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "6px" }}>
                       <span>Progress</span>
-                      <span>{shipment.progress}%</span>
+                      <span>{Math.min(100, Math.max(0, shipment.progress))}%</span>
                     </div>
                     <div style={{ width: "100%", height: "6px", background: "rgba(0,0,0,0.2)", borderRadius: "999px", overflow: "hidden" }}>
                       <div
                         style={{
-                          width: `${shipment.progress}%`,
+                          width: `${Math.min(100, Math.max(0, shipment.progress))}%`,
                           height: "100%",
                           background: "rgba(87,134,255,0.8)",
                           transition: "width 0.3s ease",
@@ -236,7 +235,7 @@ export default function ShipmentsDashboard() {
                   </div>
 
                   <div style={{ marginTop: "12px", paddingTop: "12px", borderTop: "1px solid var(--border)" }}>
-                    <button className="btn" style={{ width: "100%", fontSize: "12px" }}>
+                    <button type="button" className="btn" style={{ width: "100%", fontSize: "12px" }}>
                       View Details →
                     </button>
                   </div>

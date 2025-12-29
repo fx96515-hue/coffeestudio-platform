@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiFetch } from "../../lib/api";
 import {
   FreightPredictionRequest,
@@ -24,9 +24,13 @@ export function usePricePrediction() {
   return useMutation({
     mutationFn: async (data: PricePredictionRequest) => {
       // Map frontend field names to backend API
+      const parts = data.origin.split(",");
+      const origin_country = parts[0]?.trim() || data.origin;
+      const origin_region = parts.length > 1 ? parts[1]?.trim() || "" : "";
+      
       const backendRequest = {
-        origin_country: data.origin.includes(",") ? data.origin.split(",")[0] : data.origin,
-        origin_region: data.origin.includes(",") ? data.origin.split(",")[1]?.trim() : null,
+        origin_country,
+        origin_region,
         variety: data.variety,
         process_method: data.process,
         quality_grade: data.grade,

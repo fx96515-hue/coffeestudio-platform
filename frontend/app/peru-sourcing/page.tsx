@@ -7,12 +7,16 @@ import { CooperativeFilters } from "../types";
 
 export default function PeruSourcingDashboard() {
   const [filters, setFilters] = useState<CooperativeFilters>({});
-  const [selectedCoopId, setSelectedCoopId] = useState<number | null>(null);
 
-  const { data: regions, isLoading: regionsLoading } = usePeruRegions();
-  const { data: coopsData, isLoading: coopsLoading } = useCooperatives({ ...filters, limit: 50 });
+  const { data: regions, isLoading: regionsLoading, refetch: refetchRegions } = usePeruRegions();
+  const { data: coopsData, isLoading: coopsLoading, refetch: refetchCoops } = useCooperatives({ ...filters, limit: 50 });
 
   const cooperatives = coopsData?.items || [];
+
+  const handleRefresh = () => {
+    refetchRegions();
+    refetchCoops();
+  };
 
   return (
     <div className="page">
@@ -24,7 +28,7 @@ export default function PeruSourcingDashboard() {
           </div>
         </div>
         <div className="actions">
-          <button className="btn btnPrimary" onClick={() => window.location.reload()}>
+          <button type="button" className="btn btnPrimary" onClick={handleRefresh}>
             Refresh
           </button>
         </div>
@@ -123,6 +127,7 @@ export default function PeruSourcingDashboard() {
           </div>
           <div style={{ display: "flex", alignItems: "flex-end" }}>
             <button
+              type="button"
               className="btn"
               onClick={() => setFilters({})}
               style={{ width: "100%" }}

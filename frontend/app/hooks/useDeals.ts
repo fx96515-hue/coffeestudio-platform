@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "../../lib/api";
-import { Deal, DealFilters, MarginCalcRequest, MarginCalcResult, Paged } from "../types";
+import { DealFilters, MarginCalcRequest, MarginCalcResult, Paged } from "../types";
 
 // Fetch Deals with filters (using lots as base for now)
 export function useDeals(filters?: DealFilters & { limit?: number; page?: number }) {

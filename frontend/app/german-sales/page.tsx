@@ -11,7 +11,7 @@ export default function GermanSalesDashboard() {
     country: "Germany",
   });
 
-  const { data: roastersData, isLoading } = useRoasters({ ...filters, limit: 100 });
+  const { data: roastersData, isLoading, refetch } = useRoasters({ ...filters, limit: 100 });
   const roasters = roastersData?.items || [];
 
   // Calculate pipeline stats
@@ -47,7 +47,7 @@ export default function GermanSalesDashboard() {
           </div>
         </div>
         <div className="actions">
-          <button className="btn btnPrimary" onClick={() => window.location.reload()}>
+          <button type="button" className="btn btnPrimary" onClick={() => refetch()}>
             Refresh
           </button>
         </div>
@@ -211,6 +211,7 @@ export default function GermanSalesDashboard() {
           </div>
           <div style={{ display: "flex", alignItems: "flex-end" }}>
             <button
+              type="button"
               className="btn"
               onClick={() => setFilters({ country: "Germany" })}
               style={{ width: "100%" }}

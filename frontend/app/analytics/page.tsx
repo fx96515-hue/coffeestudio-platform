@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useFreightPrediction, usePricePrediction } from "../hooks/usePredictions";
 import { useCooperatives } from "../hooks/usePeruRegions";
 import { useRoasters } from "../hooks/useRoasters";
-import LineChart from "../charts/LineChart";
 
 export default function AnalyticsDashboard() {
   const [freightForm, setFreightForm] = useState({
@@ -167,6 +166,7 @@ export default function AnalyticsDashboard() {
           </div>
 
           <button
+            type="button"
             className="btn btnPrimary"
             onClick={handleFreightPredict}
             disabled={freightMutation.isPending}
@@ -208,7 +208,9 @@ export default function AnalyticsDashboard() {
             <div className="alert bad" style={{ marginTop: "14px" }}>
               <div className="alertTitle">Prediction Failed</div>
               <div className="alertText">
-                {freightMutation.error?.message || "Could not predict freight cost"}
+                {freightMutation.error instanceof Error 
+                  ? freightMutation.error.message 
+                  : "Could not predict freight cost"}
               </div>
             </div>
           )}
@@ -302,6 +304,7 @@ export default function AnalyticsDashboard() {
           </div>
 
           <button
+            type="button"
             className="btn btnPrimary"
             onClick={handlePricePredict}
             disabled={priceMutation.isPending}
@@ -348,7 +351,9 @@ export default function AnalyticsDashboard() {
             <div className="alert bad" style={{ marginTop: "14px" }}>
               <div className="alertTitle">Prediction Failed</div>
               <div className="alertText">
-                {priceMutation.error?.message || "Could not predict price"}
+                {priceMutation.error instanceof Error 
+                  ? priceMutation.error.message 
+                  : "Could not predict price"}
               </div>
             </div>
           )}

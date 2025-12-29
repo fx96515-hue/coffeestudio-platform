@@ -18,8 +18,10 @@ export function formatDate(date: string | Date | null | undefined, formatStr: st
  */
 export function formatCurrency(value: number | null | undefined, currency: string = "EUR"): string {
   if (value === null || value === undefined) return "–";
-  const symbol = currency === "USD" ? "$" : currency === "EUR" ? "€" : currency;
-  return `${symbol}${value.toLocaleString()}`;
+  return new Intl.NumberFormat(undefined, {
+    style: "currency",
+    currency,
+  }).format(value);
 }
 
 /**
@@ -27,7 +29,10 @@ export function formatCurrency(value: number | null | undefined, currency: strin
  */
 export function formatNumber(value: number | null | undefined, decimals: number = 0): string {
   if (value === null || value === undefined) return "–";
-  return value.toFixed(decimals).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return value.toLocaleString(undefined, {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  });
 }
 
 /**

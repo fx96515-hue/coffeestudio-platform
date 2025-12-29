@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useDeals, useCalculateMargin } from "../hooks/useDeals";
 import { MarginCalcRequest } from "../types";
 import PieChart from "../charts/PieChart";
-import BarChart from "../charts/BarChart";
 
 export default function DealsDashboard() {
   const [showCalculator, setShowCalculator] = useState(false);
@@ -53,6 +52,7 @@ export default function DealsDashboard() {
         </div>
         <div className="actions">
           <button
+            type="button"
             className="btn btnPrimary"
             onClick={() => setShowCalculator(!showCalculator)}
           >
@@ -191,6 +191,7 @@ export default function DealsDashboard() {
                   />
                 </div>
                 <button
+                  type="button"
                   className="btn btnPrimary"
                   onClick={handleCalculate}
                   disabled={calculateMargin.isPending}
