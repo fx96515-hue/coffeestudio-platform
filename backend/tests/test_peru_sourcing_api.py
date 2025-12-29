@@ -10,9 +10,6 @@ from app.main import app
 from app.db.session import Base, get_db
 from app.models.cooperative import Cooperative
 from app.models.region import Region
-from app.models.user import User
-
-
 # Create test database
 engine = create_engine(
     "sqlite:///:memory:",
