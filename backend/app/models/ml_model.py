@@ -1,3 +1,4 @@
+from datetime import datetime
 from sqlalchemy import String, Integer, DateTime, JSON
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -16,7 +17,7 @@ class MLModel(Base, TimestampMixin):
         String(64), nullable=False, index=True
     )  # freight_prediction, price_prediction
     model_version: Mapped[str] = mapped_column(String(64), nullable=False)
-    training_date: Mapped[DateTime] = mapped_column(DateTime(timezone=True), nullable=False)
+    training_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     features_used: Mapped[dict] = mapped_column(JSON, nullable=False)
     performance_metrics: Mapped[dict] = mapped_column(
         JSON, nullable=False
