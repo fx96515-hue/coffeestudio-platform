@@ -52,8 +52,9 @@ def suggest_duplicates(
     if entity_type not in {"cooperative", "roaster"}:
         raise ValueError("entity_type must be cooperative|roaster")
 
+    items_list: list[Cooperative] | list[Roaster]
     if entity_type == "cooperative":
-        items_list: list[Cooperative] | list[Roaster] = db.query(Cooperative).all()
+        items_list = db.query(Cooperative).all()
     else:
         items_list = db.query(Roaster).all()
     # group by domain when possible (strong signal)

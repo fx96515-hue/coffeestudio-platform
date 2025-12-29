@@ -126,6 +126,15 @@ See [TESTING.md](TESTING.md) for complete testing documentation.
 
 See [SECURITY.md](SECURITY.md) for comprehensive security documentation.
 
+## Status & Roadmap
+
+📊 **Siehe [STATUS.md](./STATUS.md)** für:
+- Aktueller Status aller Features
+- Was kommt als Nächstes (4-Phasen-Roadmap)
+- Implementation Backlog
+- Vorschläge & Empfehlungen
+- Produktivsetzung (Production Readiness: 60%)
+
 ## Nächste Schritte
 - Vollständige Provider (ICO/ICE/Fracht)
 - Multi-Tenant / Mandantenfähigkeit (optional)

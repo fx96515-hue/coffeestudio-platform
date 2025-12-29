@@ -55,12 +55,13 @@ def fetch_ecb_fx(base: str, quote: str, timeout_s: float = 20.0) -> Optional[FxQ
         return None
 
     dt_str = time_node.attrib.get("time")
-    try:
-        if not dt_str:
-            raise ValueError("dt_str is None or empty")
-        observed_at = datetime.fromisoformat(dt_str).replace(tzinfo=timezone.utc)
-    except Exception:
+    if not dt_str:
         observed_at = datetime.now(timezone.utc)
+    else:
+        try:
+            observed_at = datetime.fromisoformat(dt_str).replace(tzinfo=timezone.utc)
+        except Exception:
+            observed_at = datetime.now(timezone.utc)
 
     # collect rates: quote_ccy -> rate (EUR base)
     rates: dict[str, float] = {}
