@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from celery.result import AsyncResult
 
-from app.api.deps import require_role, get_current_user
+from app.api.deps import require_role
 from app.db.session import get_db
 from app.models.market import MarketObservation
 from app.models.user import User

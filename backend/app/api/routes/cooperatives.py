@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
-from app.api.deps import require_role, get_current_user
+from app.api.deps import require_role
 from app.db.session import get_db
 from app.models.cooperative import Cooperative
 from app.models.user import User
