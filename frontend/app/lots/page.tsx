@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { apiFetch } from "../../lib/api";
+import Badge from "../components/Badge";
 
 type Lot = {
   id: number;
@@ -20,6 +21,7 @@ export default function LotsPage() {
   const [lots, setLots] = useState<Lot[]>([]);
   const [err, setErr] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("");
   const [form, setForm] = useState<any>({
     cooperative_id: "",
     name: "",
@@ -69,50 +71,141 @@ export default function LotsPage() {
   }
 
   return (
-    <div>
-      <h1>Lots</h1>
-      {err && <div style={{ color: "crimson" }}>{err}</div>}
+    <div className="page">
+      <div className="pageHeader">
+        <div>
+          <div className="h1">Shipment Tracking</div>
+          <div className="muted">Track coffee lots from origin to destination</div>
+        </div>
+        <div className="row gap">
+          <select
+            className="input"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            style={{ width: 180 }}
+          >
+            <option value="">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="in_transit">In Transit</option>
+            <option value="delivered">Delivered</option>
+          </select>
+          <button className="btn btnPrimary" onClick={() => setCreating(!creating)}>
+            {creating ? "Cancel" : "+ New Lot"}
+          </button>
+        </div>
+      </div>
 
-      <div style={{ border: "1px solid #eee", borderRadius: 12, padding: 12, marginBottom: 16 }}>
-        <b>Neues Lot</b>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 10, marginTop: 10 }}>
-          <input placeholder="cooperative_id" value={form.cooperative_id} onChange={(e) => setForm({ ...form, cooperative_id: e.target.value })} />
-          <input placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-          <input placeholder="Crop Year" value={form.crop_year} onChange={(e) => setForm({ ...form, crop_year: e.target.value })} />
-          <input placeholder="Incoterm (FOB/CIF…)" value={form.incoterm} onChange={(e) => setForm({ ...form, incoterm: e.target.value })} />
-          <input placeholder="Preis/kg" value={form.price_per_kg} onChange={(e) => setForm({ ...form, price_per_kg: e.target.value })} />
-          <input placeholder="Currency" value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })} />
-          <input placeholder="Weight (kg)" value={form.weight_kg} onChange={(e) => setForm({ ...form, weight_kg: e.target.value })} />
-          <input placeholder="Expected SCA" value={form.expected_cupping_score} onChange={(e) => setForm({ ...form, expected_cupping_score: e.target.value })} />
+      {err && <div style={{ color: "crimson", marginBottom: 16 }}>{err}</div>}
+
+      {creating && (
+        <div className="panel" style={{ padding: 18, marginBottom: 18 }}>
+          <div className="panelTitle" style={{ marginBottom: 12 }}>Create New Lot</div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, marginTop: 12 }}>
+          <div>
+            <label className="muted" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>Cooperative ID</label>
+            <input className="input" placeholder="cooperative_id" value={form.cooperative_id} onChange={(e) => setForm({ ...form, cooperative_id: e.target.value })} />
+          </div>
+          <div>
+            <label className="muted" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>Lot Name</label>
+            <input className="input" placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+          </div>
+          <div>
+            <label className="muted" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>Crop Year</label>
+            <input className="input" placeholder="2024" value={form.crop_year} onChange={(e) => setForm({ ...form, crop_year: e.target.value })} />
+          </div>
+          <div>
+            <label className="muted" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>Incoterm</label>
+            <input className="input" placeholder="FOB/CIF" value={form.incoterm} onChange={(e) => setForm({ ...form, incoterm: e.target.value })} />
+          </div>
+          <div>
+            <label className="muted" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>Price/kg</label>
+            <input className="input" placeholder="5.50" value={form.price_per_kg} onChange={(e) => setForm({ ...form, price_per_kg: e.target.value })} />
+          </div>
+          <div>
+            <label className="muted" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>Currency</label>
+            <input className="input" placeholder="USD" value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })} />
+          </div>
+          <div>
+            <label className="muted" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>Weight (kg)</label>
+            <input className="input" placeholder="18000" value={form.weight_kg} onChange={(e) => setForm({ ...form, weight_kg: e.target.value })} />
+          </div>
+          <div>
+            <label className="muted" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>Expected SCA Score</label>
+            <input className="input" placeholder="84" value={form.expected_cupping_score} onChange={(e) => setForm({ ...form, expected_cupping_score: e.target.value })} />
+          </div>
         </div>
         <button
           onClick={createLot}
           disabled={creating}
-          style={{ marginTop: 10, padding: "8px 12px", borderRadius: 8, border: "1px solid #eee", background: "white", cursor: "pointer" }}
+          className="btn btnPrimary"
+          style={{ marginTop: 12 }}
         >
-          {creating ? "Speichern…" : "Lot anlegen"}
+          {creating ? "Creating..." : "Create Lot"}
         </button>
-        <div style={{ fontSize: 12, color: "#555", marginTop: 6 }}>
-          Hinweis: cooperative_id bekommst du aus der Kooperativen-Liste.
+        <div className="muted" style={{ fontSize: 12, marginTop: 8 }}>
+          Note: Get cooperative_id from the Peru Sourcing page.
         </div>
       </div>
-
-      {lots.length === 0 ? (
-        <div>Keine Lots vorhanden.</div>
-      ) : (
-        <ul>
-          {lots.map((l) => (
-            <li key={l.id} style={{ marginBottom: 8 }}>
-              <Link href={`/lots/${l.id}`}>{l.name}</Link>
-              <div style={{ fontSize: 12, color: "#555" }}>
-                Coop #{l.cooperative_id}
-                {l.crop_year ? ` — ${l.crop_year}` : ""}
-                {l.price_per_kg != null ? ` — ${l.price_per_kg} ${l.currency || ""}/kg` : ""}
-              </div>
-            </li>
-          ))}
-        </ul>
       )}
+
+      <div className="panel">
+        <div style={{ padding: 16, borderBottom: "1px solid var(--border)" }}>
+          <div className="panelTitle">Coffee Lots</div>
+        </div>
+        
+        {lots.length === 0 ? (
+          <div className="empty" style={{ padding: 32 }}>
+            No lots available. Create your first lot to start tracking shipments.
+          </div>
+        ) : (
+          <div className="tableWrap">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Cooperative</th>
+                  <th>Crop Year</th>
+                  <th>Weight</th>
+                  <th>Price</th>
+                  <th>SCA Score</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {lots.map((l) => (
+                  <tr key={l.id}>
+                    <td className="mono">{l.id}</td>
+                    <td>
+                      <Link className="link" href={`/lots/${l.id}`}>
+                        {l.name}
+                      </Link>
+                    </td>
+                    <td className="muted">#{l.cooperative_id}</td>
+                    <td className="muted">{l.crop_year ?? "–"}</td>
+                    <td>{l.weight_kg ? `${l.weight_kg} kg` : "–"}</td>
+                    <td>
+                      {l.price_per_kg != null ? (
+                        <Badge>{l.price_per_kg} {l.currency || "USD"}/kg</Badge>
+                      ) : "–"}
+                    </td>
+                    <td>
+                      {l.expected_cupping_score ? (
+                        <Badge tone="good">{l.expected_cupping_score}</Badge>
+                      ) : "–"}
+                    </td>
+                    <td>
+                      <Link className="link" href={`/lots/${l.id}`} style={{ fontSize: 12 }}>
+                        Track →
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

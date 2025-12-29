@@ -119,7 +119,7 @@ export default function DashboardPage() {
         </div>
       ) : null}
 
-      <div className="gridKpi">
+      <div className="grid gridCols4">
         <KpiCard
           label="Backend"
           value={
@@ -132,12 +132,17 @@ export default function DashboardPage() {
         <KpiCard
           label="Kooperativen"
           value={coopsTotal ?? (loading ? "…" : "–")}
-          hint="Inventar im System"
+          hint="Peru Sourcing"
         />
         <KpiCard
           label="Röstereien"
           value={roastersTotal ?? (loading ? "…" : "–")}
           hint="CRM-Pipeline"
+        />
+        <KpiCard
+          label="Active Lots"
+          value={loading ? "…" : "0"}
+          hint="Coffee Shipments"
         />
         <KpiCard
           label="USD/EUR"
@@ -149,9 +154,37 @@ export default function DashboardPage() {
           value={kc ? kc.value.toFixed(2) : loading ? "…" : "–"}
           hint={kc ? `Stand: ${fmtDate(kc.observed_at)}` : "CME / Stooq"}
         />
+        <KpiCard
+          label="Deals Pipeline"
+          value={loading ? "…" : "0"}
+          hint="Sales Opportunities"
+        />
+        <KpiCard
+          label="Avg Margin"
+          value={loading ? "…" : "–"}
+          hint="Deal Profitability"
+        />
       </div>
 
-      <div className="grid2">
+      <div className="panel" style={{ padding: 18, marginTop: 18 }}>
+        <div className="panelTitle">Quick Actions</div>
+        <div className="row gap" style={{ marginTop: 12, flexWrap: "wrap" }}>
+          <Link className="btn btnPrimary" href="/lots">
+            📦 Add Shipment
+          </Link>
+          <Link className="btn btnPrimary" href="/roasters">
+            ✉️ Contact Roaster
+          </Link>
+          <Link className="btn btnPrimary" href="/margin-analysis">
+            💰 Calculate Margin
+          </Link>
+          <Link className="btn" href="/cooperatives">
+            🌱 View Cooperatives
+          </Link>
+        </div>
+      </div>
+
+      <div className="grid2" style={{ marginTop: 18 }}>
         <div className="panel">
           <div className="panelHeader">
             <div>

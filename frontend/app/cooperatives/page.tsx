@@ -19,6 +19,7 @@ type CoopList = { items: Coop[]; total: number };
 export default function CooperativesPage() {
   const [data, setData] = useState<CoopList | null>(null);
   const [q, setQ] = useState("");
+  const [regionFilter, setRegionFilter] = useState("");
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
@@ -35,28 +36,55 @@ export default function CooperativesPage() {
   const rows = useMemo(() => {
     const items = data?.items ?? [];
     const qq = q.trim().toLowerCase();
-    if (!qq) return items;
-    return items.filter((c) =>
-      [c.name, c.region ?? "", c.country ?? "", c.website ?? ""].join(" ").toLowerCase().includes(qq),
-    );
-  }, [data, q]);
+    let filtered = items;
+    
+    if (qq) {
+      filtered = filtered.filter((c) =>
+        [c.name, c.region ?? "", c.country ?? "", c.website ?? ""].join(" ").toLowerCase().includes(qq),
+      );
+    }
+    
+    if (regionFilter) {
+      filtered = filtered.filter((c) => c.region === regionFilter);
+    }
+    
+    return filtered;
+  }, [data, q, regionFilter]);
+
+  const regions = useMemo(() => {
+    const items = data?.items ?? [];
+    const uniqueRegions = new Set(items.map(c => c.region).filter((r): r is string => Boolean(r)));
+    return Array.from(uniqueRegions).sort();
+  }, [data]);
 
   return (
     <div className="page">
       <div className="pageHeader">
         <div>
-          <div className="h1">Kooperativen</div>
-          <div className="muted">Alles an einem Ort – Suche, Bewertung, Website, Enrichment.</div>
+          <div className="h1">Peru Sourcing Intelligence</div>
+          <div className="muted">Cooperatives, regions, and sourcing analysis</div>
         </div>
         <div className="row gap">
+          <select
+            className="input"
+            value={regionFilter}
+            onChange={(e) => setRegionFilter(e.target.value)}
+            style={{ width: 180 }}
+          >
+            <option value="">All Regions</option>
+            {regions.map(r => (
+              <option key={r} value={r}>{r}</option>
+            ))}
+          </select>
           <input
             className="input"
-            placeholder="Suchen (Name, Region, Website)…"
+            placeholder="Search cooperatives..."
             value={q}
             onChange={(e) => setQ(e.target.value)}
+            style={{ width: 280 }}
           />
           <Link className="btn" href="/ops">
-            Enrichment starten
+            Enrichment
           </Link>
         </div>
       </div>
@@ -64,8 +92,10 @@ export default function CooperativesPage() {
       {err ? <div className="error">{err}</div> : null}
 
       <div className="panel">
-        <div className="panelTitle">
-          Treffer: {rows.length} {data ? <span className="muted">(gesamt {data.total})</span> : null}
+        <div style={{ padding: 16, borderBottom: "1px solid var(--border)" }}>
+          <div className="panelTitle">
+            Cooperatives: {rows.length} {data ? <span className="muted">(total {data.total})</span> : null}
+          </div>
         </div>
 
         <div className="tableWrap">
@@ -74,9 +104,10 @@ export default function CooperativesPage() {
               <tr>
                 <th>Name</th>
                 <th>Region</th>
-                <th>Land</th>
+                <th>Country</th>
                 <th>Website</th>
-                <th>SCA</th>
+                <th>Quality Score</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -99,6 +130,11 @@ export default function CooperativesPage() {
                     )}
                   </td>
                   <td>{c.sca_score ? <Badge tone="good">{c.sca_score}</Badge> : <Badge>–</Badge>}</td>
+                  <td>
+                    <Link className="link" href={`/cooperatives/${c.id}`} style={{ fontSize: 12 }}>
+                      View Details →
+                    </Link>
+                  </td>
                 </tr>
               ))}
             </tbody>

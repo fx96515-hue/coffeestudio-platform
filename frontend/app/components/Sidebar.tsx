@@ -6,8 +6,10 @@ import React from "react";
 
 const items: { href: string; label: string; badge?: string }[] = [
   { href: "/dashboard", label: "Dashboard" },
-  { href: "/cooperatives", label: "Kooperativen" },
-  { href: "/roasters", label: "Röstereien" },
+  { href: "/cooperatives", label: "Peru Sourcing" },
+  { href: "/roasters", label: "German Sales" },
+  { href: "/lots", label: "Shipments" },
+  { href: "/margin-analysis", label: "Margins" },
   { href: "/news", label: "Marktradar" },
   { href: "/reports", label: "Reports" },
   { href: "/ops", label: "Operations" },

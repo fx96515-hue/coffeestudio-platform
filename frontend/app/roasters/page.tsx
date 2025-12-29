@@ -18,6 +18,7 @@ type RoasterList = { items: Roaster[]; total: number };
 export default function RoastersPage() {
   const [data, setData] = useState<RoasterList | null>(null);
   const [q, setQ] = useState("");
+  const [cityFilter, setCityFilter] = useState("");
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
@@ -34,30 +35,67 @@ export default function RoastersPage() {
   const filtered = useMemo(() => {
     const items = data?.items ?? [];
     const t = q.trim().toLowerCase();
-    if (!t) return items;
-    return items.filter((r) => `${r.name} ${r.city ?? ""} ${r.country ?? ""}`.toLowerCase().includes(t));
-  }, [data, q]);
+    let result = items;
+    
+    if (t) {
+      result = result.filter((r) => `${r.name} ${r.city ?? ""} ${r.country ?? ""}`.toLowerCase().includes(t));
+    }
+    
+    if (cityFilter) {
+      result = result.filter((r) => r.city === cityFilter);
+    }
+    
+    return result;
+  }, [data, q, cityFilter]);
+
+  const cities = useMemo(() => {
+    const items = data?.items ?? [];
+    const uniqueCities = new Set(items.map(r => r.city).filter((c): c is string => Boolean(c)));
+    return Array.from(uniqueCities).sort();
+  }, [data]);
 
   return (
     <div className="page">
       <div className="pageHeader">
         <div>
-          <div className="h1">Röstereien</div>
-          <div className="muted">CRM-Pipeline + Zielkunden</div>
+          <div className="h1">German Sales Pipeline</div>
+          <div className="muted">Roasters, communications, and sales opportunities</div>
         </div>
         <div className="row gap">
-          <input className="input" style={{ width: 320 }} placeholder="Suchen…" value={q} onChange={(e) => setQ(e.target.value)} />
+          <select
+            className="input"
+            value={cityFilter}
+            onChange={(e) => setCityFilter(e.target.value)}
+            style={{ width: 180 }}
+          >
+            <option value="">All Cities</option>
+            {cities.map(c => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+          <input 
+            className="input" 
+            style={{ width: 280 }} 
+            placeholder="Search roasters..." 
+            value={q} 
+            onChange={(e) => setQ(e.target.value)} 
+          />
           <Link className="btn" href="/ops">
-            Discovery / Seed
+            Discovery
           </Link>
+          <button className="btn btnPrimary">
+            + New Contact
+          </button>
         </div>
       </div>
 
       {err ? <div className="error">{err}</div> : null}
 
       <div className="panel">
-        <div className="panelTitle">
-          Treffer: <span className="mono">{filtered.length}</span> (gesamt {data?.total ?? "–"})
+        <div style={{ padding: 16, borderBottom: "1px solid var(--border)" }}>
+          <div className="panelTitle">
+            Roasters: <span className="mono">{filtered.length}</span> (total {data?.total ?? "–"})
+          </div>
         </div>
         <div className="tableWrap">
           <table className="table">
@@ -65,9 +103,11 @@ export default function RoastersPage() {
               <tr>
                 <th style={{ width: 80 }}>ID</th>
                 <th>Name</th>
-                <th>Ort</th>
-                <th>Land</th>
+                <th>City</th>
+                <th>Country</th>
                 <th>Website</th>
+                <th>Status</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -87,15 +127,23 @@ export default function RoastersPage() {
                         <Badge tone="good">Website</Badge>
                       </a>
                     ) : (
-                      <Badge tone="warn">fehlend</Badge>
+                      <Badge tone="warn">Missing</Badge>
                     )}
+                  </td>
+                  <td>
+                    <Badge>Lead</Badge>
+                  </td>
+                  <td>
+                    <Link className="link" href={`/roasters/${r.id}`} style={{ fontSize: 12 }}>
+                      View Details →
+                    </Link>
                   </td>
                 </tr>
               ))}
               {!filtered.length ? (
                 <tr>
-                  <td colSpan={5} className="muted" style={{ padding: 16 }}>
-                    Keine Treffer.
+                  <td colSpan={7} className="muted" style={{ padding: 16 }}>
+                    No roasters found.
                   </td>
                 </tr>
               ) : null}
