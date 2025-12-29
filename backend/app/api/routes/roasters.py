@@ -1,10 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.api.deps import require_role
 from app.db.session import get_db
 from app.models.roaster import Roaster
 from app.schemas.roaster import RoasterCreate, RoasterOut, RoasterUpdate
+from app.core.export import DataExporter
 
 router = APIRouter()
 
@@ -68,3 +70,13 @@ def delete_roaster(
     db.delete(r)
     db.commit()
     return {"status": "deleted"}
+
+
+@router.get("/export/csv", response_class=StreamingResponse)
+def export_roasters_csv(
+    db: Session = Depends(get_db),
+    _=Depends(require_role("admin", "analyst", "viewer")),
+):
+    """Export all roasters to CSV format."""
+    roasters = db.query(Roaster).order_by(Roaster.name.asc()).all()
+    return DataExporter.roasters_to_csv(roasters)

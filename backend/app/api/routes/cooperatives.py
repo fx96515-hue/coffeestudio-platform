@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.api.deps import require_role
@@ -6,6 +7,7 @@ from app.db.session import get_db
 from app.models.cooperative import Cooperative
 from app.schemas.cooperative import CooperativeCreate, CooperativeOut, CooperativeUpdate
 from app.services.scoring import recompute_and_persist_cooperative
+from app.core.export import DataExporter
 
 router = APIRouter()
 
@@ -82,3 +84,13 @@ def recompute_score(
         raise HTTPException(status_code=404, detail="Not found")
     breakdown = recompute_and_persist_cooperative(db, coop)
     return {"status": "ok", "coop_id": coop_id, "breakdown": breakdown.__dict__}
+
+
+@router.get("/export/csv", response_class=StreamingResponse)
+def export_cooperatives_csv(
+    db: Session = Depends(get_db),
+    _=Depends(require_role("admin", "analyst", "viewer")),
+):
+    """Export all cooperatives to CSV format."""
+    cooperatives = db.query(Cooperative).order_by(Cooperative.name.asc()).all()
+    return DataExporter.cooperatives_to_csv(cooperatives)
