@@ -1,5 +1,6 @@
 import "./globals.css";
 import AppShell from "./components/AppShell";
+import QueryProvider from "./components/QueryProvider";
 
 export const metadata = {
   title: "CoffeeStudio",
@@ -14,7 +15,9 @@ export default function RootLayout({
   return (
     <html lang="de">
       <body>
-        <AppShell>{children}</AppShell>
+        <QueryProvider>
+          <AppShell>{children}</AppShell>
+        </QueryProvider>
       </body>
     </html>
   );
