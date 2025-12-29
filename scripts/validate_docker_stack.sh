@@ -116,17 +116,21 @@ done
 
 # 9. Check port conflicts
 echo -e "\n🔌 Checking for port conflicts..."
-ports=("8000:backend" "3000:frontend" "5432:postgres" "6379:redis")
-for port_info in "${ports[@]}"; do
-    port="${port_info%%:*}"
-    service="${port_info##*:}"
-    
-    if lsof -i :$port > /dev/null 2>&1; then
-        warn "Port $port ($service) is already in use on host"
-    else
-        pass "Port $port ($service) is available"
-    fi
-done
+if command -v lsof > /dev/null 2>&1; then
+    ports=("8000:backend" "3000:frontend" "5432:postgres" "6379:redis")
+    for port_info in "${ports[@]}"; do
+        port="${port_info%%:*}"
+        service="${port_info##*:}"
+        
+        if lsof -i :$port > /dev/null 2>&1; then
+            warn "Port $port ($service) is already in use on host"
+        else
+            pass "Port $port ($service) is available"
+        fi
+    done
+else
+    warn "lsof command not available, skipping port conflict checks"
+fi
 
 # Summary
 echo -e "\n📊 Validation Summary"
