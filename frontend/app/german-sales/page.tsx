@@ -26,8 +26,8 @@ export default function GermanSalesDashboard() {
 
   // Priority roasters (high score, not yet contacted or needs followup)
   const priorityRoasters = roasters
-    .filter((r) => (r.sales_fit_score || 0) >= 70)
-    .sort((a, b) => (b.sales_fit_score || 0) - (a.sales_fit_score || 0))
+    .filter((r) => (r.overall_score || 0) >= 70)
+    .sort((a, b) => (b.overall_score || 0) - (a.overall_score || 0))
     .slice(0, 10);
 
   // Pending followups (roasters with past followup dates)

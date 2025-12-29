@@ -5,6 +5,9 @@ import {
   FreightPredictionResponse,
   PricePredictionRequest,
   PricePredictionResponse,
+  FreightCostTrend,
+  PriceTrend,
+  MLModel,
 } from "../types";
 
 // Freight Cost Prediction
@@ -55,7 +58,7 @@ export function useFreightCostTrend(params?: { route?: string; months_back?: num
   return useQuery({
     queryKey: ["freight-cost-trend", params],
     queryFn: async () => {
-      const data = await apiFetch<any>(`/ml/freight-cost-trend?${searchParams.toString()}`);
+      const data = await apiFetch<FreightCostTrend>(`/ml/freight-cost-trend?${searchParams.toString()}`);
       return data;
     },
     enabled: !!params?.route,
@@ -71,7 +74,7 @@ export function useFreightHistory(params?: { route?: string; months?: number }) 
   return useQuery({
     queryKey: ["freight-history", params],
     queryFn: async () => {
-      const data = await apiFetch<any>(`/ml/freight-cost-trend?${searchParams.toString()}`);
+      const data = await apiFetch<FreightCostTrend>(`/ml/freight-cost-trend?${searchParams.toString()}`);
       return data;
     },
     enabled: !!params?.route,
@@ -87,7 +90,7 @@ export function usePriceHistory(params?: { origin?: string; months?: number }) {
   return useQuery({
     queryKey: ["price-history", params],
     queryFn: async () => {
-      const data = await apiFetch<any>(`/ml/forecast-price-trend?${searchParams.toString()}`);
+      const data = await apiFetch<PriceTrend>(`/ml/forecast-price-trend?${searchParams.toString()}`);
       return data;
     },
   });
@@ -101,7 +104,7 @@ export function useMLModels(modelType?: string) {
   return useQuery({
     queryKey: ["ml-models", modelType],
     queryFn: async () => {
-      const data = await apiFetch<any[]>(`/ml/models?${params.toString()}`);
+      const data = await apiFetch<MLModel[]>(`/ml/models?${params.toString()}`);
       return data;
     },
   });
