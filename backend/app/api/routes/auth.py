@@ -36,6 +36,17 @@ def login(request: Request, payload: LoginRequest, db: Session = Depends(get_db)
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
         )
     
+    # Check if user account is active
+    if not user.is_active:
+        logger.warning(
+            "auth.inactive_user_login_attempt",
+            email=user.email,
+            ip=request.client.host if request.client else "unknown"
+        )
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
+        )
+    
     logger.info(
         "auth.login_success",
         email=user.email,
