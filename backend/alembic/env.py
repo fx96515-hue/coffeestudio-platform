@@ -22,6 +22,9 @@ from app.models.news_item import NewsItem  # noqa: F401
 from app.models.peru_region import PeruRegion  # noqa: F401
 from app.models.knowledge_doc import KnowledgeDoc  # noqa: F401
 from app.models.cupping import CuppingResult  # noqa: F401
+from app.models.freight_history import FreightHistory  # noqa: F401
+from app.models.coffee_price_history import CoffeePriceHistory  # noqa: F401
+from app.models.ml_model import MLModel  # noqa: F401
 
 config = context.config
 fileConfig(config.config_file_name)
