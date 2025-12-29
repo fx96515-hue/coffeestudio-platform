@@ -83,9 +83,6 @@ export default function RoastersPage() {
           <Link className="btn" href="/ops">
             Discovery
           </Link>
-          <button className="btn btnPrimary">
-            + New Contact
-          </button>
         </div>
       </div>
 
