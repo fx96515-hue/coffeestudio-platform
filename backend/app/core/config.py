@@ -5,9 +5,10 @@ from typing import List
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    DATABASE_URL: str
-    REDIS_URL: str
-    JWT_SECRET: str
+    # Required settings that must come from environment
+    DATABASE_URL: str = ""  # Will be populated from .env
+    REDIS_URL: str = ""  # Will be populated from .env
+    JWT_SECRET: str = ""  # Will be populated from .env
     JWT_ISSUER: str = "coffeestudio"
     JWT_AUDIENCE: str = "coffeestudio-web"
     CORS_ORIGINS: str = "http://localhost:3000"

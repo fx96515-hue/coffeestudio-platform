@@ -63,7 +63,7 @@ def refresh_news(
                     item.title = (r.title or item.title)[:500]
                     item.snippet = r.snippet or item.snippet
                     item.country = country
-                    item.retrieved_at = now  # type: ignore[assignment]
+                    item.retrieved_at = now
                     item.meta = {"provider": "perplexity", "query": q}
                     db.commit()
             except Exception as e:

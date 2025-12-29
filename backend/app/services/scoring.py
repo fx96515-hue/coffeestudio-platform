@@ -158,7 +158,7 @@ def recompute_and_persist_cooperative(db: Session, coop: Cooperative) -> ScoreBr
     coop.economics_score = breakdown.economics
     coop.total_score = breakdown.total
     coop.confidence = breakdown.confidence
-    coop.last_scored_at = datetime.now(timezone.utc)  # type: ignore[assignment]
+    coop.last_scored_at = datetime.now(timezone.utc)
     db.add(coop)
     db.commit()
     db.refresh(coop)
