@@ -56,7 +56,7 @@ def suggest_duplicates(
     if entity_type == "cooperative":
         items_list = db.query(Cooperative).all()
     else:
-        items_list = db.query(Roaster).all()  # type: ignore[assignment]
+        items_list = db.query(Roaster).all()
     # group by domain when possible (strong signal)
     by_domain: dict[str, list[Any]] = {}
     no_domain: list[Any] = []
