@@ -39,7 +39,6 @@ class Cooperative(Base, TimestampMixin):
     )
 
     meta: Mapped[dict | None] = mapped_column(JSON, nullable=True)
- copilot/implement-sourcing-intelligence-system
     
     # Peru Sourcing Intelligence fields (v0.4.0)
     operational_data: Mapped[dict | None] = mapped_column(JSON, nullable=True)  # farmer_count, storage_capacity_kg, processing_facilities, years_exporting
@@ -49,6 +48,3 @@ class Cooperative(Base, TimestampMixin):
     digital_footprint: Mapped[dict | None] = mapped_column(JSON, nullable=True)  # website, social_media, photos, cupping_scores
     sourcing_scores: Mapped[dict | None] = mapped_column(JSON, nullable=True)  # cached scoring results
     communication_metrics: Mapped[dict | None] = mapped_column(JSON, nullable=True)  # avg_response_hours, languages, missed_meetings
-
-
- main
