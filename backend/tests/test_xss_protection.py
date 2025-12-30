@@ -15,7 +15,7 @@ def test_xss_script_tag_in_cooperative_name(client: TestClient, auth_headers):
     
     for payload in xss_payloads:
         response = client.post(
-            "/api/cooperatives/",
+            "/cooperatives/",
             headers=auth_headers,
             json={
                 "name": payload,
@@ -37,7 +37,7 @@ def test_xss_javascript_protocol_in_url(client: TestClient, auth_headers):
     
     for url in malicious_urls:
         response = client.post(
-            "/api/cooperatives/",
+            "/cooperatives/",
             headers=auth_headers,
             json={
                 "name": "Test Cooperative",
@@ -59,7 +59,7 @@ def test_xss_iframe_injection(client: TestClient, auth_headers):
     
     for payload in iframe_payloads:
         response = client.post(
-            "/api/cooperatives/",
+            "/cooperatives/",
             headers=auth_headers,
             json={
                 "name": payload,
@@ -81,7 +81,7 @@ def test_xss_event_handlers(client: TestClient, auth_headers):
     
     for payload in event_payloads:
         response = client.post(
-            "/api/cooperatives/",
+            "/cooperatives/",
             headers=auth_headers,
             json={
                 "name": payload,
@@ -102,7 +102,7 @@ def test_xss_in_roaster_website(client: TestClient, auth_headers):
     
     for url in malicious_urls:
         response = client.post(
-            "/api/roasters/",
+            "/roasters/",
             headers=auth_headers,
             json={
                 "name": "Test Roaster",
@@ -123,7 +123,7 @@ def test_xss_in_notes_field(client: TestClient, auth_headers):
     
     for payload in xss_payloads:
         response = client.post(
-            "/api/cooperatives/",
+            "/cooperatives/",
             headers=auth_headers,
             json={
                 "name": "Test Cooperative",
@@ -144,7 +144,7 @@ def test_xss_data_protocol_in_url(client: TestClient, auth_headers):
     
     for url in data_urls:
         response = client.post(
-            "/api/cooperatives/",
+            "/cooperatives/",
             headers=auth_headers,
             json={
                 "name": "Test Cooperative",
@@ -167,7 +167,7 @@ def test_safe_content_accepted(client: TestClient, auth_headers):
     }
     
     response = client.post(
-        "/api/cooperatives/",
+        "/cooperatives/",
         headers=auth_headers,
         json=safe_data
     )
@@ -187,7 +187,7 @@ def test_xss_svg_injection(client: TestClient, auth_headers):
     
     for payload in svg_payloads:
         response = client.post(
-            "/api/cooperatives/",
+            "/cooperatives/",
             headers=auth_headers,
             json={
                 "name": payload,

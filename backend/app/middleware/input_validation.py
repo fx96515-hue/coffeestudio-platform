@@ -27,6 +27,10 @@ class InputValidationMiddleware(BaseHTTPMiddleware):
         r"(\bEXECUTE\b\()",
         r"(;.*(-{2}|\/\*))",  # SQL comment patterns
         r"('\s*(OR|AND)\s*'?\d)",  # Basic OR/AND injection
+        r"'\s*--",  # SQL comment after quote
+        r"\bWAITFOR\b.*\bDELAY\b",  # Time-based blind SQL injection
+        r"\bSLEEP\b\s*\(",  # MySQL SLEEP function
+        r"\bBENCHMARK\b\s*\(",  # MySQL BENCHMARK function
     ]
 
     # XSS patterns

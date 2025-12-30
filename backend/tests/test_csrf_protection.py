@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 
 def test_csrf_token_generation(client: TestClient, auth_headers):
     """Test that CSRF tokens can be generated for authenticated users."""
-    response = client.get("/api/auth/csrf-token", headers=auth_headers)
+    response = client.get("/auth/csrf-token", headers=auth_headers)
     
     assert response.status_code == 200
     data = response.json()
@@ -16,8 +16,8 @@ def test_csrf_token_generation(client: TestClient, auth_headers):
 
 def test_csrf_token_unique_per_session(client: TestClient, auth_headers):
     """Test that CSRF tokens are unique per session."""
-    response1 = client.get("/api/auth/csrf-token", headers=auth_headers)
-    response2 = client.get("/api/auth/csrf-token", headers=auth_headers)
+    response1 = client.get("/auth/csrf-token", headers=auth_headers)
+    response2 = client.get("/auth/csrf-token", headers=auth_headers)
     
     assert response1.status_code == 200
     assert response2.status_code == 200
@@ -32,7 +32,7 @@ def test_csrf_token_unique_per_session(client: TestClient, auth_headers):
 
 def test_csrf_token_requires_authentication(client: TestClient):
     """Test that CSRF token endpoint requires authentication."""
-    response = client.get("/api/auth/csrf-token")
+    response = client.get("/auth/csrf-token")
     
     # Should require authentication
     assert response.status_code == 401

@@ -16,7 +16,7 @@ def test_sql_injection_in_cooperative_name(client: TestClient, auth_headers):
     
     for payload in malicious_payloads:
         response = client.post(
-            "/api/cooperatives/",
+            "/cooperatives/",
             headers=auth_headers,
             json={
                 "name": payload,
@@ -37,7 +37,7 @@ def test_sql_injection_in_roaster_name(client: TestClient, auth_headers):
     
     for payload in malicious_payloads:
         response = client.post(
-            "/api/roasters/",
+            "/roasters/",
             headers=auth_headers,
             json={
                 "name": payload,
@@ -63,7 +63,7 @@ def test_sql_injection_in_lot_name(client: TestClient, auth_headers, db):
     
     for payload in malicious_payloads:
         response = client.post(
-            "/api/lots/",
+            "/lots/",
             headers=auth_headers,
             json={
                 "cooperative_id": coop.id,
@@ -84,12 +84,12 @@ def test_orm_queries_safe_from_injection(client: TestClient, auth_headers, db):
     
     # Try to retrieve it with various "malicious" query attempts
     # These should all fail to return unexpected results
-    response = client.get(f"/api/cooperatives/{coop.id}", headers=auth_headers)
+    response = client.get(f"/cooperatives/{coop.id}", headers=auth_headers)
     assert response.status_code == 200
     assert response.json()["name"] == "Safe Cooperative"
     
     # Try with non-existent ID (simulating injection attempt)
-    response = client.get("/api/cooperatives/999999", headers=auth_headers)
+    response = client.get("/cooperatives/999999", headers=auth_headers)
     assert response.status_code == 404
 
 
@@ -104,7 +104,7 @@ def test_complex_sql_injection_patterns(client: TestClient, auth_headers):
     
     for payload in complex_payloads:
         response = client.post(
-            "/api/cooperatives/",
+            "/cooperatives/",
             headers=auth_headers,
             json={
                 "name": payload,
@@ -123,7 +123,7 @@ def test_blind_sql_injection_time_based(client: TestClient, auth_headers):
     start_time = time.time()
     
     response = client.post(
-        "/api/cooperatives/",
+        "/cooperatives/",
         headers=auth_headers,
         json={
             "name": payload,

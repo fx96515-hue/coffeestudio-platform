@@ -10,7 +10,7 @@ class TestCooperativeValidation:
     def test_valid_cooperative_creation(self, client: TestClient, auth_headers):
         """Test that valid cooperative data is accepted."""
         response = client.post(
-            "/api/cooperatives/",
+            "/cooperatives/",
             headers=auth_headers,
             json={
                 "name": "Test Cooperative",
@@ -25,7 +25,7 @@ class TestCooperativeValidation:
     def test_cooperative_name_too_short(self, client: TestClient, auth_headers):
         """Test that too-short names are rejected."""
         response = client.post(
-            "/api/cooperatives/",
+            "/cooperatives/",
             headers=auth_headers,
             json={"name": "X", "region": "Cajamarca"}
         )
@@ -35,7 +35,7 @@ class TestCooperativeValidation:
         """Test altitude range validation."""
         # Test negative altitude
         response = client.post(
-            "/api/cooperatives/",
+            "/cooperatives/",
             headers=auth_headers,
             json={"name": "Test Coop", "altitude_m": -100}
         )
@@ -43,7 +43,7 @@ class TestCooperativeValidation:
         
         # Test altitude too high
         response = client.post(
-            "/api/cooperatives/",
+            "/cooperatives/",
             headers=auth_headers,
             json={"name": "Test Coop", "altitude_m": 7000}
         )
@@ -55,7 +55,7 @@ class TestCooperativeValidation:
         
         for email in invalid_emails:
             response = client.post(
-                "/api/cooperatives/",
+                "/cooperatives/",
                 headers=auth_headers,
                 json={"name": "Test Coop", "contact_email": email}
             )
@@ -68,11 +68,12 @@ class TestCooperativeValidation:
         
         for url in invalid_urls:
             response = client.post(
-                "/api/cooperatives/",
+                "/cooperatives/",
                 headers=auth_headers,
                 json={"name": "Test Coop", "website": url}
             )
-            assert response.status_code == 422
+            # Can be rejected by middleware (400) or Pydantic validation (422)
+            assert response.status_code in [400, 422], f"Invalid URL not rejected: {url}"
 
 
 class TestLotValidation:
@@ -81,7 +82,7 @@ class TestLotValidation:
     def test_lot_cooperative_id_required(self, client: TestClient, auth_headers):
         """Test that cooperative_id is required and positive."""
         response = client.post(
-            "/api/lots/",
+            "/lots/",
             headers=auth_headers,
             json={"name": "Test Lot", "cooperative_id": 0}
         )
@@ -96,7 +97,7 @@ class TestLotValidation:
         
         # Too short
         response = client.post(
-            "/api/lots/",
+            "/lots/",
             headers=auth_headers,
             json={"name": "X", "cooperative_id": coop.id}
         )
@@ -111,7 +112,7 @@ class TestLotValidation:
         
         # Invalid year (too old)
         response = client.post(
-            "/api/lots/",
+            "/lots/",
             headers=auth_headers,
             json={
                 "name": "Test Lot",
@@ -123,7 +124,7 @@ class TestLotValidation:
         
         # Invalid year (too future)
         response = client.post(
-            "/api/lots/",
+            "/lots/",
             headers=auth_headers,
             json={
                 "name": "Test Lot",
@@ -142,7 +143,7 @@ class TestLotValidation:
         
         # Invalid incoterm
         response = client.post(
-            "/api/lots/",
+            "/lots/",
             headers=auth_headers,
             json={
                 "name": "Test Lot",
@@ -154,7 +155,7 @@ class TestLotValidation:
         
         # Valid incoterm
         response = client.post(
-            "/api/lots/",
+            "/lots/",
             headers=auth_headers,
             json={
                 "name": "Test Lot",
@@ -173,7 +174,7 @@ class TestLotValidation:
         
         # Negative price
         response = client.post(
-            "/api/lots/",
+            "/lots/",
             headers=auth_headers,
             json={
                 "name": "Test Lot",
@@ -185,7 +186,7 @@ class TestLotValidation:
         
         # Unreasonably high price
         response = client.post(
-            "/api/lots/",
+            "/lots/",
             headers=auth_headers,
             json={
                 "name": "Test Lot",
@@ -203,7 +204,7 @@ class TestRoasterValidation:
         """Test price position enum validation."""
         # Invalid price position
         response = client.post(
-            "/api/roasters/",
+            "/roasters/",
             headers=auth_headers,
             json={
                 "name": "Test Roaster",
@@ -215,7 +216,7 @@ class TestRoasterValidation:
         # Valid price position
         for position in ["premium", "mid-range", "value", "luxury"]:
             response = client.post(
-                "/api/roasters/",
+                "/roasters/",
                 headers=auth_headers,
                 json={
                     "name": f"Test Roaster {position}",
@@ -227,7 +228,7 @@ class TestRoasterValidation:
     def test_roaster_email_validation(self, client: TestClient, auth_headers):
         """Test roaster email validation."""
         response = client.post(
-            "/api/roasters/",
+            "/roasters/",
             headers=auth_headers,
             json={
                 "name": "Test Roaster",
@@ -244,7 +245,7 @@ class TestCuppingValidation:
         """Test that cupping scores are within valid ranges."""
         # SCA score out of range
         response = client.post(
-            "/api/cuppings/",
+            "/cuppings/",
             headers=auth_headers,
             json={"sca_score": 150}
         )
@@ -252,7 +253,7 @@ class TestCuppingValidation:
         
         # Component score out of range
         response = client.post(
-            "/api/cuppings/",
+            "/cuppings/",
             headers=auth_headers,
             json={"aroma": 15}
         )
@@ -266,7 +267,7 @@ class TestLogisticsValidation:
         """Test weight validation in landed cost calculator."""
         # Negative weight
         response = client.post(
-            "/api/logistics/landed-cost",
+            "/logistics/landed-cost",
             headers=auth_headers,
             json={
                 "weight_kg": -100,
@@ -277,7 +278,7 @@ class TestLogisticsValidation:
         
         # Zero weight
         response = client.post(
-            "/api/logistics/landed-cost",
+            "/logistics/landed-cost",
             headers=auth_headers,
             json={
                 "weight_kg": 0,
@@ -294,7 +295,7 @@ class TestMarginValidation:
         """Test currency validation in margin calculator."""
         # Invalid currency
         response = client.post(
-            "/api/margins/calculate",
+            "/margins/calc",
             headers=auth_headers,
             json={
                 "purchase_price_per_kg": 5.0,
@@ -307,7 +308,7 @@ class TestMarginValidation:
         """Test yield factor validation."""
         # Yield factor > 1
         response = client.post(
-            "/api/margins/calculate",
+            "/margins/calc",
             headers=auth_headers,
             json={
                 "purchase_price_per_kg": 5.0,
@@ -318,7 +319,7 @@ class TestMarginValidation:
         
         # Yield factor <= 0
         response = client.post(
-            "/api/margins/calculate",
+            "/margins/calc",
             headers=auth_headers,
             json={
                 "purchase_price_per_kg": 5.0,

@@ -10,7 +10,7 @@ def test_global_rate_limit_exists(client: TestClient, auth_headers):
     # Make multiple requests quickly
     responses = []
     for _ in range(210):  # Exceed the 200/minute limit
-        response = client.get("/api/cooperatives/", headers=auth_headers)
+        response = client.get("/cooperatives/", headers=auth_headers)
         responses.append(response)
         if response.status_code == 429:
             break
@@ -25,7 +25,7 @@ def test_login_rate_limit(client: TestClient):
     responses = []
     for i in range(10):
         response = client.post(
-            "/api/auth/login",
+            "/auth/login",
             json={
                 "email": f"test{i}@example.com",
                 "password": "password123"
@@ -46,7 +46,7 @@ def test_rate_limit_by_ip(client: TestClient):
     # Multiple requests from same client should be rate limited
     responses = []
     for i in range(250):
-        response = client.get("/api/health")
+        response = client.get("/health")
         responses.append(response.status_code)
         if response.status_code == 429:
             break
@@ -59,7 +59,7 @@ def test_rate_limit_error_message(client: TestClient, auth_headers):
     """Test that rate limit error messages are informative."""
     # Make enough requests to trigger rate limit
     for _ in range(210):
-        response = client.get("/api/cooperatives/", headers=auth_headers)
+        response = client.get("/cooperatives/", headers=auth_headers)
         if response.status_code == 429:
             data = response.json()
             assert "detail" in data
@@ -75,7 +75,7 @@ def test_bootstrap_rate_limit(client: TestClient):
     # Try to call bootstrap multiple times
     responses = []
     for _ in range(15):
-        response = client.post("/api/auth/dev/bootstrap")
+        response = client.post("/auth/dev/bootstrap")
         responses.append(response)
         if response.status_code == 429:
             break
@@ -99,12 +99,12 @@ def test_authenticated_vs_unauthenticated_rate_limits(client: TestClient, auth_h
     # Both should be rate limited by IP address
     responses_unauth = []
     for _ in range(100):
-        response = client.get("/api/health")
+        response = client.get("/health")
         responses_unauth.append(response.status_code)
     
     responses_auth = []
     for _ in range(100):
-        response = client.get("/api/cooperatives/", headers=auth_headers)
+        response = client.get("/cooperatives/", headers=auth_headers)
         responses_auth.append(response.status_code)
         if response.status_code == 429:
             break
@@ -118,7 +118,7 @@ def test_rate_limit_does_not_block_legitimate_use(client: TestClient, auth_heade
     # A reasonable number of requests should work fine
     responses = []
     for _ in range(50):  # Well below 200/minute limit
-        response = client.get("/api/cooperatives/", headers=auth_headers)
+        response = client.get("/cooperatives/", headers=auth_headers)
         responses.append(response.status_code)
     
     # All should succeed
