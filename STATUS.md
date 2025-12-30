@@ -21,6 +21,7 @@
   - ✅ Kooperativen (CRUD) — Peruanische Kaffeeproduzenten
   - ✅ Röster (CRUD) — Deutsche Specialty Coffee Röstereien
   - ✅ Lots (CRUD) — Lot-/Shipment-orientierte Kaffeestammdaten
+  - ✅ Shipments (CRUD) — Shipment-Tracking mit Status & Tracking-Events
   - ✅ Margen-Engine — Kalkulationen mit gespeicherten Runs pro Lot
   
 - **Scoring & Intelligence:**
@@ -54,7 +55,7 @@
 - **Dashboards (v0.2.1c + Frontend PR):**
   - ✅ Peru Sourcing Intelligence — Regionen, Kooperativen, Scores
   - ✅ German Roasters Sales — CRM-Style, Pipeline-Status, Followups
-  - ✅ Shipments Tracking — Aktive Lieferungen, ETA (Mock-Daten)
+  - ✅ Shipments Tracking — Aktive Lieferungen, ETA, Status (Backend-API verfügbar)
   - ✅ Deals & Margin Calculator — Real-time Kalkulation, Cost Breakdown
   - ✅ Analytics & ML Predictions — Freight/Price Predictor
   
@@ -181,13 +182,15 @@ Basierend auf `REFACTORING_PLAN.md`:
    - Fracht-Spot-Preise (aktuell nur ML-Predictions)
    - Live-Daten statt historischer Daten
    
-2. **Shipments Backend API**
-   - Frontend-Dashboard nutzt derzeit Mock-Daten
-   - Backend-Implementierung fehlt:
-     - Shipment-Tracking-Entität
-     - Status-Updates
-     - Route-Management
-     - ETA-Berechnung
+2. **Shipments Backend API** — ✅ COMPLETED
+   - ✅ Shipment-Tracking-Entität implementiert
+   - ✅ Status-Updates (planned, in_transit, customs, delivered, delayed)
+   - ✅ Tracking events (location updates, timestamps)
+   - ✅ Route-Management (origin/destination ports)
+   - ✅ Complete CRUD API with filtering
+   - ✅ 24 comprehensive tests (all passing)
+   - ✅ API documentation added
+   - Frontend-Dashboard kann nun echte Daten nutzen statt Mock-Daten
    
 3. **Multi-Tenant / Mandantenfähigkeit (optional)**
    - Isolierung von Daten pro Tenant
