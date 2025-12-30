@@ -278,7 +278,7 @@ def check_safety() -> dict[str, Any]:
         
         return {
             'passed': len(vulnerabilities) == 0,
-            'message': f'No vulnerabilities' if len(vulnerabilities) == 0 else f'{len(vulnerabilities)} vulnerabilities found'
+            'message': 'No vulnerabilities' if len(vulnerabilities) == 0 else f'{len(vulnerabilities)} vulnerabilities found'
         }
     except FileNotFoundError:
         return {

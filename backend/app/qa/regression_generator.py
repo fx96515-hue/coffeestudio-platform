@@ -93,6 +93,9 @@ Return ONLY the test code, no explanations.
         
         test_code = response.choices[0].message.content
         
+        if test_code is None:
+            raise ValueError("AI response content is None")
+        
         # Clean up markdown code blocks if present
         if test_code.startswith("```"):
             lines = test_code.split("\n")

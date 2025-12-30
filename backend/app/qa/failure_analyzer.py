@@ -78,7 +78,11 @@ class AIFailureAnalyzer:
             response_format={"type": "json_object"}
         )
         
-        return json.loads(response.choices[0].message.content)
+        content = response.choices[0].message.content
+        if content is None:
+            raise ValueError("AI response content is None")
+        
+        return json.loads(content)
     
     def _get_system_prompt(self) -> str:
         """Get the system prompt for the AI analyzer."""

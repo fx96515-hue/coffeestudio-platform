@@ -3,7 +3,6 @@
 import os
 import sys
 import subprocess
-import json
 from pathlib import Path
 
 try:
@@ -12,7 +11,7 @@ except ImportError:
     print("ERROR: click package is required. Install with: pip install click")
     sys.exit(1)
 
-from .failure_analyzer import AIFailureAnalyzer, TestFailure
+from .failure_analyzer import AIFailureAnalyzer
 from .auto_fixer import AutoFixer
 from .regression_generator import RegressionTestGenerator
 from .utils import (
@@ -147,7 +146,7 @@ def analyze_failures(
             continue
     
     click.echo(f"\n{'='*60}")
-    click.echo(f"✨ QA Analysis Complete!")
+    click.echo("✨ QA Analysis Complete!")
     click.echo(f"   Fixes applied: {fixes_applied}/{min(len(failures), max_fixes)}")
     
     if fixes_applied > 0:
