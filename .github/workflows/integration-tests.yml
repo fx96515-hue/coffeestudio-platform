@@ -1,0 +1,123 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  integration-tests:
+    name: E2E Integration Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r tests/requirements.txt
+      
+      - name: Create .env file for testing
+        run: |
+          cat > .env << EOF
+          APP_ENV=test
+          DATABASE_URL=postgresql+psycopg://coffeestudio:coffeestudio@postgres:5432/coffeestudio
+          REDIS_URL=redis://redis:6379/0
+          JWT_SECRET=test_secret_key_for_integration_tests_only_do_not_use_in_production
+          JWT_ISSUER=coffeestudio
+          JWT_AUDIENCE=coffeestudio-users
+          BOOTSTRAP_ADMIN_EMAIL=admin@coffeestudio.com
+          BOOTSTRAP_ADMIN_PASSWORD=test123
+          NEXT_PUBLIC_API_URL=http://localhost:8000
+          EOF
+      
+      - name: Start Docker Compose stack
+        run: |
+          docker compose up -d --build
+          echo "Waiting for services to be healthy..."
+          sleep 30
+      
+      - name: Check service health
+        run: |
+          docker compose ps
+          docker compose logs backend --tail=50
+      
+      - name: Bootstrap admin user
+        run: |
+          max_attempts=10
+          for i in $(seq 1 $max_attempts); do
+            if curl -f -X POST http://localhost:8000/auth/dev/bootstrap; then
+              echo "Bootstrap successful"
+              break
+            fi
+            echo "Attempt $i failed, retrying..."
+            sleep 5
+          done
+      
+      - name: Run integration tests
+        run: |
+          pytest tests/integration/ -v --tb=short
+        continue-on-error: false
+      
+      - name: Show logs on failure
+        if: failure()
+        run: |
+          echo "=== Backend Logs ==="
+          docker compose logs backend --tail=100
+          echo "=== Frontend Logs ==="
+          docker compose logs frontend --tail=100
+          echo "=== PostgreSQL Logs ==="
+          docker compose logs postgres --tail=50
+          echo "=== Redis Logs ==="
+          docker compose logs redis --tail=50
+      
+      - name: Cleanup
+        if: always()
+        run: |
+          docker compose down -v
+
+  docker-stack-validation:
+    name: Docker Stack Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Create .env file
+        run: |
+          cat > .env << EOF
+          DATABASE_URL=postgresql+psycopg://coffeestudio:coffeestudio@postgres:5432/coffeestudio
+          REDIS_URL=redis://redis:6379/0
+          JWT_SECRET=test_secret_minimum_32_chars_long_key_here
+          EOF
+      
+      - name: Run Docker stack validation
+        run: |
+          bash scripts/validate_docker_stack.sh
+
+  pr-dependency-check:
+    name: PR Dependency Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Run PR dependency checker
+        run: |
+          python scripts/check_pr_dependencies.py
