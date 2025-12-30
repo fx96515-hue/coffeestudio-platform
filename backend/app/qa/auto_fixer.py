@@ -2,9 +2,12 @@
 
 import ast
 import difflib
+import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+
+logger = logging.getLogger(__name__)
 
 
 class AutoFixer:
@@ -102,14 +105,14 @@ class AutoFixer:
         try:
             backup = Path(backup_path)
             if not backup.exists():
-                print(f"Backup file not found: {backup_path}")
+                logger.error(f"Backup file not found: {backup_path}")
                 return False
             
             # Extract original filename from backup
             # Format: filename.YYYYMMDD_HHMMSS.backup
             name_parts = backup.name.rsplit('.', 2)
             if len(name_parts) != 3 or name_parts[2] != 'backup':
-                print(f"Invalid backup filename format: {backup.name}")
+                logger.error(f"Invalid backup filename format: {backup.name}")
                 return False
             
             original_name = name_parts[0]
@@ -117,14 +120,14 @@ class AutoFixer:
             # Find the original file in repo
             original = self._find_original_file(original_name)
             if not original:
-                print(f"Could not find original file for: {original_name}")
+                logger.error(f"Could not find original file for: {original_name}")
                 return False
             
             original.write_text(backup.read_text())
-            print(f"Successfully rolled back {original} from {backup_path}")
+            logger.info(f"Successfully rolled back {original} from {backup_path}")
             return True
         except Exception as e:
-            print(f"Rollback failed: {e}")
+            logger.error(f"Rollback failed: {e}")
             return False
     
     def _find_original_file(self, filename: str) -> Path | None:

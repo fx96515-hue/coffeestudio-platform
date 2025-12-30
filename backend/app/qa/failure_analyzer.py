@@ -3,12 +3,15 @@
 from typing import Any
 import json
 import os
+import logging
 from dataclasses import dataclass
 
 try:
     import openai
 except ImportError:
     openai = None  # type: ignore
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -27,12 +30,12 @@ class TestFailure:
 class AIFailureAnalyzer:
     """Analyzes test failures using AI and suggests fixes."""
     
-    def __init__(self, api_key: str | None = None, model: str = "gpt-4"):
+    def __init__(self, api_key: str | None = None, model: str | None = None):
         """Initialize the AI failure analyzer.
         
         Args:
             api_key: OpenAI API key. If not provided, will try to get from environment.
-            model: OpenAI model to use for analysis.
+            model: OpenAI model to use for analysis. If not provided, uses QA_AI_MODEL env var or 'gpt-4'.
         """
         if openai is None:
             raise ImportError(
@@ -40,15 +43,15 @@ class AIFailureAnalyzer:
                 "Install it with: pip install openai"
             )
         
-        api_key = api_key or os.getenv("OPENAI_API_KEY")
+        api_key = api_key or os.getenv("OPENAI_API_KEY") or os.getenv("QA_AI_API_KEY")
         if not api_key:
             raise ValueError(
-                "OpenAI API key is required. Set OPENAI_API_KEY environment variable "
+                "OpenAI API key is required. Set OPENAI_API_KEY or QA_AI_API_KEY environment variable "
                 "or pass api_key parameter."
             )
         
         self.client = openai.OpenAI(api_key=api_key)
-        self.model = model
+        self.model = model or os.getenv("QA_AI_MODEL", "gpt-4")
     
     def analyze_failure(self, failure: TestFailure) -> dict[str, Any]:
         """Analyze a test failure and generate fix suggestion.

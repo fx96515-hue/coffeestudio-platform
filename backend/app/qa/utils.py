@@ -2,10 +2,13 @@
 
 import re
 import json
+import logging
 from pathlib import Path
 from typing import Any
 
 from .failure_analyzer import TestFailure
+
+logger = logging.getLogger(__name__)
 
 
 def parse_pytest_output(output: str) -> list[TestFailure]:
@@ -28,7 +31,7 @@ def parse_pytest_output(output: str) -> list[TestFailure]:
             if failure:
                 failures.append(failure)
         except Exception as e:
-            print(f"Warning: Failed to parse failure section: {e}")
+            logger.warning(f"Failed to parse failure section: {e}")
             continue
     
     return failures
@@ -158,7 +161,7 @@ def parse_pytest_json_report(json_path: str) -> list[TestFailure]:
         
         return failures
     except Exception as e:
-        print(f"Error parsing JSON report: {e}")
+        logger.error(f"Error parsing JSON report: {e}")
         return []
 
 
