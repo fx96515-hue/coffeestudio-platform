@@ -1,6 +1,5 @@
-from sqlalchemy import String, Text, Float, DateTime, UniqueConstraint
+from sqlalchemy import String, Text, Float, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy.sql import func
 
 from app.db.session import Base
 from app.models.common import TimestampMixin

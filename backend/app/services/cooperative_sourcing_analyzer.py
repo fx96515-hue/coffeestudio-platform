@@ -16,6 +16,10 @@ from app.services.data_sources.peru_data_sources import fetch_ico_price_data
 from sqlalchemy import select
 
 
+# Constants for default values
+MAX_RESPONSE_TIME_HOURS = 999  # Default for missing response time data (>40 days)
+
+
 class CooperativeSourcingAnalyzer:
     """Analyzer for cooperative sourcing evaluation with comprehensive scoring."""
 
@@ -295,7 +299,7 @@ class CooperativeSourcingAnalyzer:
         digital_data = coop.digital_footprint or {}
         
         # Response time (25 points)
-        avg_response_hours = comm_data.get("avg_response_hours", 999)
+        avg_response_hours = comm_data.get("avg_response_hours", MAX_RESPONSE_TIME_HOURS)
         if avg_response_hours <= 24:
             response_score = 25
         elif avg_response_hours <= 48:
@@ -471,16 +475,18 @@ class CooperativeSourcingAnalyzer:
         op_data = coop.operational_data or {}
         years_exp = op_data.get("years_exporting", 0)
         customs_issues = export_data.get("customs_issues_count", 0)
-        
-        delivery_risk = 25
+
+        delivery_risk = 25  # Start with maximum risk
+        # Reduce risk based on export experience
         if years_exp >= 5:
             delivery_risk -= 10
         elif years_exp >= 2:
             delivery_risk -= 5
-        
+
+        # Add risk for customs issues (2 points per issue, max 10 additional points)
         delivery_risk += min(10, customs_issues * 2)
         delivery_risk = max(0, min(25, delivery_risk))
-        
+
         total_risk += delivery_risk
         breakdown["delivery"] = {"risk_score": delivery_risk, "years_exp": years_exp, "customs_issues": customs_issues}
         
@@ -499,7 +505,7 @@ class CooperativeSourcingAnalyzer:
         
         # Communication risk (max 15 points)
         comm_data = coop.communication_metrics or {}
-        avg_response = comm_data.get("avg_response_hours", 999)
+        avg_response = comm_data.get("avg_response_hours", MAX_RESPONSE_TIME_HOURS)
         missed_meetings = comm_data.get("missed_meetings", 0)
         
         comm_risk = 0

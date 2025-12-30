@@ -135,9 +135,10 @@ def analyze_cooperative_for_sourcing(
     - Overall recommendation
     """
     analyzer = CooperativeSourcingAnalyzer(db)
-    
-    force_refresh = request.force_refresh if request else True
-    
+
+    # Always force refresh on POST /analyze endpoint
+    force_refresh = True if request is None else request.force_refresh
+
     try:
         analysis = analyzer.analyze_for_sourcing(coop_id, force_refresh=force_refresh)
         return analysis
