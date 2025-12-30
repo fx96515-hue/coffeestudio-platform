@@ -17,12 +17,20 @@ class CuppingResult(Base, TimestampMixin):
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    occurred_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    occurred_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     taster: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
-    cooperative_id: Mapped[int | None] = mapped_column(ForeignKey("cooperatives.id"), nullable=True, index=True)
-    lot_id: Mapped[int | None] = mapped_column(ForeignKey("lots.id"), nullable=True, index=True)
-    roaster_id: Mapped[int | None] = mapped_column(ForeignKey("roasters.id"), nullable=True, index=True)
+    cooperative_id: Mapped[int | None] = mapped_column(
+        ForeignKey("cooperatives.id"), nullable=True, index=True
+    )
+    lot_id: Mapped[int | None] = mapped_column(
+        ForeignKey("lots.id"), nullable=True, index=True
+    )
+    roaster_id: Mapped[int | None] = mapped_column(
+        ForeignKey("roasters.id"), nullable=True, index=True
+    )
 
     sca_score: Mapped[float | None] = mapped_column(Float, nullable=True)
     aroma: Mapped[float | None] = mapped_column(Float, nullable=True)
@@ -42,4 +50,3 @@ class CuppingResult(Base, TimestampMixin):
 
 
 Index("ix_cupping_score", CuppingResult.sca_score)
-

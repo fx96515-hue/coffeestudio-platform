@@ -4,6 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.db.session import Base
 from app.models.common import TimestampMixin
 
+
 class Cooperative(Base, TimestampMixin):
     __tablename__ = "cooperatives"
 
@@ -18,10 +19,14 @@ class Cooperative(Base, TimestampMixin):
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Workflow / CRM-ish fields
-    status: Mapped[str] = mapped_column(String(32), nullable=False, default="active")  # active|watch|blocked|archived
+    status: Mapped[str] = mapped_column(
+        String(32), nullable=False, default="active"
+    )  # active|watch|blocked|archived
     next_action: Mapped[str | None] = mapped_column(String(255), nullable=True)
     requested_data: Mapped[str | None] = mapped_column(Text, nullable=True)
-    last_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_verified_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     quality_score: Mapped[float | None] = mapped_column(Float, nullable=True)
     reliability_score: Mapped[float | None] = mapped_column(Float, nullable=True)
@@ -29,7 +34,8 @@ class Cooperative(Base, TimestampMixin):
     total_score: Mapped[float | None] = mapped_column(Float, nullable=True)
     confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
 
-    last_scored_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_scored_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     meta: Mapped[dict | None] = mapped_column(JSON, nullable=True)
-

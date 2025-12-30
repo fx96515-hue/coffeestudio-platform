@@ -33,7 +33,9 @@ class InputValidationMiddleware(BaseHTTPMiddleware):
     def __init__(self, app: Any):
         """Initialize middleware."""
         super().__init__(app)
-        self.sql_patterns = [re.compile(p, re.IGNORECASE) for p in self.SQL_INJECTION_PATTERNS]
+        self.sql_patterns = [
+            re.compile(p, re.IGNORECASE) for p in self.SQL_INJECTION_PATTERNS
+        ]
         self.xss_patterns = [re.compile(p, re.IGNORECASE) for p in self.XSS_PATTERNS]
 
     def _check_sql_injection(self, value: str) -> bool:
@@ -74,13 +76,14 @@ class InputValidationMiddleware(BaseHTTPMiddleware):
                     body_bytes = await request.body()
                     if body_bytes:
                         try:
-                            body = __import__('json').loads(body_bytes)
+                            body = __import__("json").loads(body_bytes)
                             if not self._validate_dict(body):
                                 from app.core.error_handlers import ErrorResponse
+
                                 return ErrorResponse.format_error(
                                     error_code="MALICIOUS_INPUT",
                                     message="Invalid input detected. Request contains potentially malicious content.",
-                                    status_code=400
+                                    status_code=400,
                                 )
                         except Exception:
                             # If JSON parsing fails, let FastAPI handle it

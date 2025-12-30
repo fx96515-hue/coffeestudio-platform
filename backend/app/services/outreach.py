@@ -147,4 +147,3 @@ def generate_outreach(
         "used_llm": used_llm,
         "text": draft,
     }
-

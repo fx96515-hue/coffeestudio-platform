@@ -21,7 +21,7 @@ class ErrorResponse:
         error_code: str,
         message: str,
         details: Union[Dict[str, Any], List[Any], None] = None,
-        status_code: int = 500
+        status_code: int = 500,
     ) -> JSONResponse:
         """Format error response consistently."""
         content: Dict[str, Any] = {
@@ -30,114 +30,87 @@ class ErrorResponse:
                 "message": message,
             }
         }
-        
+
         if details:
             content["error"]["details"] = details
-            
-        return JSONResponse(
-            status_code=status_code,
-            content=content
-        )
+
+        return JSONResponse(status_code=status_code, content=content)
 
 
 async def validation_exception_handler(
-    request: Request,
-    exc: RequestValidationError
+    request: Request, exc: RequestValidationError
 ) -> JSONResponse:
     """Handle Pydantic validation errors."""
-    logger.warning(
-        "validation_error",
-        path=request.url.path,
-        errors=exc.errors()
-    )
-    
+    logger.warning("validation_error", path=request.url.path, errors=exc.errors())
+
     return ErrorResponse.format_error(
         error_code="VALIDATION_ERROR",
         message="Request validation failed",
         details=list(exc.errors()),
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
     )
 
 
 async def http_exception_handler(
-    request: Request,
-    exc: StarletteHTTPException
+    request: Request, exc: StarletteHTTPException
 ) -> JSONResponse:
     """Handle HTTP exceptions."""
     logger.warning(
         "http_exception",
         path=request.url.path,
         status_code=exc.status_code,
-        detail=str(exc.detail)
+        detail=str(exc.detail),
     )
-    
+
     return ErrorResponse.format_error(
-        error_code="HTTP_ERROR",
-        message=str(exc.detail),
-        status_code=exc.status_code
+        error_code="HTTP_ERROR", message=str(exc.detail), status_code=exc.status_code
     )
 
 
 async def integrity_error_handler(
-    request: Request,
-    exc: IntegrityError
+    request: Request, exc: IntegrityError
 ) -> JSONResponse:
     """Handle database integrity errors."""
-    logger.error(
-        "integrity_error",
-        path=request.url.path,
-        error=str(exc)
-    )
-    
+    logger.error("integrity_error", path=request.url.path, error=str(exc))
+
     # Parse the error to provide user-friendly message
-    error_msg = str(exc.orig) if hasattr(exc, 'orig') else str(exc)
-    
+    error_msg = str(exc.orig) if hasattr(exc, "orig") else str(exc)
+
     if "unique constraint" in error_msg.lower():
         message = "A record with this value already exists"
     elif "foreign key constraint" in error_msg.lower():
         message = "Referenced record does not exist"
     else:
         message = "Database constraint violation"
-    
+
     return ErrorResponse.format_error(
         error_code="DATABASE_INTEGRITY_ERROR",
         message=message,
-        status_code=status.HTTP_409_CONFLICT
+        status_code=status.HTTP_409_CONFLICT,
     )
 
 
 async def operational_error_handler(
-    request: Request,
-    exc: OperationalError
+    request: Request, exc: OperationalError
 ) -> JSONResponse:
     """Handle database operational errors."""
-    logger.error(
-        "operational_error",
-        path=request.url.path,
-        error=str(exc)
-    )
-    
+    logger.error("operational_error", path=request.url.path, error=str(exc))
+
     return ErrorResponse.format_error(
         error_code="DATABASE_ERROR",
         message="A database error occurred. Please try again later.",
-        status_code=status.HTTP_503_SERVICE_UNAVAILABLE
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
     )
 
 
-async def generic_exception_handler(
-    request: Request,
-    exc: Exception
-) -> JSONResponse:
+async def generic_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """Handle unexpected exceptions."""
     logger.error(
-        "unexpected_error",
-        path=request.url.path,
-        error=str(exc),
-        exc_info=True
+        "unexpected_error", path=request.url.path, error=str(exc), exc_info=True
     )
-    
+
     return ErrorResponse.format_error(
         error_code="INTERNAL_SERVER_ERROR",
         message="An unexpected error occurred. Please try again later.",
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
     )

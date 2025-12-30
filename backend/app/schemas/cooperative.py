@@ -16,33 +16,41 @@ class CooperativeCreate(BaseModel):
     next_action: Optional[str] = Field(None, max_length=255)
     requested_data: Optional[str] = None
     meta: Optional[dict] = None
-    
-    @field_validator('name')
+
+    @field_validator("name")
     @classmethod
     def name_safe(cls, v: str) -> str:
         """Basic input sanitization for names."""
         if not v:
-            raise ValueError('Name darf nicht leer sein')
+            raise ValueError("Name darf nicht leer sein")
         # Basic length and character checks - database layer uses parameterized queries for SQL injection protection
         if len(v) > 255:
-            raise ValueError('Name ist zu lang (max. 255 Zeichen)')
+            raise ValueError("Name ist zu lang (max. 255 Zeichen)")
         # Prevent obvious XSS attempts
-        if '<script' in v.lower() or '<iframe' in v.lower() or 'javascript:' in v.lower():
-            raise ValueError('Ungültige Zeichen im Namen')
+        if (
+            "<script" in v.lower()
+            or "<iframe" in v.lower()
+            or "javascript:" in v.lower()
+        ):
+            raise ValueError("Ungültige Zeichen im Namen")
         return v
-    
-    @field_validator('website')
+
+    @field_validator("website")
     @classmethod
     def website_valid(cls, v: Optional[str]) -> Optional[str]:
         """Validate website URL format."""
         if v and v.strip():
             v = v.strip()
             # Must be a valid http/https URL
-            if not (v.startswith('http://') or v.startswith('https://')):
-                raise ValueError('Website muss mit http:// oder https:// beginnen')
+            if not (v.startswith("http://") or v.startswith("https://")):
+                raise ValueError("Website muss mit http:// oder https:// beginnen")
             # Basic URL validation - prevent javascript: and other dangerous protocols
-            if 'javascript:' in v.lower() or 'data:' in v.lower() or 'file:' in v.lower():
-                raise ValueError('Ungültiges URL-Protokoll')
+            if (
+                "javascript:" in v.lower()
+                or "data:" in v.lower()
+                or "file:" in v.lower()
+            ):
+                raise ValueError("Ungültiges URL-Protokoll")
         return v if v else None
 
 
@@ -60,35 +68,43 @@ class CooperativeUpdate(BaseModel):
     requested_data: Optional[str] = None
     last_verified_at: Optional[datetime] = None
     meta: Optional[dict] = None
-    
-    @field_validator('name')
+
+    @field_validator("name")
     @classmethod
     def name_safe(cls, v: Optional[str]) -> Optional[str]:
         """Basic input sanitization for names."""
         if v is None:
             return v
         if not v.strip():
-            raise ValueError('Name darf nicht leer sein')
+            raise ValueError("Name darf nicht leer sein")
         # Basic length and character checks - database layer uses parameterized queries for SQL injection protection
         if len(v) > 255:
-            raise ValueError('Name ist zu lang (max. 255 Zeichen)')
+            raise ValueError("Name ist zu lang (max. 255 Zeichen)")
         # Prevent obvious XSS attempts
-        if '<script' in v.lower() or '<iframe' in v.lower() or 'javascript:' in v.lower():
-            raise ValueError('Ungültige Zeichen im Namen')
+        if (
+            "<script" in v.lower()
+            or "<iframe" in v.lower()
+            or "javascript:" in v.lower()
+        ):
+            raise ValueError("Ungültige Zeichen im Namen")
         return v
-    
-    @field_validator('website')
+
+    @field_validator("website")
     @classmethod
     def website_valid(cls, v: Optional[str]) -> Optional[str]:
         """Validate website URL format."""
         if v and v.strip():
             v = v.strip()
             # Must be a valid http/https URL
-            if not (v.startswith('http://') or v.startswith('https://')):
-                raise ValueError('Website muss mit http:// oder https:// beginnen')
+            if not (v.startswith("http://") or v.startswith("https://")):
+                raise ValueError("Website muss mit http:// oder https:// beginnen")
             # Basic URL validation - prevent javascript: and other dangerous protocols
-            if 'javascript:' in v.lower() or 'data:' in v.lower() or 'file:' in v.lower():
-                raise ValueError('Ungültiges URL-Protokoll')
+            if (
+                "javascript:" in v.lower()
+                or "data:" in v.lower()
+                or "file:" in v.lower()
+            ):
+                raise ValueError("Ungültiges URL-Protokoll")
         return v if v else None
 
 

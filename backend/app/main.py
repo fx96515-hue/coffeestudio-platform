@@ -26,20 +26,14 @@ setup_logging()
 app = FastAPI(title="CoffeeStudio API", version="0.1.0")
 
 # Rate limiter setup
-limiter = Limiter(
-    key_func=get_remote_address,
-    default_limits=["200/minute"]
-)
+limiter = Limiter(key_func=get_remote_address, default_limits=["200/minute"])
 app.state.limiter = limiter
 
 
 # Custom rate limit handler
 # Note: exc is typed as Exception for FastAPI compatibility but will be RateLimitExceeded
 async def rate_limit_exceeded_handler(request: Request, exc: Exception) -> Response:
-    return JSONResponse(
-        status_code=429,
-        content={"detail": "Rate limit exceeded"}
-    )
+    return JSONResponse(status_code=429, content={"detail": "Rate limit exceeded"})
 
 
 app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)

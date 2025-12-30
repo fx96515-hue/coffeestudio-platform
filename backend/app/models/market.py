@@ -20,12 +20,20 @@ class MarketObservation(Base, TimestampMixin):
     unit: Mapped[str | None] = mapped_column(String(32), nullable=True)
     currency: Mapped[str | None] = mapped_column(String(8), nullable=True)
 
-    observed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True, nullable=False)
+    observed_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), index=True, nullable=False
+    )
 
-    source_id: Mapped[int | None] = mapped_column(ForeignKey("sources.id"), nullable=True, index=True)
+    source_id: Mapped[int | None] = mapped_column(
+        ForeignKey("sources.id"), nullable=True, index=True
+    )
 
     raw_text: Mapped[str | None] = mapped_column(Text, nullable=True)
     meta: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
 
-Index("ix_market_observations_key_observed_at", MarketObservation.key, MarketObservation.observed_at)
+Index(
+    "ix_market_observations_key_observed_at",
+    MarketObservation.key,
+    MarketObservation.observed_at,
+)
