@@ -8,6 +8,7 @@ on:
   schedule:
     - cron: '0 2 * * 1'  # Weekly on Monday at 2am UTC
   workflow_dispatch:
+  workflow_call:  # Allow this workflow to be called by other workflows
 
 permissions:
   contents: read

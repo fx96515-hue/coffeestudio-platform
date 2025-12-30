@@ -96,6 +96,25 @@ make smoke
 - `frontend/` Next.js UI
 - `infra/` optionale Deploy-Assets
 
+## CI/CD Pipeline
+
+Production-ready CI/CD pipeline with GitHub Actions:
+
+✅ **Automated Testing** - Backend & frontend tests on every PR  
+✅ **Security Scans** - Bandit, Trivy, CodeQL, Semgrep  
+✅ **Docker Build** - Multi-platform images pushed to GHCR  
+✅ **Staging Deploy** - Auto-deploy on `develop` branch  
+✅ **Production Deploy** - Manual approval with auto-rollback  
+✅ **Monitoring** - Post-deployment health checks & alerts
+
+📚 **[Complete CI/CD Documentation](.github/workflows/README.md)**  
+🔐 **[Secrets Setup Guide](.github/workflows/SECRETS_SETUP.md)**
+
+**Pipeline Status:**
+- [![CI Pipeline](https://github.com/fx96515-hue/coffeestudio-platform/workflows/CI%20Pipeline/badge.svg)](https://github.com/fx96515-hue/coffeestudio-platform/actions/workflows/ci.yml)
+- Execution Time: ~12-15 minutes (parallel)
+- Test Coverage: Backend 57%+, Frontend configured
+
 ## Sicherheit (Foundation)
 - JWT via `Authorization: Bearer ...`
 - Passwörter gehasht (`pbkdf2_sha256`)
