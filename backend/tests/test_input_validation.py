@@ -1,6 +1,5 @@
 """Tests for input validation across all schemas."""
 
-import pytest
 from fastapi.testclient import TestClient
 
 

@@ -1,7 +1,5 @@
 """Tests for rate limiting functionality."""
 
-import pytest
-import time
 from fastapi.testclient import TestClient
 
 
@@ -89,7 +87,7 @@ def test_rate_limit_headers_present():
     # This test documents the expected behavior
     # SlowAPI should add X-RateLimit-* headers
     # Note: Headers might not always be present depending on SlowAPI config
-    client = TestClient(app=None)  # This is a documentation test
+    # This is a documentation test
     assert True  # Placeholder for header validation
 
 

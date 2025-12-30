@@ -1,6 +1,5 @@
 """Tests for CSRF (Cross-Site Request Forgery) protection."""
 
-import pytest
 from fastapi.testclient import TestClient
 
 
@@ -92,8 +91,8 @@ def test_csrf_token_cleanup():
     session1 = "user1@example.com"
     session2 = "user2@example.com"
     
-    token1 = generate_csrf_token(session1)
-    token2 = generate_csrf_token(session2)
+    generate_csrf_token(session1)
+    generate_csrf_token(session2)
     
     # Expire first token
     _csrf_tokens[session1]["expires"] = datetime.now(timezone.utc) - timedelta(hours=1)

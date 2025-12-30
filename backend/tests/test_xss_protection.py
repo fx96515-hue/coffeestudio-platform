@@ -1,6 +1,5 @@
 """Tests for XSS (Cross-Site Scripting) protection."""
 
-import pytest
 from fastapi.testclient import TestClient
 
 
