@@ -1,6 +1,5 @@
 """Tests for security and validation middleware."""
 
-import structlog
 from fastapi.testclient import TestClient
 
 from app.main import app

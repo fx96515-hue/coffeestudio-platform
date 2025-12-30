@@ -164,11 +164,7 @@ def test_audit_logging_on_crud_operations(client, auth_headers, db, test_user, c
     
     # Check that audit log was generated for create
     # The audit logger uses structlog, which logs to the standard logging system
-    audit_create_logged = any(
-        "audit.create" in record.message or "Cooperative" in str(record)
-        for record in caplog.records
-    )
-    # Note: In test environment, structlog may not capture all logs
+    # In test environment, structlog may not capture all logs in caplog
     # The important thing is that the AuditLogger is called in the routes
     
     # Update cooperative - should generate audit log
