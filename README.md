@@ -100,6 +100,59 @@ make smoke
 - JWT via `Authorization: Bearer ...`
 - Passwörter gehasht (`pbkdf2_sha256`)
 - CORS restriktiv konfigurierbar
+- Rate Limiting (SlowAPI)
+- Input validation (Pydantic)
+- **Security Headers Middleware** (X-Frame-Options, CSP, HSTS, etc.)
+- **Input Validation Middleware** (SQL Injection & XSS Detection)
+- **Standardized Error Handling** with consistent error format
+
+See [SECURITY.md](SECURITY.md) and [SECURITY_BEST_PRACTICES.md](SECURITY_BEST_PRACTICES.md) for comprehensive security documentation.
+
+## API Documentation
+
+📖 **See [API_USAGE_GUIDE.md](./API_USAGE_GUIDE.md)** for:
+- Complete API reference with examples
+- Authentication & authorization guide
+- Request/response formats
+- Error handling
+- Rate limiting details
+- Python & JavaScript SDK examples
+
+Interactive API docs available at:
+- **Swagger UI:** http://localhost:8000/docs
+- **ReDoc:** http://localhost:8000/redoc
+
+## Testing
+
+Comprehensive test suite with **45 passing tests** and **57% code coverage**.
+
+### Backend Tests
+
+```bash
+cd backend
+pip install -r requirements-dev.txt
+pytest tests/ -v
+```
+
+**With coverage:**
+```bash
+pytest tests/ --cov=app --cov-report=html
+```
+
+See [TESTING.md](TESTING.md) for complete testing documentation.
+
+### Security
+
+See [SECURITY.md](SECURITY.md) and [SECURITY_BEST_PRACTICES.md](SECURITY_BEST_PRACTICES.md) for comprehensive security documentation.
+
+## Status & Roadmap
+
+📊 **Siehe [STATUS.md](./STATUS.md)** für:
+- Aktueller Status aller Features
+- Was kommt als Nächstes (4-Phasen-Roadmap)
+- Implementation Backlog
+- Vorschläge & Empfehlungen
+- Produktivsetzung (Production Readiness: 60%)
 
 ## Nächste Schritte
 - Vollständige Provider (ICO/ICE/Fracht)

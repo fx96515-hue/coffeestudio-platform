@@ -1,3 +1,4 @@
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import List
 
@@ -5,9 +6,10 @@ from typing import List
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    DATABASE_URL: str
-    REDIS_URL: str
-    JWT_SECRET: str
+    # Required settings that must come from environment
+    DATABASE_URL: str = Field(default="", min_length=1)
+    REDIS_URL: str = Field(default="", min_length=1)
+    JWT_SECRET: str = Field(default="", min_length=1)
     JWT_ISSUER: str = "coffeestudio"
     JWT_AUDIENCE: str = "coffeestudio-web"
     CORS_ORIGINS: str = "http://localhost:3000"
