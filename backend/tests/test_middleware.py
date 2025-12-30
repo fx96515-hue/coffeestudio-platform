@@ -1,6 +1,5 @@
 """Tests for security and validation middleware."""
 
-import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
