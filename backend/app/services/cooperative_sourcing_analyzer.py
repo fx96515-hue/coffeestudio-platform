@@ -11,9 +11,7 @@ from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 
 from app.models.cooperative import Cooperative
-from app.models.region import Region
 from app.services.data_sources.peru_data_sources import fetch_ico_price_data
-from sqlalchemy import select
 
 
 # Constants for default values
@@ -314,9 +312,9 @@ class CooperativeSourcingAnalyzer:
         # Languages (25 points)
         languages = comm_data.get("languages", [])
         lang_score = 5  # Base for Spanish
-        if "english" in [l.lower() for l in languages]:
+        if "english" in [lang.lower() for lang in languages]:
             lang_score += 15
-        if "german" in [l.lower() for l in languages]:
+        if "german" in [lang.lower() for lang in languages]:
             lang_score += 10
         score += lang_score
         breakdown["languages"] = {"score": lang_score, "list": languages}
@@ -389,11 +387,8 @@ class CooperativeSourcingAnalyzer:
         benchmark_price = None
         benchmark_source = None
         
-        if coop.region:
-            stmt = select(Region).where(Region.name == coop.region, Region.country == "Peru")
-            region = self.db.scalar(stmt)
-            # Note: Region model doesn't have benchmark_price field
-            # We'll use ICO fallback for now
+        # Note: Region model doesn't have benchmark_price field yet
+        # We'll use ICO fallback for now
         
         # Use ICO fallback
         ico_data = fetch_ico_price_data()

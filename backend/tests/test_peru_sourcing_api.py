@@ -5,7 +5,6 @@ Tests the full API flow including region intelligence and cooperative analysis.
 """
 
 from app.models.cooperative import Cooperative
-from app.models.region import Region
 
 
 def test_list_peru_regions_empty(client, auth_headers, db):
