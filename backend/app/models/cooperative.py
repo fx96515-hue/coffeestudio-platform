@@ -32,4 +32,13 @@ class Cooperative(Base, TimestampMixin):
     last_scored_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     meta: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    
+    # Peru Sourcing Intelligence fields (v0.4.0)
+    operational_data: Mapped[dict | None] = mapped_column(JSON, nullable=True)  # farmer_count, storage_capacity_kg, processing_facilities, years_exporting
+    export_readiness: Mapped[dict | None] = mapped_column(JSON, nullable=True)  # export_license, senasa_registered, certifications, customs_history, document_coordinator
+    financial_data: Mapped[dict | None] = mapped_column(JSON, nullable=True)  # annual_revenue_usd, export_volume_kg, fob_price_per_kg
+    social_impact_data: Mapped[dict | None] = mapped_column(JSON, nullable=True)  # projects, beneficiaries, etc.
+    digital_footprint: Mapped[dict | None] = mapped_column(JSON, nullable=True)  # website, social_media, photos, cupping_scores
+    sourcing_scores: Mapped[dict | None] = mapped_column(JSON, nullable=True)  # cached scoring results
+    communication_metrics: Mapped[dict | None] = mapped_column(JSON, nullable=True)  # avg_response_hours, languages, missed_meetings
 

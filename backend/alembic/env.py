@@ -20,6 +20,7 @@ from app.models.entity_event import EntityEvent  # noqa: F401
 from app.models.web_extract import WebExtract  # noqa: F401
 from app.models.news_item import NewsItem  # noqa: F401
 from app.models.peru_region import PeruRegion  # noqa: F401
+from app.models.region import Region  # noqa: F401
 from app.models.knowledge_doc import KnowledgeDoc  # noqa: F401
 from app.models.cupping import CuppingResult  # noqa: F401
 from app.models.freight_history import FreightHistory  # noqa: F401
