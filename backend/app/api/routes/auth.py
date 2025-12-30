@@ -5,7 +5,12 @@ from slowapi.util import get_remote_address
 import structlog
 
 from app.api.deps import get_current_user
-from app.core.security import verify_password, create_access_token, hash_password
+from app.core.security import (
+    verify_password,
+    create_access_token,
+    hash_password,
+    generate_csrf_token,
+)
 from app.core.audit import AuditLogger
 from app.db.session import get_db
 from app.models.user import User
@@ -83,6 +88,17 @@ def login(request: Request, payload: LoginRequest, db: Session = Depends(get_db)
 @router.get("/me", response_model=UserOut)
 def me(user: User = Depends(get_current_user)):
     return user
+
+
+@router.get("/csrf-token")
+def get_csrf_token(user: User = Depends(get_current_user)):
+    """Generate and return a CSRF token for the authenticated user.
+    
+    This token should be included in the X-CSRF-Token header for
+    state-changing operations (POST, PUT, PATCH, DELETE).
+    """
+    token = generate_csrf_token(user.email)
+    return {"csrf_token": token}
 
 
 # Dev-only bootstrap: creates admin if empty.

@@ -270,12 +270,14 @@ Basierend auf `REFACTORING_PLAN.md`:
 ### Entwicklungsprozess
 
 5. **CI/CD Pipeline erweitern**
-   - Aktuell: Basis-Setup vorhanden
-   - Empfehlung:
-     - Automated Tests (pytest, jest)
-     - Security Scans (Snyk, Trivy)
-     - Deployment-Automation (GitHub Actions → Cloud)
-     - Staging-Environment vor Production
+   - ✅ ABGESCHLOSSEN: Vollständige CI/CD Pipeline implementiert
+   - ✅ Automated Tests (pytest, jest) - Backend & Frontend
+   - ✅ Security Scans (Trivy, Bandit, CodeQL, Semgrep, Snyk)
+   - ✅ Deployment-Automation (GitHub Actions → Staging/Production)
+   - ✅ Staging-Environment Auto-Deploy (develop branch)
+   - ✅ Production Manual Deploy mit Auto-Rollback
+   - ✅ Post-Deployment Monitoring & Health Checks
+   - 📄 Siehe `.github/workflows/README.md` für Details
    
 6. **Pre-Commit Hooks**
    - Linting (ESLint, Ruff/Black)
@@ -385,9 +387,9 @@ Basierend auf `REFACTORING_PLAN.md`:
 ### ⚙️ Empfohlen vor Production (High Priority)
 
 5. **CI/CD Pipeline**
-   - [ ] Automated Tests in CI
-   - [ ] Automated Deployment (Staging → Production)
-   - [ ] Rollback-Strategie dokumentieren
+   - [x] Automated Tests in CI
+   - [x] Automated Deployment (Staging → Production)
+   - [x] Rollback-Strategie dokumentieren
    
 6. **Backup-Strategie**
    - [ ] Postgres Backups (täglich)
@@ -417,12 +419,12 @@ Basierend auf `REFACTORING_PLAN.md`:
 | **Security** | 🟡 Partial | 6/12 | Input validation & SQL injection audit fehlen |
 | **Testing** | 🔴 Needs Work | 0/4 | Keine Tests vorhanden, sofort nachholen |
 | **Monitoring** | 🟢 Good | 4/4 | MAX-Stack bietet volle Observability (optional) |
-| **Deployment** | 🟡 Partial | 2/3 | CI/CD fehlt, Docker-Setup OK |
+| **Deployment** | 🟢 Good | 3/3 | CI/CD Pipeline vollständig implementiert |
 | **Documentation** | 🟢 Good | 4/5 | Sehr gute Docs, API-Examples fehlen teilweise |
 | **Performance** | 🟡 Partial | 1/3 | Keine Perf-Tests durchgeführt |
 | **Compliance** | 🔴 Needs Work | 0/4 | DSGVO-Anforderungen nicht adressiert |
 
-**Gesamtstatus:** 🟡 **Pre-Production** (60% bereit)
+**Gesamtstatus:** 🟡 **Pre-Production** (70% bereit)
 
 ---
 

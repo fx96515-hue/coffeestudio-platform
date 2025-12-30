@@ -1,4 +1,6 @@
 from datetime import datetime, timedelta, timezone
+import secrets
+import hashlib
 
 from jose import jwt
 from passlib.context import CryptContext
@@ -57,3 +59,66 @@ def decode_token(token: str) -> dict:
         audience=settings.JWT_AUDIENCE,
         issuer=settings.JWT_ISSUER,
     )
+
+
+# CSRF Token Management
+# Store for CSRF tokens in memory (in production, use Redis or database)
+_csrf_tokens: dict[str, dict] = {}
+
+
+def generate_csrf_token(session_id: str) -> str:
+    """Generate a CSRF token for a session.
+    
+    Args:
+        session_id: Unique session identifier (e.g., user email or session UUID)
+        
+    Returns:
+        CSRF token string
+    """
+    token = secrets.token_urlsafe(32)
+    token_hash = hashlib.sha256(token.encode()).hexdigest()
+    
+    # Store hashed token with expiration (1 hour)
+    _csrf_tokens[session_id] = {
+        "hash": token_hash,
+        "expires": datetime.now(timezone.utc) + timedelta(hours=1)
+    }
+    
+    return token
+
+
+def validate_csrf_token(session_id: str, token: str) -> bool:
+    """Validate a CSRF token for a session.
+    
+    Args:
+        session_id: Session identifier
+        token: CSRF token to validate
+        
+    Returns:
+        True if token is valid, False otherwise
+    """
+    if session_id not in _csrf_tokens:
+        return False
+    
+    stored = _csrf_tokens[session_id]
+    
+    # Check if token has expired
+    if datetime.now(timezone.utc) > stored["expires"]:
+        # Clean up expired token
+        del _csrf_tokens[session_id]
+        return False
+    
+    # Validate token hash
+    token_hash = hashlib.sha256(token.encode()).hexdigest()
+    return token_hash == stored["hash"]
+
+
+def cleanup_expired_csrf_tokens() -> None:
+    """Remove expired CSRF tokens from storage."""
+    now = datetime.now(timezone.utc)
+    expired_sessions = [
+        session_id for session_id, data in _csrf_tokens.items()
+        if now > data["expires"]
+    ]
+    for session_id in expired_sessions:
+        del _csrf_tokens[session_id]
