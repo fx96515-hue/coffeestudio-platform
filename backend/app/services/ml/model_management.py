@@ -13,9 +13,7 @@ class MLModelManagementService:
     def __init__(self, db: Session):
         self.db = db
 
-    async def list_models(
-        self, model_type: str | None = None
-    ) -> list[dict[str, Any]]:
+    async def list_models(self, model_type: str | None = None) -> list[dict[str, Any]]:
         """List all ML models with metadata.
 
         Args:

@@ -99,7 +99,3 @@ def fetch_ecb_fx(base: str, quote: str, timeout_s: float = 20.0) -> Optional[FxQ
         source_url=ECB_DAILY_XML,
         raw_text=xml_text,
     )
-
-
-
-

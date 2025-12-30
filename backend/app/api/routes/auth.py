@@ -33,7 +33,7 @@ def login(request: Request, payload: LoginRequest, db: Session = Depends(get_db)
             "auth.login_failed",
             email=payload.email,
             ip=ip_address,
-            user_agent=user_agent
+            user_agent=user_agent,
         )
         AuditLogger.log_auth_event(
             email=payload.email,
@@ -41,20 +41,18 @@ def login(request: Request, payload: LoginRequest, db: Session = Depends(get_db)
             ip_address=ip_address,
             user_agent=user_agent,
             success=False,
-            reason="Invalid credentials"
+            reason="Invalid credentials",
         )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
         )
-    
+
     # Check if user account is active
     if not user.is_active:
         ip_address = request.client.host if request.client else "unknown"
         user_agent = request.headers.get("user-agent", "unknown")
         logger.warning(
-            "auth.inactive_user_login_attempt",
-            email=user.email,
-            ip=ip_address
+            "auth.inactive_user_login_attempt", email=user.email, ip=ip_address
         )
         AuditLogger.log_auth_event(
             email=user.email,
@@ -62,26 +60,21 @@ def login(request: Request, payload: LoginRequest, db: Session = Depends(get_db)
             ip_address=ip_address,
             user_agent=user_agent,
             success=False,
-            reason="Inactive account"
+            reason="Inactive account",
         )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
         )
-    
+
     ip_address = request.client.host if request.client else "unknown"
     user_agent = request.headers.get("user-agent", "unknown")
-    logger.info(
-        "auth.login_success",
-        email=user.email,
-        role=user.role,
-        ip=ip_address
-    )
+    logger.info("auth.login_success", email=user.email, role=user.role, ip=ip_address)
     AuditLogger.log_auth_event(
         email=user.email,
         event_type="login_success",
         ip_address=ip_address,
         user_agent=user_agent,
-        success=True
+        success=True,
     )
     token = create_access_token(sub=user.email, role=user.role)
     return TokenResponse(access_token=token)

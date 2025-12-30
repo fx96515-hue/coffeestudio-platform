@@ -193,9 +193,7 @@ class FreightPredictionService:
                 "sample_size": 0,
             }
 
-    async def get_cost_trend(
-        self, route: str, months_back: int = 12
-    ) -> dict[str, Any]:
+    async def get_cost_trend(self, route: str, months_back: int = 12) -> dict[str, Any]:
         """Get historical cost trend for route.
 
         Args:
@@ -242,12 +240,12 @@ class FreightPredictionService:
         if len(trend_data) >= 2:
             first_half = trend_data[: len(trend_data) // 2]
             second_half = trend_data[len(trend_data) // 2 :]
-            first_half_avg = sum(
-                float(t["average_cost"]) for t in first_half
-            ) / len(first_half)
-            second_half_avg = sum(
-                float(t["average_cost"]) for t in second_half
-            ) / len(second_half)
+            first_half_avg = sum(float(t["average_cost"]) for t in first_half) / len(
+                first_half
+            )
+            second_half_avg = sum(float(t["average_cost"]) for t in second_half) / len(
+                second_half
+            )
 
             if second_half_avg > first_half_avg * 1.1:
                 trend = "increasing"

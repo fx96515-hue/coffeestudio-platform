@@ -23,7 +23,7 @@ def list_news(
 ):
     cutoff = datetime.now(timezone.utc) - timedelta(days=max(0, min(days, 365)))
     q = db.query(NewsItem).filter(NewsItem.topic == topic)
-    q = q.filter((NewsItem.retrieved_at == None) | (NewsItem.retrieved_at >= cutoff))  # noqa: E711
+    q = q.filter((NewsItem.retrieved_at.is_(None)) | (NewsItem.retrieved_at >= cutoff))
     return (
         q.order_by(NewsItem.retrieved_at.desc().nullslast())
         .limit(min(limit, 500))

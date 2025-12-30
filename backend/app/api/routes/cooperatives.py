@@ -31,16 +31,16 @@ def create_coop(
     db.add(coop)
     db.commit()
     db.refresh(coop)
-    
+
     # Log creation for audit trail
     AuditLogger.log_create(
         db=db,
         user=user,
         entity_type="cooperative",
         entity_id=coop.id,
-        entity_data=payload.model_dump()
+        entity_data=payload.model_dump(),
     )
-    
+
     return coop
 
 
@@ -66,15 +66,17 @@ def update_coop(
     coop = db.query(Cooperative).filter(Cooperative.id == coop_id).first()
     if not coop:
         raise HTTPException(status_code=404, detail="Not found")
-    
+
     # Capture old data for audit log
-    old_data = {k: getattr(coop, k) for k in payload.model_dump(exclude_unset=True).keys()}
-    
+    old_data = {
+        k: getattr(coop, k) for k in payload.model_dump(exclude_unset=True).keys()
+    }
+
     for k, v in payload.model_dump(exclude_unset=True).items():
         setattr(coop, k, v)
     db.commit()
     db.refresh(coop)
-    
+
     # Log update for audit trail
     AuditLogger.log_update(
         db=db,
@@ -82,41 +84,41 @@ def update_coop(
         entity_type="cooperative",
         entity_id=coop_id,
         old_data=old_data,
-        new_data=payload.model_dump(exclude_unset=True)
+        new_data=payload.model_dump(exclude_unset=True),
     )
-    
+
     return coop
 
 
 @router.delete("/{coop_id}")
 def delete_coop(
-    coop_id: int, 
-    db: Session = Depends(get_db), 
-    user: User = Depends(require_role("admin"))
+    coop_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_role("admin")),
 ):
     coop = db.query(Cooperative).filter(Cooperative.id == coop_id).first()
     if not coop:
         raise HTTPException(status_code=404, detail="Not found")
-    
+
     # Capture data before deletion for audit log
     entity_data = {
         "name": coop.name,
         "region": coop.region,
         "status": coop.status,
     }
-    
+
     db.delete(coop)
     db.commit()
-    
+
     # Log deletion for audit trail
     AuditLogger.log_delete(
         db=db,
         user=user,
         entity_type="cooperative",
         entity_id=coop_id,
-        entity_data=entity_data
+        entity_data=entity_data,
     )
-    
+
     return {"status": "deleted"}
 
 

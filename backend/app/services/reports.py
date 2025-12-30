@@ -151,7 +151,7 @@ def generate_daily_report(db: Session) -> tuple[str, Dict]:
             }
         else:
             market_dict[k] = None
-    
+
     payload: Dict = {
         "generated_at": now.isoformat(),
         "market": market_dict,
@@ -178,5 +178,3 @@ def generate_daily_report(db: Session) -> tuple[str, Dict]:
     }
 
     return "\n".join(md_lines), payload
-
-

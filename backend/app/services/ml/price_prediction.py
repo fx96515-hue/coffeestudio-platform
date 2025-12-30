@@ -194,9 +194,11 @@ class CoffeePricePredictionService:
 
         # Calculate monthly growth rate
         if len(recent_prices) >= 2:
-            growth_rate = (recent_prices[0] - recent_prices[-1]) / recent_prices[
-                -1
-            ] / len(recent_prices)
+            growth_rate = (
+                (recent_prices[0] - recent_prices[-1])
+                / recent_prices[-1]
+                / len(recent_prices)
+            )
         else:
             growth_rate = 0.0
 
