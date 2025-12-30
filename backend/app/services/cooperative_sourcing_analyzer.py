@@ -377,7 +377,8 @@ class CooperativeSourcingAnalyzer:
                 "competitiveness_score": 50,
                 "note": "No pricing data available",
                 "coop_price": None,
-                "benchmark_price": None
+                "benchmark_price": None,
+                "assessment": "market_rate"
             }
         
         # Try to get regional benchmark
