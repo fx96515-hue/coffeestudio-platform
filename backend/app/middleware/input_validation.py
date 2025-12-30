@@ -1,10 +1,16 @@
 """Input validation middleware for request sanitization."""
 
 import re
+import logging
 from typing import Any, Dict
 
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
+
+logger = logging.getLogger(__name__)
+
+# Maximum request body size: 10MB
+MAX_REQUEST_BODY_SIZE = 10 * 1024 * 1024
 
 
 class InputValidationMiddleware(BaseHTTPMiddleware):
@@ -21,6 +27,10 @@ class InputValidationMiddleware(BaseHTTPMiddleware):
         r"(\bEXECUTE\b\()",
         r"(;.*(-{2}|\/\*))",  # SQL comment patterns
         r"('\s*(OR|AND)\s*'?\d)",  # Basic OR/AND injection
+        r"'\s*--",  # SQL comment after quote
+        r"\bWAITFOR\b.*\bDELAY\b",  # Time-based blind SQL injection
+        r"\bSLEEP\b\s*\(",  # MySQL SLEEP function
+        r"\bBENCHMARK\b\s*\(",  # MySQL BENCHMARK function
     ]
 
     # XSS patterns
@@ -71,13 +81,43 @@ class InputValidationMiddleware(BaseHTTPMiddleware):
         # Skip validation for GET requests (query params handled by FastAPI)
         if request.method in ["POST", "PUT", "PATCH"]:
             try:
+                # Check Content-Length header for body size limit
+                content_length = request.headers.get("content-length")
+                if content_length and int(content_length) > MAX_REQUEST_BODY_SIZE:
+                    logger.warning(
+                        f"Request body too large: {content_length} bytes from {request.client.host if request.client else 'unknown'}"
+                    )
+                    from app.core.error_handlers import ErrorResponse
+                    return ErrorResponse.format_error(
+                        error_code="REQUEST_TOO_LARGE",
+                        message=f"Request body too large. Maximum size is {MAX_REQUEST_BODY_SIZE} bytes.",
+                        status_code=413,
+                    )
+
                 if "application/json" in request.headers.get("content-type", ""):
                     # Read the body as bytes to avoid consuming the stream
                     body_bytes = await request.body()
+                    
+                    # Double-check actual body size
+                    if len(body_bytes) > MAX_REQUEST_BODY_SIZE:
+                        logger.warning(
+                            f"Request body too large: {len(body_bytes)} bytes from {request.client.host if request.client else 'unknown'}"
+                        )
+                        from app.core.error_handlers import ErrorResponse
+                        return ErrorResponse.format_error(
+                            error_code="REQUEST_TOO_LARGE",
+                            message=f"Request body too large. Maximum size is {MAX_REQUEST_BODY_SIZE} bytes.",
+                            status_code=413,
+                        )
+
                     if body_bytes:
                         try:
                             body = __import__("json").loads(body_bytes)
                             if not self._validate_dict(body):
+                                logger.warning(
+                                    f"Malicious input detected from {request.client.host if request.client else 'unknown'} "
+                                    f"to {request.url.path}"
+                                )
                                 from app.core.error_handlers import ErrorResponse
 
                                 return ErrorResponse.format_error(

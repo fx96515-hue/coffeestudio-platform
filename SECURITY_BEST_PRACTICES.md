@@ -109,6 +109,13 @@ Protects against injection attacks by detecting malicious patterns in request pa
 - r"on\w+\s*="  # Event handlers
 ```
 
+**Additional Protections:**
+```python
+- Request body size limit: 10MB maximum
+- Logging of all malicious input attempts
+- IP-based rate limiting
+```
+
 #### Response
 
 Malicious input is rejected with:
@@ -118,6 +125,120 @@ Malicious input is rejected with:
 }
 ```
 Status Code: 400 Bad Request
+
+For request body too large:
+```json
+{
+  "error": {
+    "code": "REQUEST_TOO_LARGE",
+    "message": "Request body too large. Maximum size is 10485760 bytes."
+  }
+}
+```
+Status Code: 413 Payload Too Large
+
+### Pydantic Field-Level Validation
+
+#### String Fields
+
+```python
+from pydantic import BaseModel, Field, field_validator
+
+class CooperativeCreate(BaseModel):
+    name: str = Field(..., min_length=2, max_length=255)
+    
+    @field_validator("name")
+    @classmethod
+    def validate_name(cls, v: str) -> str:
+        """Prevent XSS in name field."""
+        if any(pattern in v.lower() for pattern in ["<script", "<iframe", "javascript:"]):
+            raise ValueError("Invalid characters in name")
+        return v.strip()
+```
+
+#### Numeric Fields with Ranges
+
+```python
+class LotCreate(BaseModel):
+    altitude_m: Optional[float] = Field(None, ge=0, le=6000)
+    price_per_kg: Optional[float] = Field(None, ge=0, le=10000)
+    crop_year: Optional[int] = Field(None, ge=2000, le=2100)
+    expected_cupping_score: Optional[float] = Field(None, ge=0, le=100)
+```
+
+#### Enum Validation
+
+```python
+class RoasterCreate(BaseModel):
+    price_position: Optional[str] = Field(None, max_length=50)
+    
+    @field_validator("price_position")
+    @classmethod
+    def validate_price_position(cls, v: Optional[str]) -> Optional[str]:
+        """Validate enum values."""
+        if v is None:
+            return v
+        valid = ["premium", "mid-range", "value", "luxury"]
+        v_lower = v.lower().strip()
+        if v_lower not in valid:
+            raise ValueError(f"Must be one of {valid}")
+        return v_lower
+```
+
+#### Currency and Incoterm Validation
+
+```python
+@field_validator("currency")
+@classmethod
+def validate_currency(cls, v: Optional[str]) -> Optional[str]:
+    """Validate currency codes."""
+    if v is None:
+        return v
+    valid_currencies = ["USD", "EUR", "PEN", "GBP"]
+    v_upper = v.upper().strip()
+    if v_upper not in valid_currencies:
+        raise ValueError(f"Currency must be one of {valid_currencies}")
+    return v_upper
+
+@field_validator("incoterm")
+@classmethod
+def validate_incoterm(cls, v: Optional[str]) -> Optional[str]:
+    """Validate incoterm values."""
+    if v is None:
+        return v
+    valid_incoterms = ["EXW", "FOB", "CIF", "CFR", "DAP", "DDP", "FCA", "CPT", "CIP"]
+    v_upper = v.upper().strip()
+    if v_upper not in valid_incoterms:
+        raise ValueError(f"Incoterm must be one of {valid_incoterms}")
+    return v_upper
+```
+
+#### URL Validation
+
+```python
+@field_validator("website")
+@classmethod
+def validate_website(cls, v: Optional[str]) -> Optional[str]:
+    """Validate website URL format."""
+    if v and v.strip():
+        v = v.strip()
+        # Must be http/https
+        if not (v.startswith("http://") or v.startswith("https://")):
+            raise ValueError("Website must start with http:// or https://")
+        # Prevent dangerous protocols
+        if any(proto in v.lower() for proto in ["javascript:", "data:", "file:"]):
+            raise ValueError("Invalid URL protocol")
+    return v if v else None
+```
+
+#### Email Validation
+
+```python
+from pydantic import EmailStr
+
+class CooperativeCreate(BaseModel):
+    contact_email: Optional[EmailStr] = None
+```
 
 ### Best Practices
 
@@ -188,6 +309,115 @@ def create_cooperative(
 4. **Secure token storage** - Use httpOnly cookies or secure storage
 5. **Implement refresh tokens** - For long-lived sessions
 6. **Rate limit login attempts** - Prevent brute force attacks
+
+### CSRF Protection
+
+Cross-Site Request Forgery (CSRF) protection prevents malicious sites from making unauthorized requests on behalf of authenticated users.
+
+#### Token Generation
+
+```python
+from app.core.security import generate_csrf_token
+
+# Generate token for authenticated user
+token = generate_csrf_token(user.email)
+```
+
+**Token properties:**
+- Cryptographically strong (32-byte random token)
+- Stored as SHA-256 hash
+- Session-bound (tied to user email/session ID)
+- Time-limited (1 hour expiration)
+
+#### Token Validation
+
+```python
+from app.core.security import validate_csrf_token
+
+# Validate token on state-changing operations
+is_valid = validate_csrf_token(session_id, token)
+
+if not is_valid:
+    raise HTTPException(status_code=403, detail="Invalid CSRF token")
+```
+
+#### API Usage
+
+**Step 1: Get CSRF Token**
+```bash
+curl -H "Authorization: Bearer <jwt_token>" \
+     https://api.example.com/auth/csrf-token
+
+# Response:
+{
+  "csrf_token": "abc123..."
+}
+```
+
+**Step 2: Use Token in State-Changing Requests**
+```bash
+curl -X POST \
+     -H "Authorization: Bearer <jwt_token>" \
+     -H "X-CSRF-Token: abc123..." \
+     -H "Content-Type: application/json" \
+     -d '{"name": "New Cooperative"}' \
+     https://api.example.com/cooperatives/
+```
+
+#### Frontend Integration
+
+```javascript
+// Fetch CSRF token on login
+async function login(email, password) {
+  const loginRes = await fetch('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email, password })
+  });
+  const { access_token } = await loginRes.json();
+  
+  // Get CSRF token
+  const csrfRes = await fetch('/auth/csrf-token', {
+    headers: { 'Authorization': `Bearer ${access_token}` }
+  });
+  const { csrf_token } = await csrfRes.json();
+  
+  // Store both tokens
+  localStorage.setItem('access_token', access_token);
+  localStorage.setItem('csrf_token', csrf_token);
+}
+
+// Include CSRF token in all state-changing requests
+async function createCooperative(data) {
+  const response = await fetch('/cooperatives/', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+      'X-CSRF-Token': localStorage.getItem('csrf_token'),
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  });
+  return response.json();
+}
+```
+
+#### Token Cleanup
+
+Periodically clean up expired tokens:
+```python
+from app.core.security import cleanup_expired_csrf_tokens
+
+# Call periodically (e.g., in a background task)
+cleanup_expired_csrf_tokens()
+```
+
+#### Best Practices
+
+1. **Always validate CSRF tokens** for POST, PUT, PATCH, DELETE requests
+2. **Don't include tokens in URLs** - Use headers or request body
+3. **Regenerate tokens** after authentication state changes
+4. **Set appropriate expiration** - Balance security vs. usability (default: 1 hour)
+5. **Use secure storage** - In production, consider Redis for token storage
 
 ---
 

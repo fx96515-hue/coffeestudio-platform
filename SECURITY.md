@@ -63,6 +63,50 @@ All API inputs validated using Pydantic schemas with:
 - email: EmailStr validation
 - website: URL protocol validation (http/https only)
 - altitude_m: 0-6000 meters range
+- region: Validated against known Peruvian coffee regions
+```
+
+**Lot validation:**
+```python
+- name: 2-255 characters, XSS prevention
+- cooperative_id: Must be positive integer
+- crop_year: 2000-2100 range
+- incoterm: Validated against standard incoterms (FOB, CIF, etc.)
+- currency: Validated currency codes (USD, EUR, PEN, GBP)
+- price_per_kg: 0-10,000 range
+- weight_kg: Positive, up to 100,000 kg
+- cupping_score: 0-100 range
+```
+
+**Roaster validation:**
+```python
+- name: 2-255 characters, XSS prevention
+- email: EmailStr validation
+- website: URL protocol validation
+- price_position: Enum validation (premium, mid-range, value, luxury)
+- status: Enum validation (active, inactive, prospect, archived)
+```
+
+**Cupping validation:**
+```python
+- sca_score: 0-100 range
+- component scores (aroma, flavor, etc.): 0-10 range
+- taster: XSS prevention
+```
+
+**Logistics validation:**
+```python
+- weight_kg: Positive, up to 50,000 kg
+- price: 0-100 USD/kg range
+- incoterm: Validated against standard incoterms
+- percentages: 0-1 (0-100%) range
+```
+
+**Margin calculation validation:**
+```python
+- currencies: Validated currency codes
+- yield_factor: 0-1 range (must be positive)
+- prices: 0-10,000 range
 ```
 
 **General validation patterns:**
@@ -72,9 +116,19 @@ All API inputs validated using Pydantic schemas with:
 - XSS prevention (blocks `<script>`, `<iframe>`, `javascript:`)
 - Enum validation for restricted values
 
+### Input Validation Middleware
+
+Enhanced middleware with:
+- **Request body size limits**: Maximum 10MB per request
+- **SQL injection detection**: Pattern-based detection with multiple signatures
+- **XSS detection**: Script tags, javascript: URLs, event handlers
+- **Security event logging**: All malicious input attempts logged
+
 ### Validation Errors
 
 - Return HTTP 422 for validation errors
+- Return HTTP 400 for malicious input detected by middleware
+- Return HTTP 413 for request body too large
 - Error messages are informative but don't leak sensitive data
 - Field-level validation errors help developers debug
 
@@ -118,6 +172,62 @@ Rate limit information included in response headers:
 - `X-RateLimit-Limit`
 - `X-RateLimit-Remaining`
 - `X-RateLimit-Reset`
+
+### Endpoint-Specific Limits
+
+Custom rate limits applied to sensitive endpoints:
+```python
+@router.post("/login")
+@limiter.limit("5/minute")  # Stricter limit for auth
+def login(...)
+
+@router.post("/dev/bootstrap")
+@limiter.limit("10/hour")  # Prevent abuse
+def bootstrap(...)
+```
+
+## CSRF Protection
+
+### CSRF Token Generation
+
+CSRF tokens protect against cross-site request forgery attacks:
+
+```python
+from app.core.security import generate_csrf_token, validate_csrf_token
+
+# Generate token for authenticated user
+token = generate_csrf_token(user.email)
+
+# Validate token on state-changing operations
+is_valid = validate_csrf_token(user.email, token)
+```
+
+### Token Properties
+
+- **Cryptographically strong**: Generated using `secrets.token_urlsafe(32)`
+- **Hashed storage**: Tokens stored as SHA-256 hashes
+- **Time-limited**: Tokens expire after 1 hour
+- **Session-bound**: Each token tied to specific user session
+
+### Usage in API
+
+```bash
+# Get CSRF token
+curl -H "Authorization: Bearer <token>" /auth/csrf-token
+
+# Use token in state-changing requests
+curl -X POST -H "Authorization: Bearer <token>" \
+     -H "X-CSRF-Token: <csrf-token>" \
+     /cooperatives
+```
+
+### Token Cleanup
+
+Expired tokens automatically cleaned up:
+```python
+from app.core.security import cleanup_expired_csrf_tokens
+cleanup_expired_csrf_tokens()
+```
 
 ## CORS Configuration
 
