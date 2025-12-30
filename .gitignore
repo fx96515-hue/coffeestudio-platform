@@ -65,3 +65,7 @@ diagnostics/
 *_ui_*.txt
 00_pwd.txt
 *.bak_*
+
+# QA System artifacts
+.qa_backups/
+.qa_reports/
