@@ -1,7 +1,5 @@
-from datetime import datetime
 from app.models.shipment import Shipment
 from app.models.cooperative import Cooperative
-from app.models.roaster import Roaster
 from app.models.lot import Lot
 
 
