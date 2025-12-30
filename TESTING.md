@@ -94,9 +94,48 @@ Tests use an in-memory SQLite database that is:
 
 ### Coverage Goals
 
-- **Current**: 55 tests covering core CRUD operations, auth, security, and data export
-- **Coverage**: 58% (exceeds target of 57%)
+- **Current**: 276 tests covering services, API routes, core utilities, and integrations
+- **Coverage**: 74% (significant progress toward 80% target)
 - **Target**: ≥80% code coverage for production readiness
+
+### Test Categories
+
+The test suite is organized into the following categories:
+
+#### Service Layer Tests (77% coverage)
+- `test_margins_service.py` - Margin calculation engine
+- `test_news_service.py` - News aggregation
+- `test_logistics_service.py` - Landed cost calculations  
+- `test_outreach_service.py` - Email generation
+- `test_kb_service.py` - Knowledge base seeding
+- `test_reports_service.py` - Report generation
+- `test_dedup_service.py` - Duplicate detection
+- `test_scoring_service.py` - Scoring engine
+
+#### API Route Tests (84% coverage)
+- `test_lots_api.py` - Lot management endpoints
+- `test_sources_api.py` - Data source endpoints
+- `test_market_api.py` - Market observations
+- `test_margins_api.py` - Margin calculation APIs
+- `test_reports_api.py` - Report endpoints
+- `test_news_api.py` - News endpoints
+- `test_logistics_api.py` - Logistics/landed cost APIs
+- `test_enrich_api.py` - Web enrichment endpoints
+- `test_cuppings_api.py` - Cupping results
+- `test_dedup_api.py` - Deduplication suggestions
+- `test_regions_api.py` - Peru regions data
+- `test_outreach_api.py` - Outreach generation
+
+#### Core Utilities Tests (95% coverage)
+- `test_audit_logging.py` - Audit trail logging
+- `test_security_utils.py` - JWT tokens, password hashing
+- `test_error_handlers.py` - Error response formatting
+
+#### Provider Tests (86% coverage)
+- `test_ecb_fx_provider.py` - ECB FX rate fetching
+
+#### Integration Tests
+- `test_integration_workflows.py` - End-to-end user workflows
 
 ### Enterprise Validation
 
@@ -244,8 +283,8 @@ Solution: Check that @testing-library packages are installed
 
 ## Performance
 
-- Backend tests: ~5 seconds for 55 tests
-- Coverage: 58%
+- Backend tests: ~24 seconds for 276 tests
+- Coverage: 74%
 - All tests use in-memory SQLite database for speed
 - Frontend tests: (to be measured after implementation)
 
