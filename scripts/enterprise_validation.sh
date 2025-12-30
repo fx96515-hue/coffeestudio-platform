@@ -91,11 +91,15 @@ print_header "🧪 Test Suite Validation"
 
 ((TOTAL_CHECKS++))
 echo "Running full test suite with coverage..."
-if pytest tests/ -v --cov=app --cov-report=term --cov-report=html; then
+# Capture output to avoid running pytest twice
+TEST_OUTPUT=$(pytest tests/ -v --cov=app --cov-report=term --cov-report=html 2>&1)
+TEST_EXIT_CODE=$?
+
+if [ $TEST_EXIT_CODE -eq 0 ]; then
     print_success "All tests passed"
     
-    # Extract coverage percentage
-    COVERAGE=$(pytest tests/ --cov=app --cov-report=term 2>&1 | grep "TOTAL" | awk '{print $NF}' | sed 's/%//')
+    # Extract coverage percentage from captured output
+    COVERAGE=$(echo "$TEST_OUTPUT" | grep "TOTAL" | awk '{print $NF}' | sed 's/%//')
     if [ -n "$COVERAGE" ]; then
         if [ "${COVERAGE%.*}" -ge 57 ]; then
             print_success "Code coverage: ${COVERAGE}% (target: ≥57%)"
@@ -105,6 +109,8 @@ if pytest tests/ -v --cov=app --cov-report=term --cov-report=html; then
     fi
 else
     print_error "Test suite failed"
+    # Print the test output so user can see what failed
+    echo "$TEST_OUTPUT"
 fi
 
 # ═══════════════════════════════════════════════════════════════════
@@ -145,7 +151,11 @@ cd ..
 
 ((TOTAL_CHECKS++))
 echo "Checking .env.example completeness..."
+# Core required variables
 REQUIRED_VARS=("DATABASE_URL" "REDIS_URL" "JWT_SECRET" "BOOTSTRAP_ADMIN_EMAIL" "BOOTSTRAP_ADMIN_PASSWORD")
+# Optional but recommended variables
+OPTIONAL_VARS=("CORS_ORIGINS" "JWT_ISSUER" "JWT_AUDIENCE")
+
 MISSING_VARS=()
 for var in "${REQUIRED_VARS[@]}"; do
     if ! grep -q "^${var}=" .env.example; then
@@ -155,8 +165,20 @@ done
 
 if [ ${#MISSING_VARS[@]} -eq 0 ]; then
     print_success "All required environment variables present in .env.example"
+    
+    # Check optional variables (informational only)
+    MISSING_OPTIONAL=()
+    for var in "${OPTIONAL_VARS[@]}"; do
+        if ! grep -q "^${var}=" .env.example; then
+            MISSING_OPTIONAL+=("$var")
+        fi
+    done
+    
+    if [ ${#MISSING_OPTIONAL[@]} -gt 0 ]; then
+        echo "  Note: Optional variables present: ${OPTIONAL_VARS[*]}"
+    fi
 else
-    print_error "Missing environment variables: ${MISSING_VARS[*]}"
+    print_error "Missing required environment variables: ${MISSING_VARS[*]}"
 fi
 
 # ═══════════════════════════════════════════════════════════════════
