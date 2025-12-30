@@ -39,16 +39,16 @@ def create_observation(
     db.add(obs)
     db.commit()
     db.refresh(obs)
-    
+
     # Log creation for audit trail
     AuditLogger.log_create(
         db=db,
         user=user,
         entity_type="market_observation",
         entity_id=obs.id,
-        entity_data=payload.model_dump()
+        entity_data=payload.model_dump(),
     )
-    
+
     return obs
 
 

@@ -14,7 +14,9 @@ class Report(Base, TimestampMixin):
     id: Mapped[int] = mapped_column(primary_key=True)
     kind: Mapped[str] = mapped_column(String(32), nullable=False, default="daily")
     title: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    report_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True, nullable=False)
+    report_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), index=True, nullable=False
+    )
     markdown: Mapped[str] = mapped_column(Text, nullable=False)
     payload: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 

@@ -118,9 +118,9 @@ def _extract_entities_with_llm(
         "Du extrahierst strukturierte Entitäten aus Suchergebnissen. "
         "Gib NUR valides JSON zurück (kein Markdown, keine Erklärungen). "
         "Gib GENAU ein JSON-Objekt zurück mit dem Feld 'entities'. "
-        "Schema: {\"entities\":[{\"name\":string,\"country\":string|null,\"region\":string|null,"
-        "\"website\":string|null,\"contact_email\":string|null,\"notes\":string|null,"
-        "\"evidence_urls\":[string]}]} "
+        'Schema: {"entities":[{"name":string,"country":string|null,"region":string|null,'
+        '"website":string|null,"contact_email":string|null,"notes":string|null,'
+        '"evidence_urls":[string]}]} '
         f"Regeln: (1) nichts erfinden; unbekannt => null/[]; (2) nur echte {entity_type}; "
         "(3) Duplikate entfernen; (4) evidence_urls nur aus gelieferten URLs; (5) max 20 entities."
     )
@@ -214,12 +214,16 @@ def seed_discovery(
             if len(aggregated) >= 120:
                 break
             try:
-                results = client.search(q, max_results=20, country=country, max_tokens_per_page=512)
+                results = client.search(
+                    q, max_results=20, country=country, max_tokens_per_page=512
+                )
                 for r in results:
                     if r.url in seen_urls:
                         continue
                     seen_urls.add(r.url)
-                    aggregated.append({"title": r.title, "url": r.url, "snippet": r.snippet})
+                    aggregated.append(
+                        {"title": r.title, "url": r.url, "snippet": r.snippet}
+                    )
             except Exception as exc:
                 errors.append(f"search failed for '{q}': {exc}")
 
@@ -230,7 +234,9 @@ def seed_discovery(
             if not chunk:
                 continue
             try:
-                ents = _extract_entities_with_llm(client, entity_type=entity_type, search_results=chunk)
+                ents = _extract_entities_with_llm(
+                    client, entity_type=entity_type, search_results=chunk
+                )
                 entities.extend(ents)
             except Exception as exc:
                 errors.append(f"extract failed chunk {i}-{i+chunk_size}: {exc}")
@@ -244,7 +250,10 @@ def seed_discovery(
                 deduped[k] = ent
             else:
                 deduped[k]["evidence_urls"] = list(
-                    {*(deduped[k].get("evidence_urls") or []), *(ent.get("evidence_urls") or [])}
+                    {
+                        *(deduped[k].get("evidence_urls") or []),
+                        *(ent.get("evidence_urls") or []),
+                    }
                 )
 
         now = datetime.utcnow()
@@ -254,11 +263,15 @@ def seed_discovery(
             entity_id: int | None = None
 
             if entity_type == "cooperative":
-                stmt_coop = select(Cooperative).where(func.lower(Cooperative.name) == name.lower())
+                stmt_coop = select(Cooperative).where(
+                    func.lower(Cooperative.name) == name.lower()
+                )
                 coop = db.scalar(stmt_coop)
                 is_new = coop is None
                 if coop is None:
-                    coop = Cooperative(name=name, status="active", next_action="In Recherche")
+                    coop = Cooperative(
+                        name=name, status="active", next_action="In Recherche"
+                    )
                     db.add(coop)
 
                 if ent.get("region") and not coop.region:
@@ -271,11 +284,15 @@ def seed_discovery(
                     coop.notes = (coop.notes or "").strip()
                     add = str(ent["notes"]).strip()
                     if add and add not in (coop.notes or ""):
-                        coop.notes = (coop.notes + "\n\n" + add).strip() if coop.notes else add
+                        coop.notes = (
+                            (coop.notes + "\n\n" + add).strip() if coop.notes else add
+                        )
 
                 coop.meta = coop.meta or {}
                 coop.meta.setdefault("discovery", {})
-                coop.meta["discovery"].update({"provider": "perplexity", "last_run": now.isoformat()})
+                coop.meta["discovery"].update(
+                    {"provider": "perplexity", "last_run": now.isoformat()}
+                )
 
                 if not dry_run:
                     db.commit()
@@ -283,11 +300,15 @@ def seed_discovery(
                     entity_id = coop.id
 
             else:
-                stmt_roaster = select(Roaster).where(func.lower(Roaster.name) == name.lower())
+                stmt_roaster = select(Roaster).where(
+                    func.lower(Roaster.name) == name.lower()
+                )
                 roaster = db.scalar(stmt_roaster)
                 is_new = roaster is None
                 if roaster is None:
-                    roaster = Roaster(name=name, status="active", next_action="In Recherche")
+                    roaster = Roaster(
+                        name=name, status="active", next_action="In Recherche"
+                    )
                     db.add(roaster)
 
                 if ent.get("region") and not roaster.city:
@@ -300,11 +321,17 @@ def seed_discovery(
                     roaster.notes = (roaster.notes or "").strip()
                     add = str(ent["notes"]).strip()
                     if add and add not in (roaster.notes or ""):
-                        roaster.notes = (roaster.notes + "\n\n" + add).strip() if roaster.notes else add
+                        roaster.notes = (
+                            (roaster.notes + "\n\n" + add).strip()
+                            if roaster.notes
+                            else add
+                        )
 
                 roaster.meta = roaster.meta or {}
                 roaster.meta.setdefault("discovery", {})
-                roaster.meta["discovery"].update({"provider": "perplexity", "last_run": now.isoformat()})
+                roaster.meta["discovery"].update(
+                    {"provider": "perplexity", "last_run": now.isoformat()}
+                )
 
                 if not dry_run:
                     db.commit()

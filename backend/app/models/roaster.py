@@ -16,16 +16,24 @@ class Roaster(Base, TimestampMixin):
     contact_email: Mapped[str | None] = mapped_column(String(320), nullable=True)
     peru_focus: Mapped[bool] = mapped_column(nullable=False, default=False)
     specialty_focus: Mapped[bool] = mapped_column(nullable=False, default=True)
-    price_position: Mapped[str | None] = mapped_column(String(64), nullable=True)  # low|mid|premium|unknown
+    price_position: Mapped[str | None] = mapped_column(
+        String(64), nullable=True
+    )  # low|mid|premium|unknown
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Optional scoring / prioritization (can be used later)
     total_score: Mapped[float | None] = mapped_column(Float, nullable=True)
     confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
-    last_scored_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_scored_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
-    status: Mapped[str] = mapped_column(String(32), nullable=False, default="active")  # active|watch|blocked|archived
+    status: Mapped[str] = mapped_column(
+        String(32), nullable=False, default="active"
+    )  # active|watch|blocked|archived
     next_action: Mapped[str | None] = mapped_column(String(255), nullable=True)
     requested_data: Mapped[str | None] = mapped_column(Text, nullable=True)
-    last_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_verified_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     meta: Mapped[dict | None] = mapped_column(JSON, nullable=True)
