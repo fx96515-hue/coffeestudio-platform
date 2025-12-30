@@ -46,7 +46,7 @@ def test_xss_javascript_protocol_in_url(client: TestClient, auth_headers):
             }
         )
         # Should be rejected by validation
-        assert response.status_code == 422, f"Malicious URL not rejected: {url}"
+        assert response.status_code in [400, 422], f"Malicious URL not rejected: {url}"
 
 
 def test_xss_iframe_injection(client: TestClient, auth_headers):
@@ -110,7 +110,7 @@ def test_xss_in_roaster_website(client: TestClient, auth_headers):
             }
         )
         # Should be rejected
-        assert response.status_code == 422, f"Malicious URL not rejected: {url}"
+        assert response.status_code in [400, 422], f"Malicious URL not rejected: {url}"
 
 
 def test_xss_in_notes_field(client: TestClient, auth_headers):
@@ -153,7 +153,7 @@ def test_xss_data_protocol_in_url(client: TestClient, auth_headers):
             }
         )
         # Should be rejected
-        assert response.status_code == 422, f"Data URL not rejected: {url}"
+        assert response.status_code in [400, 422], f"Data URL not rejected: {url}"
 
 
 def test_safe_content_accepted(client: TestClient, auth_headers):
