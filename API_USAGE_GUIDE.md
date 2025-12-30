@@ -9,10 +9,11 @@ Complete guide to using the CoffeeStudio Platform API with examples.
 3. [Cooperatives](#cooperatives)
 4. [Roasters](#roasters)
 5. [Lots](#lots)
-6. [Margin Calculations](#margin-calculations)
-7. [Reports](#reports)
-8. [ML Predictions](#ml-predictions)
-9. [Error Handling](#error-handling)
+6. [Shipments](#shipments)
+7. [Margin Calculations](#margin-calculations)
+8. [Reports](#reports)
+9. [ML Predictions](#ml-predictions)
+10. [Error Handling](#error-handling)
 
 ---
 
@@ -305,6 +306,171 @@ curl -X POST http://localhost:8000/lots \
     "altitude_masl": 1600,
     "notes": "Bright acidity, notes of citrus and chocolate"
   }'
+```
+
+---
+
+## Shipments
+
+### List All Shipments
+
+Get all shipments with optional filters:
+
+```bash
+curl -X GET "http://localhost:8000/shipments/?status=in_transit" \
+  -H "Authorization: Bearer <TOKEN>"
+```
+
+Query parameters:
+- `status`: Filter by status (in_transit, delivered, customs, delayed, planned)
+- `origin_port`: Filter by origin port
+- `destination_port`: Filter by destination port
+- `limit`: Maximum results (default: 200, max: 1000)
+
+Response:
+```json
+[
+  {
+    "id": 1,
+    "lot_id": 5,
+    "cooperative_id": 2,
+    "roaster_id": 3,
+    "container_number": "MSCU1234567",
+    "bill_of_lading": "BOL-2024-001",
+    "weight_kg": 18000.0,
+    "container_type": "40ft",
+    "origin_port": "Callao, Peru",
+    "destination_port": "Hamburg, Germany",
+    "current_location": "Panama Canal",
+    "departure_date": "2024-01-15",
+    "estimated_arrival": "2024-02-20",
+    "actual_arrival": null,
+    "status": "in_transit",
+    "status_updated_at": "2024-01-15T10:00:00Z",
+    "delay_hours": 0,
+    "tracking_events": [
+      {
+        "timestamp": "2024-01-15T08:00:00Z",
+        "location": "Callao Port",
+        "event": "Departure",
+        "details": "Container loaded and departed"
+      },
+      {
+        "timestamp": "2024-01-20T14:00:00Z",
+        "location": "Panama Canal",
+        "event": "Transit",
+        "details": "Passed through Panama Canal"
+      }
+    ],
+    "notes": "High priority shipment"
+  }
+]
+```
+
+### Get Active Shipments
+
+Get all shipments currently in transit:
+
+```bash
+curl -X GET http://localhost:8000/shipments/active \
+  -H "Authorization: Bearer <TOKEN>"
+```
+
+### Get Delayed Shipments
+
+Get all shipments with delays:
+
+```bash
+curl -X GET http://localhost:8000/shipments/delayed \
+  -H "Authorization: Bearer <TOKEN>"
+```
+
+### Create Shipment
+
+```bash
+curl -X POST http://localhost:8000/shipments/ \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "lot_id": 5,
+    "cooperative_id": 2,
+    "roaster_id": 3,
+    "container_number": "MSCU1234567",
+    "bill_of_lading": "BOL-2024-001",
+    "weight_kg": 18000.0,
+    "container_type": "40ft",
+    "origin_port": "Callao, Peru",
+    "destination_port": "Hamburg, Germany",
+    "departure_date": "2024-01-15",
+    "estimated_arrival": "2024-02-20",
+    "notes": "High priority shipment"
+  }'
+```
+
+**Container Types:**
+- `20ft`: 20-foot container
+- `40ft`: 40-foot container
+- `40ft_hc`: 40-foot high cube container
+
+Response: Returns the created shipment object.
+
+### Get Shipment by ID
+
+```bash
+curl -X GET http://localhost:8000/shipments/1 \
+  -H "Authorization: Bearer <TOKEN>"
+```
+
+### Update Shipment
+
+```bash
+curl -X PATCH http://localhost:8000/shipments/1 \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "current_location": "Atlantic Ocean",
+    "status": "in_transit",
+    "delay_hours": 24
+  }'
+```
+
+**Valid Status Values:**
+- `planned`: Shipment is planned
+- `in_transit`: Currently shipping
+- `customs`: In customs clearance
+- `delivered`: Successfully delivered
+- `delayed`: Delayed shipment
+
+### Add Tracking Event
+
+Add a location update to a shipment:
+
+```bash
+curl -X POST http://localhost:8000/shipments/1/track \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "timestamp": "2024-01-25T10:00:00Z",
+    "location": "Atlantic Ocean",
+    "event": "In Transit",
+    "details": "Halfway to destination"
+  }'
+```
+
+Response: Returns the updated shipment with all tracking events.
+
+### Delete Shipment
+
+```bash
+curl -X DELETE http://localhost:8000/shipments/1 \
+  -H "Authorization: Bearer <TOKEN>"
+```
+
+Response:
+```json
+{
+  "status": "deleted"
+}
 ```
 
 ---
