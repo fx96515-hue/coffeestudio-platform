@@ -2,7 +2,6 @@
 import pytest
 from app.models.lot import Lot
 from app.models.cooperative import Cooperative
-from app.models.margin import MarginRun
 
 
 def test_calc_margin_endpoint(client, auth_headers, db):

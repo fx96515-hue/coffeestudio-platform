@@ -1,5 +1,4 @@
 """Tests for sources API routes."""
-import pytest
 from app.models.source import Source
 
 

@@ -1,5 +1,4 @@
 """Tests for regions API routes."""
-import pytest
 from app.models.peru_region import PeruRegion
 
 

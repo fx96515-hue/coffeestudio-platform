@@ -1,5 +1,4 @@
 """Tests for cuppings API routes."""
-import pytest
 from app.models.cupping import CuppingResult
 from datetime import datetime, timezone
 

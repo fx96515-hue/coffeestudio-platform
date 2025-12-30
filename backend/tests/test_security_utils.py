@@ -6,7 +6,7 @@ from app.core.security import (
     create_access_token,
     decode_token
 )
-from jose import jwt, JWTError
+from jose import JWTError
 
 
 def test_hash_password():

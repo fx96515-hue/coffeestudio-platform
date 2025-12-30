@@ -1,7 +1,6 @@
 """Tests for news service."""
-import pytest
 from unittest.mock import patch, MagicMock
-from app.services.news import refresh_news, DEFAULT_NEWS_QUERIES
+from app.services.news import refresh_news
 from app.models.news_item import NewsItem
 
 

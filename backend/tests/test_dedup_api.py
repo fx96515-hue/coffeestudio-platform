@@ -1,5 +1,4 @@
 """Tests for dedup API routes."""
-import pytest
 from app.models.cooperative import Cooperative
 from app.models.roaster import Roaster
 

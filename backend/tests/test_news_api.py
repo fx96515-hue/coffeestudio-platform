@@ -1,5 +1,4 @@
 """Tests for news API routes."""
-import pytest
 from unittest.mock import patch
 from app.models.news_item import NewsItem
 from datetime import datetime, timezone

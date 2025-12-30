@@ -1,5 +1,4 @@
 """Tests for reports API routes."""
-import pytest
 from app.models.report import Report
 from datetime import datetime, timezone
 

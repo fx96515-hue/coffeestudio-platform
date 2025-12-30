@@ -1,5 +1,4 @@
 """Tests for logistics API routes."""
-import pytest
 
 
 def test_landed_cost_calculation(client, auth_headers, db):

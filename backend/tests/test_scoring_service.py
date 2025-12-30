@@ -1,5 +1,4 @@
 """Tests for scoring service."""
-import pytest
 from app.services.scoring import (
     compute_cooperative_score,
     _clamp,

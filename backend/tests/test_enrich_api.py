@@ -1,5 +1,4 @@
 """Tests for enrichment API routes."""
-import pytest
 from unittest.mock import patch
 from app.models.cooperative import Cooperative
 

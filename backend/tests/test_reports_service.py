@@ -1,5 +1,4 @@
 """Tests for reports service."""
-import pytest
 from app.services.reports import generate_daily_report, _latest_by_key, _fmt_obs
 from app.models.market import MarketObservation
 from app.models.cooperative import Cooperative

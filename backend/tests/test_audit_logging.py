@@ -1,5 +1,4 @@
 """Tests for audit logging."""
-import pytest
 from app.core.audit import AuditLogger
 from app.models.user import User
 from app.core.security import hash_password

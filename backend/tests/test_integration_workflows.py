@@ -1,9 +1,6 @@
 """Integration tests for core workflows."""
 import pytest
 from app.models.cooperative import Cooperative
-from app.models.roaster import Roaster
-from app.models.lot import Lot
-from app.models.market import MarketObservation
 from datetime import datetime, timezone
 
 

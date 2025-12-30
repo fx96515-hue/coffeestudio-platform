@@ -1,5 +1,4 @@
 """Tests for knowledge base service."""
-import pytest
 from app.services.kb import seed_default_kb, DEFAULT_DOCS
 from app.models.knowledge_doc import KnowledgeDoc
 
@@ -16,8 +15,7 @@ def test_seed_default_kb_creates_docs(db):
 def test_seed_default_kb_idempotent(db):
     """Test seeding is idempotent (can run multiple times)."""
     # First seed
-    result1 = seed_default_kb(db)
-    first_created = result1["created"]
+    seed_default_kb(db)
     
     # Second seed
     result2 = seed_default_kb(db)
@@ -40,7 +38,7 @@ def test_seed_default_kb_updates_changed_content(db):
         db.commit()
         
         # Seed again - should update to original
-        result = seed_default_kb(db)
+        seed_default_kb(db)
         
         db.refresh(doc)
         assert doc.content_md == original_content

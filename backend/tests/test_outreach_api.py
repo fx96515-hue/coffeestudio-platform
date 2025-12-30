@@ -1,6 +1,4 @@
 """Tests for outreach API routes."""
-import pytest
-from unittest.mock import patch
 from app.models.cooperative import Cooperative
 from app.models.roaster import Roaster
 

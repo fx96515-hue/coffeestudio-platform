@@ -1,6 +1,5 @@
 """Tests for error handlers."""
 import pytest
-from fastapi import Request
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from sqlalchemy.exc import IntegrityError, OperationalError

@@ -1,5 +1,4 @@
 """Tests for ECB FX provider."""
-import pytest
 from unittest.mock import patch, MagicMock
 from app.providers.ecb_fx import fetch_ecb_fx, FxQuote
 from datetime import datetime, timezone

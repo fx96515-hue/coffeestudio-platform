@@ -1,5 +1,4 @@
 """Tests for lots API routes."""
-import pytest
 from app.models.lot import Lot
 from app.models.cooperative import Cooperative
 
