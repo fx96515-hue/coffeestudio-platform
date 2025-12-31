@@ -100,6 +100,7 @@ jobs:
       - name: Run Database Migrations
         env:
           DATABASE_URL: postgresql+psycopg://test_user:test_pass@localhost:5432/test_db
+          JWT_SECRET: test_secret_key_for_ci_minimum_32_characters_long
         run: |
           cd backend
           alembic upgrade head
@@ -189,6 +190,7 @@ jobs:
       - name: Run Database Migrations
         env:
           DATABASE_URL: postgresql+psycopg://test_user:test_pass@localhost:5432/test_db
+          JWT_SECRET: test_secret_key_for_ci_minimum_32_characters_long
         run: |
           cd backend
           alembic upgrade head
