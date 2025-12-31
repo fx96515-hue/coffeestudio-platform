@@ -72,9 +72,10 @@ class TestCooperativeValidation:
                 json={"name": "Test Coop", "website": url},
             )
             # Can be rejected by middleware (400) or Pydantic validation (422)
-            assert response.status_code in [400, 422], (
-                f"Invalid URL not rejected: {url}"
-            )
+            assert response.status_code in [
+                400,
+                422,
+            ], f"Invalid URL not rejected: {url}"
 
 
 class TestLotValidation:

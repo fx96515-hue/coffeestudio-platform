@@ -207,7 +207,12 @@ def add_tracking_event(
         raise HTTPException(status_code=404, detail="Not found")
 
     # Get existing tracking events or initialize
-    tracking_events: list[dict] = shipment.tracking_events or []
+    # Defensive handling in case of unexpected data format
+    raw_events = shipment.tracking_events
+    if isinstance(raw_events, list):
+        tracking_events: list[dict] = raw_events
+    else:
+        tracking_events = []
 
     # Add new event
     new_event = event.model_dump()
