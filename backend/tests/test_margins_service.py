@@ -65,9 +65,9 @@ def test_margin_calculation_zero_selling_price():
 
 def test_margin_calculation_invalid_yield_factor():
     """Test margin calculation with invalid yield factor."""
-    
+
     from pydantic import ValidationError
-    
+
     with pytest.raises(ValidationError, match="Input should be greater than 0"):
         MarginCalcRequest(
             purchase_price_per_kg=10.0,
@@ -76,10 +76,13 @@ def test_margin_calculation_invalid_yield_factor():
             roast_and_pack_costs_per_kg=3.0,
             selling_price_per_kg=20.0,
             purchase_currency="USD",
-            selling_currency="EUR"
+            selling_currency="EUR",
         )
 
-        req = MarginCalcRequest(
+
+def test_calc_margin_invalid_yield_factor_zero_raises_value_error():
+    """calc_margin should raise ValueError when yield_factor is 0."""
+    req = MarginCalcRequest(
         purchase_price_per_kg=10.0,
         landed_costs_per_kg=2.0,
         yield_factor=0.0,
@@ -91,13 +94,12 @@ def test_margin_calculation_invalid_yield_factor():
 
     with pytest.raises(ValueError, match="yield_factor must be within"):
         calc_margin(req)
- main
 
 
 def test_margin_calculation_yield_factor_greater_than_one():
     """Test margin calculation with yield factor > 1."""
     from pydantic import ValidationError
-    
+
     with pytest.raises(ValidationError, match="Input should be less than or equal to 1"):
         MarginCalcRequest(
             purchase_price_per_kg=10.0,
@@ -106,9 +108,12 @@ def test_margin_calculation_yield_factor_greater_than_one():
             roast_and_pack_costs_per_kg=3.0,
             selling_price_per_kg=20.0,
             purchase_currency="USD",
-            selling_currency="EUR"
+            selling_currency="EUR",
         )
-=======
+
+
+def test_calc_margin_invalid_yield_factor_gt_one_raises_value_error():
+    """calc_margin should raise ValueError when yield_factor > 1."""
     req = MarginCalcRequest(
         purchase_price_per_kg=10.0,
         landed_costs_per_kg=2.0,
@@ -121,7 +126,6 @@ def test_margin_calculation_yield_factor_greater_than_one():
 
     with pytest.raises(ValueError, match="yield_factor must be within"):
         calc_margin(req)
- main
 
 
 def test_margin_calculation_high_margin():
