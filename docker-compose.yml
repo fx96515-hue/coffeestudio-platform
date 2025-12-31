@@ -1,4 +1,4 @@
-name: coffeestudio
+﻿name: coffeestudio
 services:
   postgres:
     image: postgres:16
@@ -68,7 +68,7 @@ services:
     command:
     - sh
     - -c
-    - alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000
+    - alembic upgrade heads && uvicorn app.main:app --host 0.0.0.0 --port 8000
   worker:
     build:
       context: ./backend
@@ -146,3 +146,4 @@ services:
     - npm run start
 volumes:
   pgdata: null
+
