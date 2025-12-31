@@ -94,17 +94,40 @@ def _validate_public_http_url(url: str) -> str:
 
 def fetch_text(url: str, timeout_seconds: int = 25) -> tuple[str, dict[str, Any]]:
     # Validate the initial URL before making any request.
-    safe_url = _validate_public_http_url(url)
+    current_url = _validate_public_http_url(url)
     headers = {
         # browser-like UA reduces dumb 403s (not all)
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36 CoffeeStudio/0.3",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Accept-Language": "de-DE,de;q=0.9,en;q=0.8",
     }
+    max_redirects = 5
     with httpx.Client(
-        timeout=timeout_seconds, follow_redirects=True, headers=headers
+        timeout=timeout_seconds, follow_redirects=False, headers=headers
     ) as client:
-        r = client.get(safe_url)
+        redirects_followed = 0
+        while True:
+            r = client.get(current_url)
+            # If this is not a redirect, stop here.
+            if r.status_code not in {301, 302, 303, 307, 308}:
+                break
+
+            location = r.headers.get("location")
+            if not location:
+                break
+
+            # Resolve relative redirects against the current URL.
+            try:
+                next_url = str(httpx.URL(current_url).join(location))
+            except Exception:
+                raise ValueError("invalid redirect URL")
+
+            # Validate each redirect target to prevent SSRF via redirects.
+            current_url = _validate_public_http_url(next_url)
+            redirects_followed += 1
+            if redirects_followed > max_redirects:
+                raise ValueError("too many redirects")
+
         r.raise_for_status()
         html = r.text
 
