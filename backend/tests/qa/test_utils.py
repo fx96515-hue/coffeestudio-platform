@@ -7,7 +7,6 @@ import tempfile
 from app.qa.failure_analyzer import TestFailure
 from app.qa.utils import (
     parse_pytest_output,
-    _parse_failure_section,
     _read_file_section
 )
 
