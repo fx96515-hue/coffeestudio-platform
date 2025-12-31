@@ -1,6 +1,5 @@
 """Tests for QA system configuration."""
 
-import pytest
 from app.qa.config import QAConfig
 
 
