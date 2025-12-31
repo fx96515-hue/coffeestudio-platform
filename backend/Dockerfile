@@ -1,9 +1,9 @@
 # syntax=docker/dockerfile:1
 
 # =============================================================================
-# Build stage: Install dependencies
+# Build stage:  Install dependencies
 # =============================================================================
-FROM python:3.12-slim AS builder
+FROM python: 3.12-slim AS builder
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -12,27 +12,34 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Install dependencies in a virtual environment for easy copying
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install dependencies in a virtual environment
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# Copy only requirements first for better layer caching
-COPY requirements.txt ./
+# Copy requirements and install
+COPY requirements. txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 # =============================================================================
-# Runtime stage: Minimal production image
+# Runtime stage: Use slim (NOT alpine)
 # =============================================================================
-FROM python:3.12-alpine AS runtime
+FROM python:3.12-slim AS runtime
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PATH="/opt/venv/bin:$PATH"
+    PATH="/opt/venv/bin: $PATH"
 
-# Install runtime dependencies (curl for healthchecks, libpq for psycopg)
-RUN apk add --no-cache \
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
-    libpq
+    libpq5 \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -44,14 +51,13 @@ COPY alembic.ini ./
 COPY alembic ./alembic
 COPY app ./app
 
-# Create non-root user for security
-RUN addgroup -g 1000 appuser && \
-    adduser -D -u 1000 -G appuser appuser && \
-    chown -R appuser:appuser /app
+# Create non-root user
+RUN groupadd -r appuser && \
+    useradd -r -g appuser appuser && \
+    chown -R appuser: appuser /app
 
 USER appuser
 
 EXPOSE 8000
 
-# Use exec form for proper signal handling
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app. main:app", "--host", "0.0.0.0", "--port", "8000"]
