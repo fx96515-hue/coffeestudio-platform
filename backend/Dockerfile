@@ -12,6 +12,12 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
+# Install build dependencies for ML packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
 # Install dependencies in a virtual environment for easy copying
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
@@ -21,18 +27,19 @@ COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 # =============================================================================
-# Runtime stage: Minimal production image
+# Runtime stage: Minimal production image (MUST be slim, NOT alpine)
 # =============================================================================
-FROM python:3.12-alpine AS runtime
+FROM python:3.12-slim AS runtime
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PATH="/opt/venv/bin:$PATH"
 
 # Install runtime dependencies (curl for healthchecks, libpq for psycopg)
-RUN apk add --no-cache \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
-    libpq
+    libpq5 \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -45,8 +52,8 @@ COPY alembic ./alembic
 COPY app ./app
 
 # Create non-root user for security
-RUN addgroup -g 1000 appuser && \
-    adduser -D -u 1000 -G appuser appuser && \
+RUN groupadd -r appuser && \
+    useradd -r -g appuser appuser && \
     chown -R appuser:appuser /app
 
 USER appuser
