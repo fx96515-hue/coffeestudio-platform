@@ -211,7 +211,7 @@ def add_tracking_event(
         raise HTTPException(status_code=404, detail="Not found")
 
     # Get existing tracking events or initialize
-    tracking_events = shipment.tracking_events or []
+    tracking_events: list = shipment.tracking_events or []
     if not isinstance(tracking_events, list):
         tracking_events = []
 

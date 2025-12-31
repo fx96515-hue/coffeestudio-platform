@@ -46,7 +46,7 @@ class Shipment(Base, TimestampMixin):
     delay_hours: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
     # Tracking
-    tracking_events: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    tracking_events: Mapped[list | None] = mapped_column(JSON, nullable=True)
 
     # Metadata
     notes: Mapped[str | None] = mapped_column(String(1000), nullable=True)

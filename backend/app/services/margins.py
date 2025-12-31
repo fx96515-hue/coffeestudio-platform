@@ -18,10 +18,7 @@ def calc_margin(req: MarginCalcRequest) -> Tuple[Dict, Dict]:
     # per kg green
     green_total_cost = float(req.purchase_price_per_kg) + float(req.landed_costs_per_kg)
 
-    # convert to per kg roasted
-    if req.yield_factor <= 0 or req.yield_factor > 1.0:
-        raise ValueError("yield_factor must be within (0,1]")
-
+    # convert to per kg roasted (yield_factor is validated by Pydantic schema)
     cost_per_kg_roasted_from_green = green_total_cost / float(req.yield_factor)
     total_cost_per_kg_roasted = cost_per_kg_roasted_from_green + float(
         req.roast_and_pack_costs_per_kg
