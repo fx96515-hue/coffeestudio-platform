@@ -60,6 +60,11 @@ def _validate_public_http_url(url: str) -> str:
     if not parsed.hostname:
         raise ValueError("invalid URL: missing host")
 
+    # Optionally restrict ports to typical HTTP(S) ports. If no port is given,
+    # httpx will use defaults based on the scheme.
+    if parsed.port is not None and parsed.port not in (80, 443):
+        raise ValueError("unsupported URL port")
+
     try:
         addrinfo_list = socket.getaddrinfo(parsed.hostname, None)
     except OSError:
@@ -88,6 +93,7 @@ def _validate_public_http_url(url: str) -> str:
 
 
 def fetch_text(url: str, timeout_seconds: int = 25) -> tuple[str, dict[str, Any]]:
+    # Validate the initial URL before making any request.
     safe_url = _validate_public_http_url(url)
     headers = {
         # browser-like UA reduces dumb 403s (not all)
@@ -102,16 +108,21 @@ def fetch_text(url: str, timeout_seconds: int = 25) -> tuple[str, dict[str, Any]
         r.raise_for_status()
         html = r.text
 
+    # Re-validate the final URL after following redirects to ensure that
+    # redirection did not lead to an internal or otherwise disallowed host.
+    final_url_str = str(r.url)
+    safe_final_url = _validate_public_http_url(final_url_str)
+
     soup = BeautifulSoup(html, "html.parser")
     for tag in soup(["script", "style", "noscript"]):
         tag.decompose()
 
     text = _clean_text(soup.get_text(" "))
     meta = {
-        "final_url": str(r.url),
+        "final_url": safe_final_url,
         "status_code": r.status_code,
         "content_type": r.headers.get("content-type"),
-        "domain": _domain(str(r.url)),
+        "domain": _domain(safe_final_url),
     }
     return text[:20000], meta
 
@@ -183,7 +194,8 @@ def enrich_entity(
     try:
         text, meta = fetch_text(target_url)
         chash = _sha256(text)
-        final_url = _normalize_url(meta.get("final_url") or target_url)
+        # meta["final_url"] has already been validated in fetch_text.
+        final_url = meta.get("final_url") or target_url
 
         # IMPORTANT: stmt must be a SQLAlchemy select(), never a plain string
         stmt = select(WebExtract).where(
