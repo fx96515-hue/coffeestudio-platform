@@ -125,11 +125,11 @@ Production-ready CI/CD pipeline with GitHub Actions:
 - **Input Validation Middleware** (SQL Injection & XSS Detection)
 - **Standardized Error Handling** with consistent error format
 
-See [SECURITY.md](SECURITY.md) and [SECURITY_BEST_PRACTICES.md](SECURITY_BEST_PRACTICES.md) for comprehensive security documentation.
+See [SECURITY.md](docs/security/SECURITY.md) and [SECURITY_BEST_PRACTICES.md](docs/security/SECURITY_BEST_PRACTICES.md) for comprehensive security documentation.
 
 ## API Documentation
 
-📖 **See [API_USAGE_GUIDE.md](./API_USAGE_GUIDE.md)** for:
+📖 **See [API_USAGE_GUIDE.md](./docs/guides/API_USAGE_GUIDE.md)** for:
 - Complete API reference with examples
 - Authentication & authorization guide
 - Request/response formats
@@ -158,20 +158,29 @@ pytest tests/ -v
 pytest tests/ --cov=app --cov-report=html
 ```
 
-See [TESTING.md](TESTING.md) for complete testing documentation.
+See [TESTING.md](docs/guides/TESTING.md) for complete testing documentation.
 
 ### Security
 
-See [SECURITY.md](SECURITY.md) and [SECURITY_BEST_PRACTICES.md](SECURITY_BEST_PRACTICES.md) for comprehensive security documentation.
+See [SECURITY.md](docs/security/SECURITY.md) and [SECURITY_BEST_PRACTICES.md](docs/security/SECURITY_BEST_PRACTICES.md) for comprehensive security documentation.
 
 ## Status & Roadmap
 
-📊 **Siehe [STATUS.md](./STATUS.md)** für:
+📊 **Siehe [STATUS.md](./docs/operations/STATUS.md)** für:
 - Aktueller Status aller Features
 - Was kommt als Nächstes (4-Phasen-Roadmap)
 - Implementation Backlog
 - Vorschläge & Empfehlungen
 - Produktivsetzung (Production Readiness: 60%)
+
+## 📚 Documentation
+
+Complete documentation is organized in the [docs/](docs/) directory:
+
+- **[Architecture & Implementation](docs/architecture/)** - System design and technical summaries
+- **[Guides & Quick Starts](docs/guides/)** - Step-by-step guides and tutorials
+- **[Security](docs/security/)** - Security policies and best practices
+- **[Operations](docs/operations/)** - Runbooks and status reports
 
 ## Nächste Schritte
 - Vollständige Provider (ICO/ICE/Fracht)
