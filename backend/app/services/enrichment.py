@@ -47,8 +47,9 @@ def _normalize_url(u: str) -> str:
 
 def _validate_public_http_url(url: str) -> str:
     """
-    Normalize and validate that the URL uses http(s) and does not resolve to
-    localhost or private/internal IP address ranges. Raises ValueError on failure.
+    Normalize and validate that the URL uses http(s), that the hostname is
+    allowed, and that it does not resolve to localhost or private/internal IP
+    address ranges. Raises ValueError on failure.
     """
     normalized = _normalize_url(url)
     if not normalized:
@@ -59,6 +60,25 @@ def _validate_public_http_url(url: str) -> str:
         raise ValueError("unsupported URL scheme")
     if not parsed.hostname:
         raise ValueError("invalid URL: missing host")
+
+    hostname = parsed.hostname.lower()
+
+    # If an allow-list of hosts/domains is configured, enforce it here.
+    allowed_hosts = getattr(settings, "ENRICH_ALLOWED_HOSTS", None) or []
+    allowed_domains = getattr(settings, "ENRICH_ALLOWED_DOMAINS", None) or []
+
+    if allowed_hosts or allowed_domains:
+        host_allowed = False
+        if hostname in {h.lower() for h in allowed_hosts}:
+            host_allowed = True
+        else:
+            for domain in allowed_domains:
+                d = (domain or "").lower().lstrip(".")
+                if d and (hostname == d or hostname.endswith("." + d)):
+                    host_allowed = True
+                    break
+        if not host_allowed:
+            raise ValueError("URL host is not allowed")
 
     # Optionally restrict ports to typical HTTP(S) ports. If no port is given,
     # httpx will use defaults based on the scheme.
