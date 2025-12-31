@@ -1,4 +1,5 @@
 """Tests for deduplication service."""
+
 import pytest
 from app.services.dedup import suggest_duplicates, _domain, _score, DedupPair
 from app.models.cooperative import Cooperative
@@ -12,9 +13,9 @@ def test_suggest_duplicates_cooperatives(db):
     coop3 = Cooperative(name="Totally Different", region="Junin")
     db.add_all([coop1, coop2, coop3])
     db.commit()
-    
+
     results = suggest_duplicates(db, entity_type="cooperative", threshold=80.0)
-    
+
     assert isinstance(results, list)
     # Should find similarity between coop1 and coop2
     if results:
@@ -28,9 +29,9 @@ def test_suggest_duplicates_roasters(db):
     roaster3 = Roaster(name="Munich Coffee", city="Munich")
     db.add_all([roaster1, roaster2, roaster3])
     db.commit()
-    
+
     results = suggest_duplicates(db, entity_type="roaster", threshold=80.0)
-    
+
     assert isinstance(results, list)
 
 
@@ -43,7 +44,7 @@ def test_suggest_duplicates_invalid_entity_type(db):
 def test_suggest_duplicates_empty_database(db):
     """Test duplicate detection with empty database."""
     results = suggest_duplicates(db, entity_type="cooperative")
-    
+
     assert results == []
 
 
@@ -53,13 +54,13 @@ def test_suggest_duplicates_with_threshold(db):
     coop2 = Cooperative(name="Coffee XYZ", region="Cajamarca")  # Somewhat similar
     db.add_all([coop1, coop2])
     db.commit()
-    
+
     # High threshold - should find fewer or no matches
     results_high = suggest_duplicates(db, entity_type="cooperative", threshold=95.0)
-    
+
     # Low threshold - should find more matches
     results_low = suggest_duplicates(db, entity_type="cooperative", threshold=50.0)
-    
+
     assert len(results_low) >= len(results_high)
 
 
@@ -76,11 +77,11 @@ def test_score_similarity():
     # Exact match
     score1 = _score("Coffee Cooperative", "Coffee Cooperative")
     assert score1 >= 95.0
-    
+
     # Similar names
     score2 = _score("Coffee Coop", "Coffee Cooperative")
     assert score2 > 50.0
-    
+
     # Very different names
     score3 = _score("ABC", "XYZ")
     assert score3 < 50.0
@@ -101,9 +102,9 @@ def test_dedup_pair_dataclass():
         a_name="Test A",
         b_name="Test B",
         score=85.5,
-        reason="similar_name"
+        reason="similar_name",
     )
-    
+
     assert pair.a_id == 1
     assert pair.b_id == 2
     assert pair.score == 85.5

@@ -4,10 +4,9 @@ from app.core.security import hash_password
 
 def test_login_success(client, test_user):
     """Test successful login with valid credentials."""
-    response = client.post("/auth/login", json={
-        "email": "test@example.com",
-        "password": "test_password"
-    })
+    response = client.post(
+        "/auth/login", json={"email": "test@example.com", "password": "test_password"}
+    )
     assert response.status_code == 200
     data = response.json()
     assert "access_token" in data
@@ -16,10 +15,9 @@ def test_login_success(client, test_user):
 
 def test_login_invalid_password(client, test_user):
     """Test login with invalid password."""
-    response = client.post("/auth/login", json={
-        "email": "test@example.com",
-        "password": "wrong_password"
-    })
+    response = client.post(
+        "/auth/login", json={"email": "test@example.com", "password": "wrong_password"}
+    )
     assert response.status_code == 401
     data = response.json()
     assert "error" in data
@@ -28,10 +26,10 @@ def test_login_invalid_password(client, test_user):
 
 def test_login_invalid_email(client):
     """Test login with non-existent email."""
-    response = client.post("/auth/login", json={
-        "email": "nonexistent@example.com",
-        "password": "any_password"
-    })
+    response = client.post(
+        "/auth/login",
+        json={"email": "nonexistent@example.com", "password": "any_password"},
+    )
     assert response.status_code == 401
     data = response.json()
     assert "error" in data
@@ -44,15 +42,15 @@ def test_login_inactive_user(client, db):
         email="inactive@example.com",
         password_hash=hash_password("test_password"),
         role="admin",
-        is_active=False
+        is_active=False,
     )
     db.add(inactive_user)
     db.commit()
-    
-    response = client.post("/auth/login", json={
-        "email": "inactive@example.com",
-        "password": "test_password"
-    })
+
+    response = client.post(
+        "/auth/login",
+        json={"email": "inactive@example.com", "password": "test_password"},
+    )
     assert response.status_code == 401
 
 
@@ -88,16 +86,15 @@ def test_protected_route_with_malformed_token(client):
 
 def test_token_contains_user_info(client, test_user):
     """Test that login token contains correct user information."""
-    response = client.post("/auth/login", json={
-        "email": "test@example.com",
-        "password": "test_password"
-    })
+    response = client.post(
+        "/auth/login", json={"email": "test@example.com", "password": "test_password"}
+    )
     assert response.status_code == 200
-    
+
     # Use the token to get user info
     token = response.json()["access_token"]
     headers = {"Authorization": f"Bearer {token}"}
-    
+
     user_response = client.get("/auth/me", headers=headers)
     assert user_response.status_code == 200
     assert user_response.json()["email"] == "test@example.com"
@@ -115,32 +112,27 @@ def test_viewer_role_restrictions(client, viewer_auth_headers):
     # Viewer can read
     read_response = client.get("/cooperatives", headers=viewer_auth_headers)
     assert read_response.status_code == 200
-    
+
     # Viewer cannot create
-    create_response = client.post("/cooperatives", json={"name": "Test"}, headers=viewer_auth_headers)
+    create_response = client.post(
+        "/cooperatives", json={"name": "Test"}, headers=viewer_auth_headers
+    )
     assert create_response.status_code == 403
 
 
 def test_login_missing_email(client):
     """Test login with missing email field."""
-    response = client.post("/auth/login", json={
-        "password": "test_password"
-    })
+    response = client.post("/auth/login", json={"password": "test_password"})
     assert response.status_code == 422  # Validation error
 
 
 def test_login_missing_password(client):
     """Test login with missing password field."""
-    response = client.post("/auth/login", json={
-        "email": "test@example.com"
-    })
+    response = client.post("/auth/login", json={"email": "test@example.com"})
     assert response.status_code == 422  # Validation error
 
 
 def test_login_empty_credentials(client):
     """Test login with empty credentials."""
-    response = client.post("/auth/login", json={
-        "email": "",
-        "password": ""
-    })
+    response = client.post("/auth/login", json={"email": "", "password": ""})
     assert response.status_code == 422  # Validation error

@@ -38,20 +38,20 @@ def test_export_cooperatives_csv_with_data(client, auth_headers, db):
         "region": "Cusco",
         "contact_email": "test2@example.com",
     }
-    
+
     client.post("/cooperatives", json=coop1_data, headers=auth_headers)
     client.post("/cooperatives", json=coop2_data, headers=auth_headers)
-    
+
     # Export to CSV
     response = client.get("/cooperatives/export/csv", headers=auth_headers)
     assert response.status_code == 200
     assert response.headers["content-type"] == "text/csv; charset=utf-8"
-    
+
     # Parse CSV
     csv_content = response.content.decode("utf-8")
     reader = csv.DictReader(io.StringIO(csv_content))
     rows = list(reader)
-    
+
     assert len(rows) == 2
     assert rows[0]["Name"] == "Test Cooperative 1"
     assert rows[0]["Region"] == "Cajamarca"
@@ -78,20 +78,20 @@ def test_export_roasters_csv_with_data(client, auth_headers, db):
         "city": "Munich",
         "contact_email": "info@roaster2.de",
     }
-    
+
     client.post("/roasters", json=roaster1_data, headers=auth_headers)
     client.post("/roasters", json=roaster2_data, headers=auth_headers)
-    
+
     # Export to CSV
     response = client.get("/roasters/export/csv", headers=auth_headers)
     assert response.status_code == 200
     assert response.headers["content-type"] == "text/csv; charset=utf-8"
-    
+
     # Parse CSV
     csv_content = response.content.decode("utf-8")
     reader = csv.DictReader(io.StringIO(csv_content))
     rows = list(reader)
-    
+
     assert len(rows) == 2
     assert rows[0]["Name"] == "Test Roaster 1"
     assert rows[0]["City"] == "Berlin"
@@ -107,15 +107,15 @@ def test_csv_export_includes_headers(client, auth_headers, db):
         "region": "Test Region",
     }
     client.post("/cooperatives", json=coop_data, headers=auth_headers)
-    
+
     # Export to CSV
     response = client.get("/cooperatives/export/csv", headers=auth_headers)
     csv_content = response.content.decode("utf-8")
-    
+
     # Check headers
     lines = csv_content.split("\n")
     headers = lines[0].split(",")
-    
+
     assert "ID" in headers[0]
     assert "Name" in headers[1]
     assert "Region" in headers[2]
@@ -125,6 +125,6 @@ def test_csv_filename_includes_timestamp(client, auth_headers, db):
     """Test that CSV filename includes timestamp."""
     response = client.get("/cooperatives/export/csv", headers=auth_headers)
     content_disposition = response.headers.get("content-disposition", "")
-    
+
     assert "cooperatives_export_" in content_disposition
     assert ".csv" in content_disposition

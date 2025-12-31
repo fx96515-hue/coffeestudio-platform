@@ -12,9 +12,9 @@ def test_create_roaster(client, auth_headers, db):
         "specialty_focus": True,
         "price_position": "premium",
         "notes": "Focus on single-origin specialty",
-        "status": "active"
+        "status": "active",
     }
-    
+
     response = client.post("/roasters", json=payload, headers=auth_headers)
     assert response.status_code == 200
     data = response.json()
@@ -32,7 +32,7 @@ def test_get_roasters_list(client, auth_headers, db):
     roaster2 = Roaster(name="Munich Coffee", city="Munich", peru_focus=True)
     db.add_all([roaster1, roaster2])
     db.commit()
-    
+
     response = client.get("/roasters", headers=auth_headers)
     assert response.status_code == 200
     data = response.json()
@@ -47,7 +47,7 @@ def test_get_roaster_by_id(client, auth_headers, db):
     db.add(roaster)
     db.commit()
     db.refresh(roaster)
-    
+
     response = client.get(f"/roasters/{roaster.id}", headers=auth_headers)
     assert response.status_code == 200
     data = response.json()
@@ -62,9 +62,11 @@ def test_update_roaster(client, auth_headers, db):
     db.add(roaster)
     db.commit()
     db.refresh(roaster)
-    
+
     update_data = {"name": "Updated Roaster Name", "peru_focus": True}
-    response = client.patch(f"/roasters/{roaster.id}", json=update_data, headers=auth_headers)
+    response = client.patch(
+        f"/roasters/{roaster.id}", json=update_data, headers=auth_headers
+    )
     assert response.status_code == 200
     data = response.json()
     assert data["name"] == "Updated Roaster Name"
@@ -77,11 +79,11 @@ def test_delete_roaster(client, auth_headers, db):
     db.add(roaster)
     db.commit()
     db.refresh(roaster)
-    
+
     response = client.delete(f"/roasters/{roaster.id}", headers=auth_headers)
     assert response.status_code == 200
     assert response.json()["status"] == "deleted"
-    
+
     # Verify deletion
     response = client.get(f"/roasters/{roaster.id}", headers=auth_headers)
     assert response.status_code == 404
@@ -89,10 +91,8 @@ def test_delete_roaster(client, auth_headers, db):
 
 def test_create_roaster_minimal_data(client, auth_headers):
     """Test creating roaster with minimal required data."""
-    payload = {
-        "name": "Minimal Roaster"
-    }
-    
+    payload = {"name": "Minimal Roaster"}
+
     response = client.post("/roasters", json=payload, headers=auth_headers)
     assert response.status_code == 200
     data = response.json()
@@ -109,11 +109,8 @@ def test_roaster_unauthorized_access(client):
 
 def test_roaster_viewer_cannot_create(client, viewer_auth_headers):
     """Test that viewer role cannot create roasters."""
-    payload = {
-        "name": "Unauthorized Roaster",
-        "city": "Berlin"
-    }
-    
+    payload = {"name": "Unauthorized Roaster", "city": "Berlin"}
+
     response = client.post("/roasters", json=payload, headers=viewer_auth_headers)
     assert response.status_code == 403
 
@@ -123,7 +120,7 @@ def test_roaster_viewer_can_read(client, viewer_auth_headers, db):
     roaster = Roaster(name="Viewable Roaster", city="Hamburg")
     db.add(roaster)
     db.commit()
-    
+
     response = client.get("/roasters", headers=viewer_auth_headers)
     assert response.status_code == 200
     assert len(response.json()) >= 1
@@ -131,11 +128,8 @@ def test_roaster_viewer_can_read(client, viewer_auth_headers, db):
 
 def test_roaster_analyst_can_create(client, analyst_auth_headers):
     """Test that analyst role can create roasters."""
-    payload = {
-        "name": "Analyst Created Roaster",
-        "city": "Leipzig"
-    }
-    
+    payload = {"name": "Analyst Created Roaster", "city": "Leipzig"}
+
     response = client.post("/roasters", json=payload, headers=analyst_auth_headers)
     assert response.status_code == 200
 
@@ -148,7 +142,9 @@ def test_get_nonexistent_roaster(client, auth_headers):
 
 def test_update_nonexistent_roaster(client, auth_headers):
     """Test updating a roaster that doesn't exist."""
-    response = client.patch("/roasters/99999", json={"name": "New Name"}, headers=auth_headers)
+    response = client.patch(
+        "/roasters/99999", json={"name": "New Name"}, headers=auth_headers
+    )
     assert response.status_code == 404
 
 

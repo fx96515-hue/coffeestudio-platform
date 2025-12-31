@@ -88,6 +88,7 @@ class InputValidationMiddleware(BaseHTTPMiddleware):
                         f"Request body too large: {content_length} bytes from {request.client.host if request.client else 'unknown'}"
                     )
                     from app.core.error_handlers import ErrorResponse
+
                     return ErrorResponse.format_error(
                         error_code="REQUEST_TOO_LARGE",
                         message=f"Request body too large. Maximum size is {MAX_REQUEST_BODY_SIZE} bytes.",
@@ -97,13 +98,14 @@ class InputValidationMiddleware(BaseHTTPMiddleware):
                 if "application/json" in request.headers.get("content-type", ""):
                     # Read the body as bytes to avoid consuming the stream
                     body_bytes = await request.body()
-                    
+
                     # Double-check actual body size
                     if len(body_bytes) > MAX_REQUEST_BODY_SIZE:
                         logger.warning(
                             f"Request body too large: {len(body_bytes)} bytes from {request.client.host if request.client else 'unknown'}"
                         )
                         from app.core.error_handlers import ErrorResponse
+
                         return ErrorResponse.format_error(
                             error_code="REQUEST_TOO_LARGE",
                             message=f"Request body too large. Maximum size is {MAX_REQUEST_BODY_SIZE} bytes.",

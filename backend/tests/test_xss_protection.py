@@ -11,18 +11,18 @@ def test_xss_script_tag_in_cooperative_name(client: TestClient, auth_headers):
         "<SCRIPT>alert('XSS')</SCRIPT>",
         "<script>document.cookie</script>",
     ]
-    
+
     for payload in xss_payloads:
         response = client.post(
             "/cooperatives/",
             headers=auth_headers,
-            json={
-                "name": payload,
-                "region": "Cajamarca"
-            }
+            json={"name": payload, "region": "Cajamarca"},
         )
         # Should be rejected by validation
-        assert response.status_code in [400, 422], f"XSS payload not rejected: {payload}"
+        assert response.status_code in [
+            400,
+            422,
+        ], f"XSS payload not rejected: {payload}"
 
 
 def test_xss_javascript_protocol_in_url(client: TestClient, auth_headers):
@@ -33,16 +33,12 @@ def test_xss_javascript_protocol_in_url(client: TestClient, auth_headers):
         "javascript:void(0)",
         "javascript:window.location='http://evil.com'",
     ]
-    
+
     for url in malicious_urls:
         response = client.post(
             "/cooperatives/",
             headers=auth_headers,
-            json={
-                "name": "Test Cooperative",
-                "website": url,
-                "region": "Cajamarca"
-            }
+            json={"name": "Test Cooperative", "website": url, "region": "Cajamarca"},
         )
         # Should be rejected by validation
         assert response.status_code in [400, 422], f"Malicious URL not rejected: {url}"
@@ -55,18 +51,18 @@ def test_xss_iframe_injection(client: TestClient, auth_headers):
         "<IFRAME src='javascript:alert(1)'></IFRAME>",
         "test<iframe>evil</iframe>name",
     ]
-    
+
     for payload in iframe_payloads:
         response = client.post(
             "/cooperatives/",
             headers=auth_headers,
-            json={
-                "name": payload,
-                "region": "Cajamarca"
-            }
+            json={"name": payload, "region": "Cajamarca"},
         )
         # Should be rejected
-        assert response.status_code in [400, 422], f"Iframe payload not rejected: {payload}"
+        assert response.status_code in [
+            400,
+            422,
+        ], f"Iframe payload not rejected: {payload}"
 
 
 def test_xss_event_handlers(client: TestClient, auth_headers):
@@ -77,18 +73,18 @@ def test_xss_event_handlers(client: TestClient, auth_headers):
         "test onerror='alert(1)'",
         "<img src=x onerror='alert(1)'>",
     ]
-    
+
     for payload in event_payloads:
         response = client.post(
             "/cooperatives/",
             headers=auth_headers,
-            json={
-                "name": payload,
-                "region": "Cajamarca"
-            }
+            json={"name": payload, "region": "Cajamarca"},
         )
         # Should be rejected by middleware
-        assert response.status_code in [400, 422], f"Event handler not rejected: {payload}"
+        assert response.status_code in [
+            400,
+            422,
+        ], f"Event handler not rejected: {payload}"
 
 
 def test_xss_in_roaster_website(client: TestClient, auth_headers):
@@ -98,15 +94,12 @@ def test_xss_in_roaster_website(client: TestClient, auth_headers):
         "data:text/html,<script>alert('XSS')</script>",
         "file:///etc/passwd",
     ]
-    
+
     for url in malicious_urls:
         response = client.post(
             "/roasters/",
             headers=auth_headers,
-            json={
-                "name": "Test Roaster",
-                "website": url
-            }
+            json={"name": "Test Roaster", "website": url},
         )
         # Should be rejected
         assert response.status_code in [400, 422], f"Malicious URL not rejected: {url}"
@@ -119,19 +112,18 @@ def test_xss_in_notes_field(client: TestClient, auth_headers):
         "<img src=x onerror=alert(1)>",
         "javascript:void(0)",
     ]
-    
+
     for payload in xss_payloads:
         response = client.post(
             "/cooperatives/",
             headers=auth_headers,
-            json={
-                "name": "Test Cooperative",
-                "region": "Cajamarca",
-                "notes": payload
-            }
+            json={"name": "Test Cooperative", "region": "Cajamarca", "notes": payload},
         )
         # Should be rejected by middleware
-        assert response.status_code in [400, 422], f"XSS in notes not rejected: {payload}"
+        assert response.status_code in [
+            400,
+            422,
+        ], f"XSS in notes not rejected: {payload}"
 
 
 def test_xss_data_protocol_in_url(client: TestClient, auth_headers):
@@ -140,16 +132,12 @@ def test_xss_data_protocol_in_url(client: TestClient, auth_headers):
         "data:text/html,<script>alert('XSS')</script>",
         "data:text/html;base64,PHNjcmlwdD5hbGVydCgnWFNTJyk8L3NjcmlwdD4=",
     ]
-    
+
     for url in data_urls:
         response = client.post(
             "/cooperatives/",
             headers=auth_headers,
-            json={
-                "name": "Test Cooperative",
-                "website": url,
-                "region": "Cajamarca"
-            }
+            json={"name": "Test Cooperative", "website": url, "region": "Cajamarca"},
         )
         # Should be rejected
         assert response.status_code in [400, 422], f"Data URL not rejected: {url}"
@@ -162,15 +150,11 @@ def test_safe_content_accepted(client: TestClient, auth_headers):
         "region": "Cajamarca",
         "website": "https://example.com",
         "notes": "This is a safe note with normal text and numbers 123.",
-        "contact_email": "contact@example.com"
+        "contact_email": "contact@example.com",
     }
-    
-    response = client.post(
-        "/cooperatives/",
-        headers=auth_headers,
-        json=safe_data
-    )
-    
+
+    response = client.post("/cooperatives/", headers=auth_headers, json=safe_data)
+
     # Should be accepted
     assert response.status_code == 200, "Safe content was rejected"
     data = response.json()
@@ -183,15 +167,15 @@ def test_xss_svg_injection(client: TestClient, auth_headers):
         "<svg/onload=alert('XSS')>",
         "<svg><script>alert('XSS')</script></svg>",
     ]
-    
+
     for payload in svg_payloads:
         response = client.post(
             "/cooperatives/",
             headers=auth_headers,
-            json={
-                "name": payload,
-                "region": "Cajamarca"
-            }
+            json={"name": payload, "region": "Cajamarca"},
         )
         # Should be rejected
-        assert response.status_code in [400, 422], f"SVG payload not rejected: {payload}"
+        assert response.status_code in [
+            400,
+            422,
+        ], f"SVG payload not rejected: {payload}"
