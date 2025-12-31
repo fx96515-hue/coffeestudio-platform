@@ -69,3 +69,5 @@ diagnostics/
 # QA System artifacts
 .qa_backups/
 .qa_reports/
+*.BAK
+*.bak
