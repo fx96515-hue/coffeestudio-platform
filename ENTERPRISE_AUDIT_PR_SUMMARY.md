@@ -230,7 +230,7 @@ pytest tests/ -v --cov=app
 
 ### Run Enterprise Validation
 ```bash
-bash scripts/enterprise_validation.sh
+bash scripts/validate_enterprise_audit.sh
 ```
 
 ### Expected Results

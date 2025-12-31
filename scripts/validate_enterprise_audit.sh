@@ -74,11 +74,13 @@ else
 fi
 
 # Check that routes import AuditLogger
+# We expect audit logging in key routes: auth, cooperatives, roasters, lots, market, shipments, sources
+EXPECTED_MIN_ROUTES=5
 ROUTES_WITH_AUDIT=$(grep -l "from app.core.audit import AuditLogger" app/api/routes/*.py | wc -l)
-if [ "$ROUTES_WITH_AUDIT" -ge 5 ]; then
+if [ "$ROUTES_WITH_AUDIT" -ge "$EXPECTED_MIN_ROUTES" ]; then
     echo -e "${GREEN}✓${NC} AuditLogger used in $ROUTES_WITH_AUDIT route files"
 else
-    echo -e "${YELLOW}⚠${NC} AuditLogger used in only $ROUTES_WITH_AUDIT route files (expected 5+)"
+    echo -e "${YELLOW}⚠${NC} AuditLogger used in only $ROUTES_WITH_AUDIT route files (expected $EXPECTED_MIN_ROUTES+)"
 fi
 
 echo ""
@@ -93,7 +95,7 @@ TEST_FILES=(
 for test_file in "${TEST_FILES[@]}"; do
     if [ -f "$test_file" ]; then
         # Count test functions in file
-        TEST_COUNT=$(grep -c "^def test_" "$test_file" || echo "0")
+        TEST_COUNT=$(grep -c "^def test_" "$test_file" 2>/dev/null || echo "0")
         echo -e "${GREEN}✓${NC} $test_file ($TEST_COUNT tests)"
     else
         echo -e "${RED}✗${NC} $test_file (MISSING)"
