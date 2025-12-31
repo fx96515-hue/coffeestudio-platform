@@ -1,6 +1,5 @@
 """Tests for QA utility functions."""
 
-import pytest
 from pathlib import Path
 import tempfile
 
