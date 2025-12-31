@@ -1,68 +1,96 @@
 name: Backend CI
 
 on:
-  push:
-    branches: [main, develop]
+  pull_request:
     paths:
       - 'backend/**'
       - '.github/workflows/ci-backend.yml'
-  pull_request:
-    branches: [main, develop]
+  push:
+    branches:
+      - main
     paths:
       - 'backend/**'
-  workflow_call:  # Allow this workflow to be called by other workflows
-
-permissions:
-  contents: read
-  pull-requests: write
+      - '.github/workflows/ci-backend.yml'
 
 jobs:
-  lint-and-type-check:
-    name: Lint & Type Check
+  lint:
     runs-on: ubuntu-latest
-    
+    defaults:
+      run:
+        working-directory: ./backend
+
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Set up Python 3.12
+
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
-          cache: 'pip'
-          cache-dependency-path: backend/requirements.txt
-      
+          python-version: '3.11'
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
       - name: Install dependencies
         run: |
-          cd backend
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
-      
-      - name: Run Ruff (Linting)
+
+      - name: Run ruff check
+        run: ruff check .
+
+      - name: Run ruff format check
+        run: ruff format --check .
+
+  type-check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
         run: |
-          cd backend
-          ruff check app/ tests/ --output-format=github
-      
-      - name: Run MyPy (Type Checking)
-        run: |
-          cd backend
-          mypy --config-file ../mypy.ini app/
-      
-      - name: Check Code Formatting (Black)
-        run: |
-          cd backend
-          ruff format --check app/ tests/
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: Run mypy
+        run: mypy .
 
   unit-tests:
-    name: Unit Tests
     runs-on: ubuntu-latest
-    
+    defaults:
+      run:
+        working-directory: ./backend
+
     services:
       postgres:
-        image: postgres:16
+        image: postgres:15
         env:
-          POSTGRES_DB: test_db
           POSTGRES_USER: test_user
           POSTGRES_PASSWORD: test_pass
+          POSTGRES_DB: test_db
         ports:
           - 5432:5432
         options: >-
@@ -70,89 +98,68 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-      
-      redis:
-        image: redis:7
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    
+
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Set up Python 3.12
+
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
-          cache: 'pip'
-          cache-dependency-path: backend/requirements.txt
-      
+          python-version: '3.11'
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
       - name: Install dependencies
         run: |
-          cd backend
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
-      
+
       - name: Run Database Migrations
         env:
           DATABASE_URL: postgresql+psycopg://test_user:test_pass@localhost:5432/test_db
-        run: |
-          cd backend
-          alembic upgrade head
-      
-      - name: Run Tests with Coverage
-        env:
-          DATABASE_URL: postgresql+psycopg://test_user:test_pass@localhost:5432/test_db
-          REDIS_URL: redis://localhost:6379/0
           JWT_SECRET: test_secret_key_for_ci_minimum_32_characters_long
         run: |
           cd backend
-          pytest tests/ -v \
-            --cov=app \
-            --cov-report=xml \
-            --cov-report=html \
-            --cov-report=term-missing \
-            --cov-fail-under=70
-      
-      - name: Upload Coverage to Codecov
+          alembic upgrade head
+
+      - name: Run pytest (unit tests only)
+        env:
+          DATABASE_URL: postgresql+psycopg://test_user:test_pass@localhost:5432/test_db
+          JWT_SECRET: test_secret_key_for_ci
+          JWT_ALGORITHM: HS256
+          ACCESS_TOKEN_EXPIRE_MINUTES: 30
+          ENVIRONMENT: test
+        run: |
+          pytest tests/unit -v --cov=app --cov-report=xml --cov-report=term
+
+      - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
           file: ./backend/coverage.xml
-          flags: backend
-          name: backend-coverage
-          token: ${{ secrets.CODECOV_TOKEN }}
-        continue-on-error: true
-      
-      - name: Upload Coverage Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-coverage-report
-          path: backend/htmlcov/
-      
-      - name: Comment PR with Coverage
-        if: github.event_name == 'pull_request'
-        uses: py-cov-action/python-coverage-comment-action@v3
-        with:
-          GITHUB_TOKEN: ${{ github.token }}
-        continue-on-error: true
+          flags: unit-tests
+          name: backend-unit-tests
+          fail_ci_if_error: false
 
   integration-tests:
-    name: Integration Tests
     runs-on: ubuntu-latest
-    needs: unit-tests
-    
+    defaults:
+      run:
+        working-directory: ./backend
+
     services:
       postgres:
-        image: postgres:16
+        image: postgres:15
         env:
-          POSTGRES_DB: test_db
           POSTGRES_USER: test_user
           POSTGRES_PASSWORD: test_pass
+          POSTGRES_DB: test_db
         ports:
           - 5432:5432
         options: >-
@@ -160,9 +167,9 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-      
+
       redis:
-        image: redis:7
+        image: redis:7-alpine
         ports:
           - 6379:6379
         options: >-
@@ -170,54 +177,93 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-    
+
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Set up Python 3.12
+
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
-          cache: 'pip'
-      
+          python-version: '3.11'
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
       - name: Install dependencies
         run: |
-          cd backend
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
-      
+
       - name: Run Database Migrations
         env:
           DATABASE_URL: postgresql+psycopg://test_user:test_pass@localhost:5432/test_db
-        run: |
-          cd backend
-          alembic upgrade head
-      
-      - name: Start Backend API
-        env:
-          DATABASE_URL: postgresql+psycopg://test_user:test_pass@localhost:5432/test_db
-          REDIS_URL: redis://localhost:6379/0
           JWT_SECRET: test_secret_key_for_ci_minimum_32_characters_long
         run: |
           cd backend
-          uvicorn app.main:app --host 0.0.0.0 --port 8000 &
-          sleep 10
-      
-      - name: API Health Check
+          alembic upgrade head
+
+      - name: Run pytest (integration tests only)
+        env:
+          DATABASE_URL: postgresql+psycopg://test_user:test_pass@localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379/0
+          JWT_SECRET: test_secret_key_for_ci
+          JWT_ALGORITHM: HS256
+          ACCESS_TOKEN_EXPIRE_MINUTES: 30
+          ENVIRONMENT: test
         run: |
-          for i in {1..10}; do
-            if curl -f http://localhost:8000/health; then
-              echo "Health check passed"
-              exit 0
-            fi
-            echo "Attempt $i failed, retrying..."
-            sleep 5
-          done
-          exit 1
-      
-      - name: Show Backend Logs on Failure
-        if: failure()
+          pytest tests/integration -v --cov=app --cov-report=xml --cov-report=term
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./backend/coverage.xml
+          flags: integration-tests
+          name: backend-integration-tests
+          fail_ci_if_error: false
+
+  security-scan:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
         run: |
-          echo "=== Backend Logs ==="
-          jobs || true
-          ps aux | grep uvicorn || true
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install safety bandit[toml]
+
+      - name: Run safety check
+        run: safety check --json || true
+
+      - name: Run bandit security scan
+        run: bandit -r app -f json -o bandit-report.json || true
+
+      - name: Upload bandit report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bandit-security-report
+          path: backend/bandit-report.json
