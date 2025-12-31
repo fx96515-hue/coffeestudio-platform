@@ -5,6 +5,8 @@ import re
 from datetime import datetime, timezone
 from typing import Any
 from urllib.parse import urlparse
+import ipaddress
+import socket
 
 import httpx
 from bs4 import BeautifulSoup
@@ -43,7 +45,50 @@ def _normalize_url(u: str) -> str:
     return u
 
 
+def _validate_public_http_url(url: str) -> str:
+    """
+    Normalize and validate that the URL uses http(s) and does not resolve to
+    localhost or private/internal IP address ranges. Raises ValueError on failure.
+    """
+    normalized = _normalize_url(url)
+    if not normalized:
+        raise ValueError("empty url")
+
+    parsed = urlparse(normalized)
+    if parsed.scheme not in {"http", "https"}:
+        raise ValueError("unsupported URL scheme")
+    if not parsed.hostname:
+        raise ValueError("invalid URL: missing host")
+
+    try:
+        addrinfo_list = socket.getaddrinfo(parsed.hostname, None)
+    except OSError:
+        raise ValueError("unable to resolve host")
+
+    for family, _, _, _, sockaddr in addrinfo_list:
+        ip_str = None
+        if family == socket.AF_INET:
+            ip_str = sockaddr[0]
+        elif family == socket.AF_INET6:
+            ip_str = sockaddr[0]
+        if not ip_str:
+            continue
+        ip = ipaddress.ip_address(ip_str)
+        if (
+            ip.is_loopback
+            or ip.is_private
+            or ip.is_link_local
+            or ip.is_multicast
+            or ip.is_reserved
+            or ip.is_unspecified
+        ):
+            raise ValueError("URL host resolves to a disallowed IP address")
+
+    return normalized
+
+
 def fetch_text(url: str, timeout_seconds: int = 25) -> tuple[str, dict[str, Any]]:
+    safe_url = _validate_public_http_url(url)
     headers = {
         # browser-like UA reduces dumb 403s (not all)
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36 CoffeeStudio/0.3",
@@ -53,7 +98,7 @@ def fetch_text(url: str, timeout_seconds: int = 25) -> tuple[str, dict[str, Any]
     with httpx.Client(
         timeout=timeout_seconds, follow_redirects=True, headers=headers
     ) as client:
-        r = client.get(url)
+        r = client.get(safe_url)
         r.raise_for_status()
         html = r.text
 
