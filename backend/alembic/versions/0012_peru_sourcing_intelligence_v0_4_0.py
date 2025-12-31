@@ -1,7 +1,7 @@
-"""peru_sourcing_intelligence_v0_4_0
+﻿"""peru_sourcing_intelligence_v0_4_0
 
-Revision ID: 0009
-Revises: 0008
+Revision ID: 0012_peru_sourcing_intelligence_v0_4_0
+Revises: 0011_add_shipments_table
 Create Date: 2025-12-30 16:38:00.000000
 
 """
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = '0009'
-down_revision = '0008'
+revision = "0012_peru_sourcing_intelligence_v0_4_0"
+down_revision = "0011_add_shipments_table"
 branch_labels = None
 depends_on = None
 
@@ -76,3 +76,4 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_regions_country'), table_name='regions')
     op.drop_index(op.f('ix_regions_name'), table_name='regions')
     op.drop_table('regions')
+
