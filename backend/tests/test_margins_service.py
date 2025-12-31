@@ -1,6 +1,7 @@
 """Tests for margins calculation service."""
 
 import pytest
+from pydantic_core import ValidationError
 from app.services.margins import calc_margin
 from app.schemas.margin import MarginCalcRequest
 
@@ -65,34 +66,30 @@ def test_margin_calculation_zero_selling_price():
 
 def test_margin_calculation_invalid_yield_factor():
     """Test margin calculation with invalid yield factor."""
-    req = MarginCalcRequest(
-        purchase_price_per_kg=10.0,
-        landed_costs_per_kg=2.0,
-        yield_factor=0.0,
-        roast_and_pack_costs_per_kg=3.0,
-        selling_price_per_kg=20.0,
-        purchase_currency="USD",
-        selling_currency="EUR",
-    )
-
-    with pytest.raises(ValueError, match="yield_factor must be within"):
-        calc_margin(req)
+    with pytest.raises(ValidationError, match="Input should be greater than 0"):
+        MarginCalcRequest(
+            purchase_price_per_kg=10.0,
+            landed_costs_per_kg=2.0,
+            yield_factor=0.0,
+            roast_and_pack_costs_per_kg=3.0,
+            selling_price_per_kg=20.0,
+            purchase_currency="USD",
+            selling_currency="EUR",
+        )
 
 
 def test_margin_calculation_yield_factor_greater_than_one():
     """Test margin calculation with yield factor > 1."""
-    req = MarginCalcRequest(
-        purchase_price_per_kg=10.0,
-        landed_costs_per_kg=2.0,
-        yield_factor=1.5,
-        roast_and_pack_costs_per_kg=3.0,
-        selling_price_per_kg=20.0,
-        purchase_currency="USD",
-        selling_currency="EUR",
-    )
-
-    with pytest.raises(ValueError, match="yield_factor must be within"):
-        calc_margin(req)
+    with pytest.raises(ValidationError, match="Input should be less than or equal to 1"):
+        MarginCalcRequest(
+            purchase_price_per_kg=10.0,
+            landed_costs_per_kg=2.0,
+            yield_factor=1.5,
+            roast_and_pack_costs_per_kg=3.0,
+            selling_price_per_kg=20.0,
+            purchase_currency="USD",
+            selling_currency="EUR",
+        )
 
 
 def test_margin_calculation_high_margin():
