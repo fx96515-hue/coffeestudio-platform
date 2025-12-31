@@ -218,7 +218,7 @@ jobs:
         continue-on-error: true
       
       - name: Notify Team on Failure
-        if: steps.api_health.outputs.status == 'failure' && secrets.SLACK_WEBHOOK != ''
+        if: ${{ steps.api_health.outputs.status == 'failure' && secrets.SLACK_WEBHOOK != '' }}
         uses: slackapi/slack-github-action@v1
         with:
           webhook-url: ${{ secrets.SLACK_WEBHOOK }}
