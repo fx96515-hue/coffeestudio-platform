@@ -91,14 +91,17 @@ class CoffeePricePredictionService:
 
         try:
             X, _ = self.model.prepare_features(input_data)
-            predictions, lower, upper = self.model.predict_with_confidence(X)
+            predicted_price, model_confidence = self.model.predict_with_confidence(X)
 
-            predicted_price = float(predictions[0])
-            confidence_low = float(max(0, lower[0]))
-            confidence_high = float(upper[0])
+            # Calculate confidence intervals based on model confidence
+            # Lower confidence means wider intervals
+            interval_width = predicted_price * (1.0 - model_confidence) * 0.5
+            confidence_low = float(max(0, predicted_price - interval_width))
+            confidence_high = float(predicted_price + interval_width)
 
             # Calculate confidence based on data availability
-            confidence_score = min(1.0, len(historical) / 20.0)
+            data_confidence = min(1.0, len(historical) / 20.0)
+            confidence_score = (model_confidence + data_confidence) / 2.0
 
             # Compare with recent prices
             if historical:

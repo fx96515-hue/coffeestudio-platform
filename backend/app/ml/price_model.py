@@ -108,4 +108,3 @@ class CoffeePriceModel(BaseMLModel):
         upper_bound = predictions + 1.96 * std
 
         return predictions, lower_bound, upper_bound
-
