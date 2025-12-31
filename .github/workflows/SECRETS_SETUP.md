@@ -208,6 +208,12 @@ git push
 
 ## Troubleshooting
 
+### "Error: The workflow is not valid"
+- **Cause**: GitHub Actions syntax error when checking secrets in `if` conditions
+- **Solution**: Always wrap secret checks in `${{ }}` expression syntax
+- **Example**: Use `if: ${{ secrets.MY_SECRET != '' }}` instead of `if: secrets.MY_SECRET != ''`
+- Note: This is a known GitHub Actions limitation where secrets cannot be directly referenced in conditional expressions
+
 ### "Error: secret not found"
 - Check secret name matches exactly (case-sensitive)
 - Verify secret is set in repository settings

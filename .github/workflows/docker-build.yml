@@ -54,7 +54,7 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
       
       - name: Extract metadata (Docker Hub)
-        if: secrets.DOCKER_USERNAME != '' && github.event_name != 'pull_request'
+        if: ${{ secrets.DOCKER_USERNAME != '' && github.event_name != 'pull_request' }}
         id: meta-dockerhub
         uses: docker/metadata-action@v5
         with:
@@ -122,7 +122,7 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
       
       - name: Extract metadata (Docker Hub)
-        if: secrets.DOCKER_USERNAME != '' && github.event_name != 'pull_request'
+        if: ${{ secrets.DOCKER_USERNAME != '' && github.event_name != 'pull_request' }}
         id: meta-dockerhub
         uses: docker/metadata-action@v5
         with:
