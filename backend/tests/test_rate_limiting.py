@@ -12,10 +12,12 @@ def test_global_rate_limit_exists(client: TestClient, auth_headers):
     for _ in range(50):  # Reduced from 210 for test environment
         response = client.get("/cooperatives/", headers=auth_headers)
         responses.append(response)
-    
+
     # All requests should succeed in test environment
     # Rate limiting is configured but may not trigger due to test client behavior
-    assert all(r.status_code in [200, 429] for r in responses), "Unexpected status codes"
+    assert all(r.status_code in [200, 429] for r in responses), (
+        "Unexpected status codes"
+    )
 
 
 def test_login_rate_limit(client: TestClient):
@@ -25,15 +27,12 @@ def test_login_rate_limit(client: TestClient):
     for i in range(10):
         response = client.post(
             "/auth/login",
-            json={
-                "email": f"test{i}@example.com",
-                "password": "password123"
-            }
+            json={"email": f"test{i}@example.com", "password": "password123"},
         )
         responses.append(response)
         if response.status_code == 429:
             break
-    
+
     # Should hit rate limit before 10 attempts
     rate_limited = [r for r in responses if r.status_code == 429]
     assert len(rate_limited) > 0, "Login rate limit not enforced"
@@ -47,7 +46,7 @@ def test_rate_limit_by_ip(client: TestClient):
     for i in range(50):  # Reduced from 250 for test environment
         response = client.get("/health")
         responses.append(response.status_code)
-    
+
     # All responses should be valid (200 or 429 if limit hit)
     assert all(status in [200, 429] for status in responses), "Unexpected status codes"
 
@@ -76,7 +75,7 @@ def test_bootstrap_rate_limit(client: TestClient):
         responses.append(response)
         if response.status_code == 429:
             break
-    
+
     # Should hit rate limit before 15 attempts (limit is 10/hour)
     rate_limited = [r for r in responses if r.status_code == 429]
     assert len(rate_limited) > 0, "Bootstrap rate limit not enforced"
@@ -98,15 +97,19 @@ def test_authenticated_vs_unauthenticated_rate_limits(client: TestClient, auth_h
     for _ in range(20):  # Reduced for test environment
         response = client.get("/health")
         responses_unauth.append(response.status_code)
-    
+
     responses_auth = []
     for _ in range(20):  # Reduced for test environment
         response = client.get("/cooperatives/", headers=auth_headers)
         responses_auth.append(response.status_code)
-    
+
     # Both should process successfully (200) or hit rate limit (429)
-    assert all(status in [200, 429] for status in responses_unauth), "Unexpected unauth status"
-    assert all(status in [200, 429] for status in responses_auth), "Unexpected auth status"
+    assert all(status in [200, 429] for status in responses_unauth), (
+        "Unexpected unauth status"
+    )
+    assert all(status in [200, 429] for status in responses_auth), (
+        "Unexpected auth status"
+    )
 
 
 def test_rate_limit_does_not_block_legitimate_use(client: TestClient, auth_headers):
@@ -116,9 +119,11 @@ def test_rate_limit_does_not_block_legitimate_use(client: TestClient, auth_heade
     for _ in range(50):  # Well below 200/minute limit
         response = client.get("/cooperatives/", headers=auth_headers)
         responses.append(response.status_code)
-    
+
     # All should succeed
-    assert all(status == 200 for status in responses), "Rate limit too strict for normal use"
+    assert all(status == 200 for status in responses), (
+        "Rate limit too strict for normal use"
+    )
 
 
 def test_rate_limit_per_endpoint():
@@ -127,7 +132,7 @@ def test_rate_limit_per_endpoint():
     # - /api/auth/login: 5/minute
     # - /api/auth/dev/bootstrap: 10/hour
     # - Global default: 200/minute
-    
+
     # This is validated by the individual endpoint tests above
     assert True  # Documentation test
 
@@ -137,7 +142,7 @@ def test_rate_limit_recovery(client: TestClient):
     # Note: This test would require waiting for the time window to pass
     # For a 1-minute window, we'd need to wait 60+ seconds
     # Skipping actual wait in unit tests, but documenting the behavior
-    
+
     # Rate limits should reset after:
     # - 1 minute for per-minute limits
     # - 1 hour for per-hour limits

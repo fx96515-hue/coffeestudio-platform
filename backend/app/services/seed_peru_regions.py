@@ -37,7 +37,7 @@ PERU_REGIONS_DATA: list[dict[str, Any]] = [
         "weather_risk": "medium",
         "political_risk": "low",
         "logistics_risk": "low",
-        "quality_consistency_score": 84.0
+        "quality_consistency_score": 84.0,
     },
     {
         "name": "Junín",
@@ -62,7 +62,7 @@ PERU_REGIONS_DATA: list[dict[str, Any]] = [
         "weather_risk": "medium",
         "political_risk": "low",
         "logistics_risk": "low",
-        "quality_consistency_score": 83.0
+        "quality_consistency_score": 83.0,
     },
     {
         "name": "San Martín",
@@ -87,7 +87,7 @@ PERU_REGIONS_DATA: list[dict[str, Any]] = [
         "weather_risk": "high",  # High humidity challenges
         "political_risk": "low",
         "logistics_risk": "medium",
-        "quality_consistency_score": 81.0
+        "quality_consistency_score": 81.0,
     },
     {
         "name": "Cusco",
@@ -112,7 +112,7 @@ PERU_REGIONS_DATA: list[dict[str, Any]] = [
         "weather_risk": "medium",
         "political_risk": "low",
         "logistics_risk": "high",  # Mountain terrain challenges
-        "quality_consistency_score": 86.0
+        "quality_consistency_score": 86.0,
     },
     {
         "name": "Amazonas",
@@ -137,7 +137,7 @@ PERU_REGIONS_DATA: list[dict[str, Any]] = [
         "weather_risk": "medium",
         "political_risk": "low",
         "logistics_risk": "medium",
-        "quality_consistency_score": 85.0
+        "quality_consistency_score": 85.0,
     },
     {
         "name": "Puno",
@@ -162,35 +162,34 @@ PERU_REGIONS_DATA: list[dict[str, Any]] = [
         "weather_risk": "medium",
         "political_risk": "low",
         "logistics_risk": "high",  # Long distance and altitude
-        "quality_consistency_score": 87.0
-    }
+        "quality_consistency_score": 87.0,
+    },
 ]
 
 
 def seed_peru_regions(db: Session) -> dict[str, Any]:
     """
     Seed database with comprehensive Peru region data.
-    
+
     Creates or updates 6 major Peru coffee regions with complete production,
     quality, logistics, and risk information.
-    
+
     Args:
         db: Database session
-        
+
     Returns:
         Dictionary with operation results
     """
     created = 0
     updated = 0
-    
+
     for region_data in PERU_REGIONS_DATA:
         # Check if region exists
         stmt = select(Region).where(
-            Region.name == region_data["name"],
-            Region.country == region_data["country"]
+            Region.name == region_data["name"], Region.country == region_data["country"]
         )
         region = db.scalar(stmt)
-        
+
         if region:
             # Update existing region
             for key, value in region_data.items():
@@ -202,33 +201,35 @@ def seed_peru_regions(db: Session) -> dict[str, Any]:
             region = Region(**region_data)
             db.add(region)
             created += 1
-    
+
     db.commit()
-    
+
     return {
         "status": "success",
         "created": created,
         "updated": updated,
         "total_regions": len(PERU_REGIONS_DATA),
-        "regions": [r["name"] for r in PERU_REGIONS_DATA]
+        "regions": [r["name"] for r in PERU_REGIONS_DATA],
     }
 
 
 def get_region_summary() -> list[dict[str, Any]]:
     """
     Get summary information for all Peru regions.
-    
+
     Returns:
         List of region summaries with key metrics
     """
     summaries = []
     for region in PERU_REGIONS_DATA:
-        summaries.append({
-            "name": region["name"],
-            "production_share": region["production_share_pct"],
-            "elevation_range": f"{region['elevation_min_m']}-{region['elevation_max_m']}m",
-            "quality_score": region["quality_consistency_score"],
-            "infrastructure_score": region["infrastructure_score"],
-            "logistics_risk": region["logistics_risk"]
-        })
+        summaries.append(
+            {
+                "name": region["name"],
+                "production_share": region["production_share_pct"],
+                "elevation_range": f"{region['elevation_min_m']}-{region['elevation_max_m']}m",
+                "quality_score": region["quality_consistency_score"],
+                "infrastructure_score": region["infrastructure_score"],
+                "logistics_risk": region["logistics_risk"],
+            }
+        )
     return summaries

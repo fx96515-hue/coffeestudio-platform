@@ -6,7 +6,7 @@ from app.qa.config import QAConfig
 def test_qa_config_defaults():
     """Test QA configuration default values."""
     config = QAConfig(ai_api_key="test_key")
-    
+
     assert config.ai_provider == "openai"
     assert config.ai_model == "gpt-4-turbo-preview"
     assert config.ai_api_key == "test_key"
@@ -26,9 +26,9 @@ def test_qa_config_custom_values():
         ai_model="gpt-4",
         auto_fix_enabled=True,
         confidence_threshold=90.0,
-        max_fixes_per_run=10
+        max_fixes_per_run=10,
     )
-    
+
     assert config.ai_api_key == "custom_key"
     assert config.ai_model == "gpt-4"
     assert config.auto_fix_enabled is True

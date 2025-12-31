@@ -1,10 +1,11 @@
 """Tests for security utilities."""
+
 import pytest
 from app.core.security import (
     hash_password,
     verify_password,
     create_access_token,
-    decode_token
+    decode_token,
 )
 from jose import JWTError
 
@@ -13,7 +14,7 @@ def test_hash_password():
     """Test password hashing."""
     password = "test_password_123"
     hashed = hash_password(password)
-    
+
     assert hashed != password
     assert len(hashed) > 0
     assert "$pbkdf2-sha256$" in hashed
@@ -23,7 +24,7 @@ def test_verify_password_correct():
     """Test password verification with correct password."""
     password = "test_password_123"
     hashed = hash_password(password)
-    
+
     assert verify_password(password, hashed) is True
 
 
@@ -32,17 +33,17 @@ def test_verify_password_incorrect():
     password = "test_password_123"
     wrong_password = "wrong_password"
     hashed = hash_password(password)
-    
+
     assert verify_password(wrong_password, hashed) is False
 
 
 def test_create_access_token():
     """Test JWT token creation."""
     token = create_access_token(sub="test@example.com", role="admin")
-    
+
     assert isinstance(token, str)
     assert len(token) > 0
-    
+
     # Should be decodable
     decoded = decode_token(token)
     assert decoded["sub"] == "test@example.com"
@@ -52,11 +53,9 @@ def test_create_access_token():
 def test_create_access_token_custom_expiry():
     """Test JWT token creation with custom expiry."""
     token = create_access_token(
-        sub="test@example.com",
-        role="admin",
-        expires_minutes=30
+        sub="test@example.com", role="admin", expires_minutes=30
     )
-    
+
     assert isinstance(token, str)
     decoded = decode_token(token)
     assert decoded["sub"] == "test@example.com"
@@ -66,7 +65,7 @@ def test_decode_token_valid():
     """Test decoding a valid token."""
     token = create_access_token(sub="test@example.com", role="admin")
     decoded = decode_token(token)
-    
+
     assert "sub" in decoded
     assert "role" in decoded
     assert "iss" in decoded
@@ -77,7 +76,7 @@ def test_decode_token_valid():
 def test_decode_token_invalid():
     """Test decoding an invalid token."""
     invalid_token = "invalid.token.here"
-    
+
     with pytest.raises(JWTError):
         decode_token(invalid_token)
 
@@ -87,10 +86,10 @@ def test_hash_password_different_each_time():
     password = "test_password_123"
     hash1 = hash_password(password)
     hash2 = hash_password(password)
-    
+
     # Hashes should be different due to salt
     assert hash1 != hash2
-    
+
     # But both should verify
     assert verify_password(password, hash1) is True
     assert verify_password(password, hash2) is True
@@ -100,7 +99,7 @@ def test_token_contains_required_claims():
     """Test that token contains all required claims."""
     token = create_access_token(sub="test@example.com", role="analyst")
     decoded = decode_token(token)
-    
+
     required_claims = ["sub", "role", "iss", "aud", "iat", "exp"]
     for claim in required_claims:
         assert claim in decoded
@@ -110,7 +109,7 @@ def test_hash_empty_password():
     """Test hashing an empty password."""
     password = ""
     hashed = hash_password(password)
-    
+
     assert len(hashed) > 0
     assert verify_password(password, hashed) is True
 
@@ -118,7 +117,7 @@ def test_hash_empty_password():
 def test_different_roles_in_tokens():
     """Test creating tokens with different roles."""
     roles = ["admin", "analyst", "viewer"]
-    
+
     for role in roles:
         token = create_access_token(sub="test@example.com", role=role)
         decoded = decode_token(token)

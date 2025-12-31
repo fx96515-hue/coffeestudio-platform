@@ -18,16 +18,16 @@ def test_high_volume_supply_capacity(db):
             "farmer_count": 600,  # should score 20
             "storage_capacity_kg": 250000,  # should score 20
             "processing_facilities": ["wet_mill", "dry_mill"],  # should score 15
-            "years_exporting": 12  # should score 15
-        }
+            "years_exporting": 12,  # should score 15
+        },
     )
     db.add(coop)
     db.commit()
     db.refresh(coop)
-    
+
     analyzer = CooperativeSourcingAnalyzer(db)
     result = analyzer.check_supply_capacity(coop)
-    
+
     assert result["score"] == 100, "High volume coop should score perfect 100"
     assert result["assessment"] == "strong"
     assert result["breakdown"]["volume"]["score"] == 30
@@ -47,16 +47,16 @@ def test_low_volume_supply_capacity(db):
             "farmer_count": 30,  # should score 5
             "storage_capacity_kg": 10000,  # should score 5
             "processing_facilities": [],  # should score 0
-            "years_exporting": 0  # should score 2
-        }
+            "years_exporting": 0,  # should score 2
+        },
     )
     db.add(coop)
     db.commit()
     db.refresh(coop)
-    
+
     analyzer = CooperativeSourcingAnalyzer(db)
     result = analyzer.check_supply_capacity(coop)
-    
+
     assert result["score"] == 17, "Low volume coop should score 17"
     assert result["assessment"] == "limited"
     assert result["breakdown"]["volume"]["score"] == 5
@@ -76,16 +76,16 @@ def test_medium_volume_supply_capacity(db):
             "farmer_count": 250,  # should score 17
             "storage_capacity_kg": 120000,  # should score 17
             "processing_facilities": ["wet_mill"],  # should score 8
-            "years_exporting": 6  # should score 12
-        }
+            "years_exporting": 6,  # should score 12
+        },
     )
     db.add(coop)
     db.commit()
     db.refresh(coop)
-    
+
     analyzer = CooperativeSourcingAnalyzer(db)
     result = analyzer.check_supply_capacity(coop)
-    
+
     assert result["score"] == 79, "Medium volume coop should score 79"
     assert result["assessment"] == "strong"
     assert result["breakdown"]["volume"]["score"] == 25
@@ -97,18 +97,14 @@ def test_medium_volume_supply_capacity(db):
 
 def test_empty_operational_data(db):
     """Test supply capacity scoring with no operational data."""
-    coop = Cooperative(
-        name="No Data Coop",
-        region="Cusco",
-        operational_data=None
-    )
+    coop = Cooperative(name="No Data Coop", region="Cusco", operational_data=None)
     db.add(coop)
     db.commit()
     db.refresh(coop)
-    
+
     analyzer = CooperativeSourcingAnalyzer(db)
     result = analyzer.check_supply_capacity(coop)
-    
+
     # Should get minimum scores: 5+5+5+0+2 = 17
     assert result["score"] == 17, "Coop with no data should score minimum 17"
     assert result["assessment"] == "limited"

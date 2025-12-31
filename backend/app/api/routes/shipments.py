@@ -79,9 +79,7 @@ def create_shipment(
         .first()
     )
     if existing:
-        raise HTTPException(
-            status_code=400, detail="Container number already exists"
-        )
+        raise HTTPException(status_code=400, detail="Container number already exists")
 
     # Check for duplicate bill of lading
     existing_bol = (
@@ -90,9 +88,7 @@ def create_shipment(
         .first()
     )
     if existing_bol:
-        raise HTTPException(
-            status_code=400, detail="Bill of lading already exists"
-        )
+        raise HTTPException(status_code=400, detail="Bill of lading already exists")
 
     shipment = Shipment(**payload.model_dump())
     shipment.tracking_events = []  # Initialize empty tracking events
@@ -211,14 +207,12 @@ def add_tracking_event(
         raise HTTPException(status_code=404, detail="Not found")
 
     # Get existing tracking events or initialize
-    tracking_events = shipment.tracking_events or []
-    if not isinstance(tracking_events, list):
-        tracking_events = []
+    tracking_events: list[dict] = shipment.tracking_events or []
 
     # Add new event
     new_event = event.model_dump()
     tracking_events.append(new_event)
-    
+
     # Force SQLAlchemy to detect the change by creating a new list
     shipment.tracking_events = list(tracking_events)
 
@@ -227,6 +221,7 @@ def add_tracking_event(
 
     # Mark the field as modified to ensure SQLAlchemy commits the change
     from sqlalchemy.orm.attributes import flag_modified
+
     flag_modified(shipment, "tracking_events")
 
     db.commit()

@@ -24,7 +24,9 @@ class RoasterCreate(BaseModel):
         if not v or not v.strip():
             raise ValueError("Name cannot be empty")
         # Prevent XSS attempts
-        if any(pattern in v.lower() for pattern in ["<script", "<iframe", "javascript:"]):
+        if any(
+            pattern in v.lower() for pattern in ["<script", "<iframe", "javascript:"]
+        ):
             raise ValueError("Invalid characters in name")
         return v.strip()
 
@@ -93,7 +95,9 @@ class RoasterUpdate(BaseModel):
         if not v.strip():
             raise ValueError("Name cannot be empty")
         # Prevent XSS attempts
-        if any(pattern in v.lower() for pattern in ["<script", "<iframe", "javascript:"]):
+        if any(
+            pattern in v.lower() for pattern in ["<script", "<iframe", "javascript:"]
+        ):
             raise ValueError("Invalid characters in name")
         return v.strip()
 

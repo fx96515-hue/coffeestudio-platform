@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import json
 import re
@@ -239,7 +239,7 @@ def seed_discovery(
                 )
                 entities.extend(ents)
             except Exception as exc:
-                errors.append(f"extract failed chunk {i}-{i+chunk_size}: {exc}")
+                errors.append(f"extract failed chunk {i}-{i + chunk_size}: {exc}")
 
         deduped: dict[str, dict[str, Any]] = {}
         for ent in entities:
