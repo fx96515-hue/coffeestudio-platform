@@ -4,10 +4,7 @@ from pathlib import Path
 import tempfile
 
 from app.qa.failure_analyzer import TestFailure
-from app.qa.utils import (
-    parse_pytest_output,
-    _read_file_section
-)
+from app.qa.utils import parse_pytest_output, _read_file_section
 
 
 def test_test_failure_dataclass():
@@ -20,9 +17,9 @@ def test_test_failure_dataclass():
         file_path="tests/test_example.py",
         line_number=42,
         test_code="def test_example(): ...",
-        source_code="def example(): ..."
+        source_code="def example(): ...",
     )
-    
+
     assert failure.test_name == "test_example"
     assert failure.error_type == "AssertionError"
     assert failure.line_number == 42
@@ -38,7 +35,7 @@ tests/test_example.py .....                                              [100%]
 
 ============================== 5 passed in 0.01s ===============================
 """
-    
+
     failures = parse_pytest_output(output)
     assert len(failures) == 0
 
@@ -52,7 +49,7 @@ collected 2 items
 FAILED tests/test_example.py::test_addition - AssertionError: Expected 3, got 2
 FAILED tests/test_example.py::test_subtraction - ValueError: Invalid operation
 """
-    
+
     failures = parse_pytest_output(output)
     assert len(failures) == 2
 
@@ -66,7 +63,7 @@ def test_read_file_section_nonexistent():
 def test_read_file_section_existing():
     """Test reading a function from an existing file."""
     # Create a temporary file
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
         f.write("""
 def test_function():
     return 42
@@ -75,7 +72,7 @@ def another_function():
     return 43
 """)
         temp_path = f.name
-    
+
     try:
         result = _read_file_section(temp_path, "test_function")
         assert "def test_function" in result

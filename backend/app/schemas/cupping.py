@@ -33,7 +33,9 @@ class CuppingCreate(BaseModel):
         if v is None:
             return v
         # Prevent XSS attempts
-        if any(pattern in v.lower() for pattern in ["<script", "<iframe", "javascript:"]):
+        if any(
+            pattern in v.lower() for pattern in ["<script", "<iframe", "javascript:"]
+        ):
             raise ValueError("Invalid characters in taster name")
         return v.strip() if v else None
 

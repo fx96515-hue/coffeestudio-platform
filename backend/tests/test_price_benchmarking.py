@@ -17,15 +17,15 @@ def test_competitive_pricing(db):
         region="Cajamarca",
         financial_data={
             "fob_price_per_kg": 4.80  # Very close to benchmark
-        }
+        },
     )
     db.add(coop)
     db.commit()
     db.refresh(coop)
-    
+
     analyzer = CooperativeSourcingAnalyzer(db)
     result = analyzer.benchmark_pricing(coop)
-    
+
     # Price diff: (4.80 - 4.85) / 4.85 = -1.03%
     # Score: 100 - (1.03 * 2) = ~97.94
     assert result["competitiveness_score"] >= 95, "Competitive price should score ≥95"
@@ -41,15 +41,15 @@ def test_expensive_pricing(db):
         region="Cusco",
         financial_data={
             "fob_price_per_kg": 6.00  # 23.7% above benchmark
-        }
+        },
     )
     db.add(coop)
     db.commit()
     db.refresh(coop)
-    
+
     analyzer = CooperativeSourcingAnalyzer(db)
     result = analyzer.benchmark_pricing(coop)
-    
+
     # Price diff: (6.00 - 4.85) / 4.85 = 23.7%
     # Score: 100 - (23.7 * 2) = ~52.6
     assert result["competitiveness_score"] < 60, "Expensive price should score <60"
@@ -59,18 +59,14 @@ def test_expensive_pricing(db):
 
 def test_no_pricing_data(db):
     """Test pricing when no data available."""
-    coop = Cooperative(
-        name="No Price Coop",
-        region="San Martín",
-        financial_data=None
-    )
+    coop = Cooperative(name="No Price Coop", region="San Martín", financial_data=None)
     db.add(coop)
     db.commit()
     db.refresh(coop)
-    
+
     analyzer = CooperativeSourcingAnalyzer(db)
     result = analyzer.benchmark_pricing(coop)
-    
+
     assert result["competitiveness_score"] == 50, "No price data should default to 50"
     assert result["coop_price"] is None
     assert "No pricing data" in result["note"]
@@ -79,28 +75,22 @@ def test_no_pricing_data(db):
 def test_pricing_with_ico_fallback(db):
     """Test pricing using ICO fallback benchmark."""
     # Create region first
-    region = Region(
-        name="Amazonas",
-        country="Peru",
-        production_share_pct=8.0
-    )
+    region = Region(name="Amazonas", country="Peru", production_share_pct=8.0)
     db.add(region)
     db.commit()
-    
+
     coop = Cooperative(
         name="ICO Benchmark Coop",
         region="Amazonas",
-        financial_data={
-            "fob_price_per_kg": 5.00
-        }
+        financial_data={"fob_price_per_kg": 5.00},
     )
     db.add(coop)
     db.commit()
     db.refresh(coop)
-    
+
     analyzer = CooperativeSourcingAnalyzer(db)
     result = analyzer.benchmark_pricing(coop)
-    
+
     # Should use ICO fallback (4.85)
     assert result["benchmark_source"] == "ICO fallback"
     assert result["benchmark_price"] == 4.85

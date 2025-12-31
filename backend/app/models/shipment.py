@@ -24,7 +24,9 @@ class Shipment(Base, TimestampMixin):
     container_number: Mapped[str] = mapped_column(
         String(50), unique=True, index=True, nullable=False
     )
-    bill_of_lading: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
+    bill_of_lading: Mapped[str] = mapped_column(
+        String(100), unique=True, nullable=False
+    )
     weight_kg: Mapped[float] = mapped_column(Float, nullable=False)
     container_type: Mapped[str] = mapped_column(String(20), nullable=False)
 
@@ -46,7 +48,7 @@ class Shipment(Base, TimestampMixin):
     delay_hours: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
     # Tracking
-    tracking_events: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    tracking_events: Mapped[list[dict] | None] = mapped_column(JSON, nullable=True)
 
     # Metadata
     notes: Mapped[str | None] = mapped_column(String(1000), nullable=True)

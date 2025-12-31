@@ -408,9 +408,7 @@ def test_add_multiple_tracking_events(client, auth_headers, db):
         "location": "Callao Port",
         "event": "Departure",
     }
-    client.post(
-        f"/shipments/{shipment.id}/track", json=event1, headers=auth_headers
-    )
+    client.post(f"/shipments/{shipment.id}/track", json=event1, headers=auth_headers)
 
     # Add second event
     event2 = {

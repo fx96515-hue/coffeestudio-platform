@@ -38,32 +38,32 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 def receive_before_insert(mapper, connection, target):
     """Set created_at and updated_at before insert for SQLite compatibility."""
     now = datetime.now(timezone.utc)
-    if hasattr(target, 'created_at') and target.created_at is None:
+    if hasattr(target, "created_at") and target.created_at is None:
         target.created_at = now
-    if hasattr(target, 'updated_at') and target.updated_at is None:
+    if hasattr(target, "updated_at") and target.updated_at is None:
         target.updated_at = now
 
 
 @event.listens_for(Base, "before_update", propagate=True)
 def receive_before_update(mapper, connection, target):
     """Update updated_at before update for SQLite compatibility."""
-    if hasattr(target, 'updated_at'):
+    if hasattr(target, "updated_at"):
         target.updated_at = datetime.now(timezone.utc)
 
 
 @pytest.fixture(scope="function")
 def db():
     """Create a fresh database for each test.
-    
+
     Note: For SQLite compatibility, we remove server_default from timestamp columns
     and set timestamps via SQLAlchemy events (see above).
     """
     # Remove server_default from timestamp columns for SQLite compatibility
     for table in Base.metadata.tables.values():
         for column in table.columns:
-            if column.name in ('created_at', 'updated_at'):
+            if column.name in ("created_at", "updated_at"):
                 column.server_default = None
-    
+
     Base.metadata.create_all(bind=engine)
     db_session = TestingSessionLocal()
     try:
@@ -76,21 +76,22 @@ def db():
 @pytest.fixture(scope="function")
 def client(db):
     """Create a test client with overridden database dependency."""
+
     def override_get_db():
         try:
             yield db
         finally:
             pass
-    
+
     app.dependency_overrides[get_db] = override_get_db
-    
+
     # Reset rate limiter state before each test
-    if hasattr(app.state, 'limiter'):
+    if hasattr(app.state, "limiter"):
         # Clear the rate limiter's storage
         app.state.limiter._storage.storage.clear()
-    
+
     yield TestClient(app)
-    
+
     # Clear overrides
     app.dependency_overrides.clear()
 
@@ -102,7 +103,7 @@ def test_user(db):
         email="test@example.com",
         password_hash=hash_password("test_password"),
         role="admin",
-        is_active=True
+        is_active=True,
     )
     db.add(user)
     db.commit()
@@ -117,7 +118,7 @@ def test_analyst_user(db):
         email="analyst@example.com",
         password_hash=hash_password("analyst_password"),
         role="analyst",
-        is_active=True
+        is_active=True,
     )
     db.add(user)
     db.commit()
@@ -132,7 +133,7 @@ def test_viewer_user(db):
         email="viewer@example.com",
         password_hash=hash_password("viewer_password"),
         role="viewer",
-        is_active=True
+        is_active=True,
     )
     db.add(user)
     db.commit()
@@ -150,7 +151,9 @@ def auth_headers(test_user):
 @pytest.fixture
 def analyst_auth_headers(test_analyst_user):
     """Create JWT token headers for analyst user."""
-    token = create_access_token(sub=test_analyst_user.email, role=test_analyst_user.role)
+    token = create_access_token(
+        sub=test_analyst_user.email, role=test_analyst_user.role
+    )
     return {"Authorization": f"Bearer {token}"}
 
 

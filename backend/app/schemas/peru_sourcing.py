@@ -145,7 +145,9 @@ class SourcingAnalysisResponse(BaseModel):
 
 # Request schemas
 class AnalyzeCooperativeRequest(BaseModel):
-    force_refresh: bool = Field(default=False, description="Force fresh analysis, bypassing cache")
+    force_refresh: bool = Field(
+        default=False, description="Force fresh analysis, bypassing cache"
+    )
 
 
 class RefreshRegionRequest(BaseModel):

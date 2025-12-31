@@ -16,7 +16,17 @@ class LandedCostRequest(BaseModel):
     @classmethod
     def validate_incoterm(cls, v: str) -> str:
         """Validate incoterm values."""
-        valid_incoterms = ["EXW", "FOB", "CIF", "CFR", "DAP", "DDP", "FCA", "CPT", "CIP"]
+        valid_incoterms = [
+            "EXW",
+            "FOB",
+            "CIF",
+            "CFR",
+            "DAP",
+            "DDP",
+            "FCA",
+            "CPT",
+            "CIP",
+        ]
         v_upper = v.upper().strip()
         if v_upper not in valid_incoterms:
             raise ValueError(f"Incoterm must be one of {valid_incoterms}")
