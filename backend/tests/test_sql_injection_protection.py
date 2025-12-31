@@ -102,9 +102,10 @@ def test_complex_sql_injection_patterns(client: TestClient, auth_headers):
             json={"name": payload, "region": "Cajamarca"},
         )
         # Should be rejected
-        assert response.status_code in [400, 422], (
-            f"Complex payload not rejected: {payload}"
-        )
+        assert response.status_code in [
+            400,
+            422,
+        ], f"Complex payload not rejected: {payload}"
 
 
 def test_blind_sql_injection_time_based(client: TestClient, auth_headers):

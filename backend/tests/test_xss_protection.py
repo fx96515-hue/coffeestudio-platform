@@ -19,9 +19,10 @@ def test_xss_script_tag_in_cooperative_name(client: TestClient, auth_headers):
             json={"name": payload, "region": "Cajamarca"},
         )
         # Should be rejected by validation
-        assert response.status_code in [400, 422], (
-            f"XSS payload not rejected: {payload}"
-        )
+        assert response.status_code in [
+            400,
+            422,
+        ], f"XSS payload not rejected: {payload}"
 
 
 def test_xss_javascript_protocol_in_url(client: TestClient, auth_headers):
@@ -58,9 +59,10 @@ def test_xss_iframe_injection(client: TestClient, auth_headers):
             json={"name": payload, "region": "Cajamarca"},
         )
         # Should be rejected
-        assert response.status_code in [400, 422], (
-            f"Iframe payload not rejected: {payload}"
-        )
+        assert response.status_code in [
+            400,
+            422,
+        ], f"Iframe payload not rejected: {payload}"
 
 
 def test_xss_event_handlers(client: TestClient, auth_headers):
@@ -79,9 +81,10 @@ def test_xss_event_handlers(client: TestClient, auth_headers):
             json={"name": payload, "region": "Cajamarca"},
         )
         # Should be rejected by middleware
-        assert response.status_code in [400, 422], (
-            f"Event handler not rejected: {payload}"
-        )
+        assert response.status_code in [
+            400,
+            422,
+        ], f"Event handler not rejected: {payload}"
 
 
 def test_xss_in_roaster_website(client: TestClient, auth_headers):
@@ -117,9 +120,10 @@ def test_xss_in_notes_field(client: TestClient, auth_headers):
             json={"name": "Test Cooperative", "region": "Cajamarca", "notes": payload},
         )
         # Should be rejected by middleware
-        assert response.status_code in [400, 422], (
-            f"XSS in notes not rejected: {payload}"
-        )
+        assert response.status_code in [
+            400,
+            422,
+        ], f"XSS in notes not rejected: {payload}"
 
 
 def test_xss_data_protocol_in_url(client: TestClient, auth_headers):
@@ -171,6 +175,7 @@ def test_xss_svg_injection(client: TestClient, auth_headers):
             json={"name": payload, "region": "Cajamarca"},
         )
         # Should be rejected
-        assert response.status_code in [400, 422], (
-            f"SVG payload not rejected: {payload}"
-        )
+        assert response.status_code in [
+            400,
+            422,
+        ], f"SVG payload not rejected: {payload}"
