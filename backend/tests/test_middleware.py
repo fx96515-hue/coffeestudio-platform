@@ -11,7 +11,7 @@ client = TestClient(app)
 def test_security_headers_present():
     """Test that security headers are added to responses."""
     response = client.get("/health")
-    
+
     # Check security headers
     assert response.headers.get("X-Frame-Options") == "DENY"
     assert response.headers.get("X-Content-Type-Options") == "nosniff"
@@ -26,14 +26,14 @@ def test_sql_injection_detection():
     # Create a test user first (admin role)
     # Since we can't easily create users in these tests, we'll test with a public endpoint
     # that accepts JSON input
-    
+
     # Test SQL injection in POST request
     malicious_payloads = [
         {"name": "'; DROP TABLE users; --"},
         {"name": "1' UNION SELECT * FROM users--"},
         {"description": "test' OR '1'='1"},
     ]
-    
+
     # We'll test with the cooperatives endpoint (requires auth, but test validation before auth)
     for payload in malicious_payloads:
         response = client.post("/cooperatives", json=payload)
@@ -49,7 +49,7 @@ def test_xss_detection():
         {"description": "javascript:alert('XSS')"},
         {"name": "<img src=x onerror=alert('XSS')>"},
     ]
-    
+
     for payload in malicious_payloads:
         response = client.post("/cooperatives", json=payload)
         # Should be rejected as malicious (400) or unauthorized (401)
@@ -61,9 +61,9 @@ def test_valid_input_passes_validation():
     # This will fail auth (401) but should pass validation
     valid_payload = {
         "name": "Valid Cooperative Name",
-        "description": "A valid description without malicious content"
+        "description": "A valid description without malicious content",
     }
-    
+
     response = client.post("/cooperatives", json=valid_payload)
     # Should get 401 (unauthorized), not 400 (validation error)
     assert response.status_code == 401
@@ -75,10 +75,10 @@ def test_nested_malicious_content_detected():
         "name": "Cooperative",
         "contact": {
             "email": "test@example.com",
-            "notes": "'; DROP TABLE cooperatives; --"
-        }
+            "notes": "'; DROP TABLE cooperatives; --",
+        },
     }
-    
+
     response = client.post("/cooperatives", json=malicious_payload)
     assert response.status_code in [400, 401]
 
@@ -87,9 +87,9 @@ def test_array_malicious_content_detected():
     """Test that malicious content in arrays is detected."""
     malicious_payload = {
         "name": "Cooperative",
-        "tags": ["normal", "<script>alert('xss')</script>", "safe"]
+        "tags": ["normal", "<script>alert('xss')</script>", "safe"],
     }
-    
+
     response = client.post("/cooperatives", json=malicious_payload)
     assert response.status_code in [400, 401]
 
@@ -99,19 +99,19 @@ def test_rate_limiting():
     # Note: The default rate limit is 200 requests per minute
     # We test that the limiter is configured, not that it triggers
     # (triggering 201 requests in tests would be slow and flaky)
-    
+
     # Make a few requests to verify the limiter is working
     responses = []
     for _ in range(5):
         response = client.get("/health")
         responses.append(response)
-    
+
     # All requests should succeed (we're well under the limit)
     assert all(r.status_code == 200 for r in responses)
-    
+
     # Verify rate limit headers would be present if we exceeded limit
     # The rate limiter is configured and active
-    assert hasattr(app.state, 'limiter')
+    assert hasattr(app.state, "limiter")
     assert app.state.limiter is not None
 
 
@@ -120,7 +120,7 @@ def test_cors_configuration():
     # Make a request with an Origin header
     headers = {"Origin": "http://localhost:3000"}
     response = client.get("/health", headers=headers)
-    
+
     # Should have CORS headers in response
     assert response.status_code == 200
     # Note: TestClient doesn't process CORS middleware the same as a real browser

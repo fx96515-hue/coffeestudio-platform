@@ -9,7 +9,7 @@ from dataclasses import dataclass
 try:
     import openai
 except ImportError:
-    openai = None  # type: ignore
+    openai = None
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class TestFailure:
     """Represents a test failure with all relevant information."""
+
     test_name: str
     error_type: str
     error_message: str
@@ -29,10 +30,10 @@ class TestFailure:
 
 class AIFailureAnalyzer:
     """Analyzes test failures using AI and suggests fixes."""
-    
+
     def __init__(self, api_key: str | None = None, model: str | None = None):
         """Initialize the AI failure analyzer.
-        
+
         Args:
             api_key: OpenAI API key. If not provided, will try to get from environment.
             model: OpenAI model to use for analysis. If not provided, uses QA_AI_MODEL env var or 'gpt-4'.
@@ -42,23 +43,23 @@ class AIFailureAnalyzer:
                 "openai package is required for AIFailureAnalyzer. "
                 "Install it with: pip install openai"
             )
-        
+
         api_key = api_key or os.getenv("OPENAI_API_KEY") or os.getenv("QA_AI_API_KEY")
         if not api_key:
             raise ValueError(
                 "OpenAI API key is required. Set OPENAI_API_KEY or QA_AI_API_KEY environment variable "
                 "or pass api_key parameter."
             )
-        
+
         self.client = openai.OpenAI(api_key=api_key)
         self.model = model or os.getenv("QA_AI_MODEL", "gpt-4")
-    
+
     def analyze_failure(self, failure: TestFailure) -> dict[str, Any]:
         """Analyze a test failure and generate fix suggestion.
-        
+
         Args:
             failure: TestFailure object containing failure details.
-        
+
         Returns:
             Dictionary containing:
                 - root_cause: str - What exactly is broken
@@ -70,23 +71,23 @@ class AIFailureAnalyzer:
                 - prevention_tips: List[str] - How to avoid this in future
         """
         prompt = self._build_analysis_prompt(failure)
-        
+
         response = self.client.chat.completions.create(
             model=self.model,
             messages=[
                 {"role": "system", "content": self._get_system_prompt()},
-                {"role": "user", "content": prompt}
+                {"role": "user", "content": prompt},
             ],
             temperature=0.2,  # Low temperature for precise code analysis
-            response_format={"type": "json_object"}
+            response_format={"type": "json_object"},
         )
-        
+
         content = response.choices[0].message.content
         if content is None:
             raise ValueError("AI response content is None")
-        
+
         return json.loads(content)
-    
+
     def _get_system_prompt(self) -> str:
         """Get the system prompt for the AI analyzer."""
         return """You are an expert Python/TypeScript engineer specializing in:
@@ -102,7 +103,7 @@ Analyze test failures and provide:
 4. Prevention strategies
 
 Always return valid JSON with the specified structure."""
-    
+
     def _build_analysis_prompt(self, failure: TestFailure) -> str:
         """Build the analysis prompt for the AI."""
         return f"""

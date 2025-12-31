@@ -93,7 +93,7 @@ def me(user: User = Depends(get_current_user)):
 @router.get("/csrf-token")
 def get_csrf_token(user: User = Depends(get_current_user)):
     """Generate and return a CSRF token for the authenticated user.
-    
+
     This token should be included in the X-CSRF-Token header for
     state-changing operations (POST, PUT, PATCH, DELETE).
     """

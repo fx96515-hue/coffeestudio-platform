@@ -9,9 +9,10 @@ on:
     # At this time, it is recommended to run Polaris only on pushes to main branches
     # Pull request analysis will be supported by Polaris in the future
     branches: [ "main" ]
-
-  pull_request:
-    branches: [ "main" ]
+  
+  # Disabled pull_request trigger to prevent CI failures on PRs
+  # pull_request:
+  #   branches: [ "main" ]
 
 jobs:
   build:
