@@ -2,19 +2,15 @@
 
 import pandas as pd
 import numpy as np
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.preprocessing import LabelEncoder
-import joblib
+from app.ml.base_model import BaseMLModel
 
 
-class CoffeePriceModel:
+class CoffeePriceModel(BaseMLModel):
     """Machine learning model for coffee price prediction."""
 
     def __init__(self) -> None:
-        self.model = RandomForestRegressor(
-            n_estimators=100, max_depth=10, random_state=42
-        )
-        self.encoders: dict[str, LabelEncoder] = {}
+        """Initialize coffee price prediction model."""
+        super().__init__(n_estimators=100, max_depth=10, random_state=42)
 
     def prepare_features(
         self, data: pd.DataFrame
@@ -29,7 +25,7 @@ class CoffeePriceModel:
         """
         df = data.copy()
 
-        # Encode categorical features
+        # Encode categorical features using base class helper
         categorical_cols = [
             "origin_country",
             "origin_region",
@@ -38,19 +34,7 @@ class CoffeePriceModel:
             "quality_grade",
             "market_source",
         ]
-        for col in categorical_cols:
-            if col in df.columns:
-                if col not in self.encoders:
-                    self.encoders[col] = LabelEncoder()
-                    if col in df.columns and not df[col].empty:
-                        self.encoders[col].fit(df[col].astype(str))
-                try:
-                    df[f"{col}_encoded"] = self.encoders[col].transform(
-                        df[col].astype(str)
-                    )
-                except ValueError:
-                    # Handle unknown labels
-                    df[f"{col}_encoded"] = 0
+        df = self.encode_categorical(df, categorical_cols)
 
         # Handle cupping score
         if "cupping_score" in df.columns:
@@ -98,30 +82,13 @@ class CoffeePriceModel:
 
         return X, y
 
-    def train(self, X: pd.DataFrame, y: pd.Series) -> None:
-        """Train the coffee price model.
-
-        Args:
-            X: Feature dataframe
-            y: Target series (prices)
-        """
-        self.model.fit(X, y)
-
-    def predict(self, X: pd.DataFrame) -> np.ndarray:
-        """Make price predictions.
-
-        Args:
-            X: Feature dataframe
-
-        Returns:
-            Array of predicted prices
-        """
-        return self.model.predict(X)
-
-    def predict_with_confidence(
+    def predict_with_bounds(
         self, X: pd.DataFrame
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Make predictions with confidence intervals.
+        """Make predictions with confidence intervals (alias for compatibility).
+
+        Note: This method provides confidence bounds. For confidence score,
+        use the base class predict_with_confidence method.
 
         Args:
             X: Feature dataframe
@@ -131,7 +98,7 @@ class CoffeePriceModel:
         """
         predictions = self.predict(X)
 
-        # Use standard deviation from trees for confidence
+        # Use standard deviation from trees for confidence bounds
         tree_predictions = np.array(
             [tree.predict(X) for tree in self.model.estimators_]
         )
@@ -142,21 +109,3 @@ class CoffeePriceModel:
 
         return predictions, lower_bound, upper_bound
 
-    def save(self, path: str) -> None:
-        """Save model to disk.
-
-        Args:
-            path: File path for saving the model
-        """
-        model_data = {"model": self.model, "encoders": self.encoders}
-        joblib.dump(model_data, path)
-
-    def load(self, path: str) -> None:
-        """Load model from disk.
-
-        Args:
-            path: File path for loading the model
-        """
-        model_data = joblib.load(path)
-        self.model = model_data["model"]
-        self.encoders = model_data["encoders"]
