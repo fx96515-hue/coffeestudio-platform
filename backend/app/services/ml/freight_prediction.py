@@ -97,14 +97,17 @@ class FreightPredictionService:
 
         try:
             X, _ = self.model.prepare_features(input_data)
-            predictions, lower, upper = self.model.predict_with_confidence(X)
+            predicted_cost, model_confidence = self.model.predict_with_confidence(X)
 
-            predicted_cost = float(predictions[0])
-            confidence_low = float(max(0, lower[0]))
-            confidence_high = float(upper[0])
+            # Calculate confidence intervals based on model confidence
+            # Lower confidence means wider intervals
+            interval_width = predicted_cost * (1.0 - model_confidence) * 0.5
+            confidence_low = float(max(0, predicted_cost - interval_width))
+            confidence_high = float(predicted_cost + interval_width)
 
-            # Calculate confidence score based on similar shipments
-            confidence_score = min(1.0, len(similar_shipments) / 10.0)
+            # Calculate confidence score based on similar shipments and model confidence
+            data_confidence = min(1.0, len(similar_shipments) / 10.0)
+            confidence_score = (model_confidence + data_confidence) / 2.0
 
             factors = [
                 "route",

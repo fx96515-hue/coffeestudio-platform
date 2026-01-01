@@ -1,57 +1,49 @@
-# syntax=docker/dockerfile:1
+# Use official Python runtime as base image
+FROM python:3.11-slim
 
-# =============================================================================
-# Build stage: Install dependencies
-# =============================================================================
-FROM python:3.12-slim AS builder
-
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
-
+# Set working directory in container
 WORKDIR /app
 
-# Install dependencies in a virtual environment for easy copying
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create virtual environment
 RUN python -m venv /opt/venv
+
+# Activate virtual environment
 ENV PATH="/opt/venv/bin:$PATH"
 
-# Copy only requirements first for better layer caching
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy requirements first for better caching
+COPY requirements.txt .
 
-# =============================================================================
-# Runtime stage: Minimal production image
-# =============================================================================
-FROM python:3.12-alpine AS runtime
-
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PATH="/opt/venv/bin:$PATH"
-
-# Install runtime dependencies (curl for healthchecks, libpq for psycopg)
-RUN apk add --no-cache \
-    curl \
-    libpq
-
-WORKDIR /app
-
-# Copy virtual environment from builder
-COPY --from=builder /opt/venv /opt/venv
+# Install Python dependencies
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
-COPY alembic.ini ./
-COPY alembic ./alembic
-COPY app ./app
+COPY . .
 
 # Create non-root user for security
-RUN addgroup -g 1000 appuser && \
-    adduser -D -u 1000 -G appuser appuser && \
+RUN useradd -m -u 1000 appuser && \
     chown -R appuser:appuser /app
 
+# Switch to non-root user
 USER appuser
 
+# Expose port
 EXPOSE 8000
 
-# Use exec form for proper signal handling
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "import requests; requests.get('http://localhost:8000/health')"
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PATH="/opt/venv/bin:$PATH"
+
+# Run the application
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

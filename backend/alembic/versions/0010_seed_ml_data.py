@@ -1,4 +1,4 @@
-"""Seed ML training data
+﻿"""Seed ML training data
 
 Revision ID: 0010_seed_ml_data
 Revises: 0009_ml_prediction_tables
@@ -7,6 +7,7 @@ Create Date: 2025-12-29
 
 from alembic import op
 import sqlalchemy as sa
+from datetime import datetime
 from datetime import date, timedelta
 
 revision = "0010_seed_ml_data"
@@ -96,7 +97,7 @@ def upgrade() -> None:
         ("Peru", "Cusco"),
         ("Peru", "Amazonas"),
         ("Colombia", "Huila"),
-        ("Colombia", "Nariño"),
+        ("Colombia", "NariÃ±o"),
     ]
 
     varieties = ["Caturra", "Bourbon", "Typica", "Catimor"]
@@ -192,7 +193,7 @@ def upgrade() -> None:
                 "model_name": "Freight Cost Predictor v1",
                 "model_type": "freight_prediction",
                 "model_version": "1.0.0",
-                "training_date": sa.text("now()"),
+                "training_date": datetime.utcnow(),
                 "features_used": ["route", "weight", "container_type", "season"],
                 "performance_metrics": {
                     "mae": 250.0,
@@ -208,7 +209,7 @@ def upgrade() -> None:
                 "model_name": "Coffee Price Predictor v1",
                 "model_type": "price_prediction",
                 "model_version": "1.0.0",
-                "training_date": sa.text("now()"),
+                "training_date": datetime.utcnow(),
                 "features_used": [
                     "origin",
                     "variety",
@@ -235,3 +236,4 @@ def downgrade() -> None:
     op.execute("DELETE FROM ml_models WHERE model_version = '1.0.0'")
     op.execute("DELETE FROM coffee_price_history")
     op.execute("DELETE FROM freight_history")
+
