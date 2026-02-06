@@ -8,10 +8,10 @@ FROM node:20-alpine AS deps
 WORKDIR /app
 
 # Copy package files for dependency installation
-COPY package.json ./
+COPY package.json package-lock.json ./
 
 # Install dependencies (production + dev for build)
-RUN npm install
+RUN npm ci
 
 # =============================================================================
 # Builder stage: Build the application
@@ -23,6 +23,7 @@ WORKDIR /app
 # Copy dependencies from deps stage
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/package.json ./package.json
+COPY --from=deps /app/package-lock.json ./package-lock.json
 
 # Copy configuration and source files
 COPY next.config.mjs ./
@@ -48,8 +49,8 @@ ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1
 
 # Install only production dependencies
-COPY package.json ./
-RUN npm install --production && \
+COPY package.json package-lock.json ./
+RUN npm ci --production && \
     npm cache clean --force
 
 # Copy built application from builder
