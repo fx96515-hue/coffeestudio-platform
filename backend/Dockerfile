@@ -53,6 +53,7 @@ COPY alembic ./alembic
 COPY app ./app
 
 # Create non-root user for security (Debian commands, not Alpine)
+# Using -r flag creates a system user (UID < 1000) which is Docker best practice
 RUN groupadd -r appuser && \
     useradd -r -g appuser appuser && \
     chown -R appuser:appuser /app
