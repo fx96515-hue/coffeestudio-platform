@@ -46,16 +46,15 @@ FROM node:20-alpine AS runtime
 WORKDIR /app
 
 ENV NODE_ENV=production \
-    NEXT_TELEMETRY_DISABLED=1
+    NEXT_TELEMETRY_DISABLED=1 \
+    PORT=3000 \
+    HOSTNAME="0.0.0.0"
 
-# Install only production dependencies
-COPY package.json package-lock.json ./
-RUN npm ci --production && \
-    npm cache clean --force
+# Copy standalone server (includes minimal node_modules)
+COPY --from=builder /app/.next/standalone ./
 
-# Copy built application from builder
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/next.config.mjs ./
+# Copy static assets (not included in standalone output)
+COPY --from=builder /app/.next/static ./.next/static
 
 # Use existing node user for security
 RUN chown -R node:node /app
@@ -64,5 +63,5 @@ USER node
 
 EXPOSE 3000
 
-# Use exec form for proper signal handling
-CMD ["npm", "start"]
+# Use standalone server directly (faster, smaller)
+CMD ["node", "server.js"]
