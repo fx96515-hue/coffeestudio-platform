@@ -25,12 +25,15 @@ NOTE:
   - memory_cost: 64 MB (65536 KiB)
   - time_cost: 3 iterations
   - parallelism: 4 threads
+- We support pbkdf2_sha256 for backward compatibility (marked as deprecated).
+  Old hashes will still verify, but new hashes will use argon2.
 """
 
 # Using argon2 with secure OWASP-recommended parameters.
+# pbkdf2_sha256 is supported for backward compatibility but deprecated.
 pwd_context = CryptContext(
-    schemes=["argon2"],
-    deprecated="auto",
+    schemes=["argon2", "pbkdf2_sha256"],
+    deprecated=["pbkdf2_sha256"],
     argon2__memory_cost=65536,  # 64 MB
     argon2__time_cost=3,  # 3 iterations
     argon2__parallelism=4,  # 4 threads
