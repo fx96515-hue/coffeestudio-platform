@@ -17,7 +17,7 @@ def test_hash_password():
 
     assert hashed != password
     assert len(hashed) > 0
-    assert "$pbkdf2-sha256$" in hashed
+    assert "$argon2" in hashed
 
 
 def test_verify_password_correct():

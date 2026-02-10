@@ -9,24 +9,24 @@ from app.core.config import settings
 
 """Security primitives.
 
-We intentionally use PBKDF2 (pbkdf2_sha256) instead of bcrypt.
+We use argon2 for password hashing instead of bcrypt or pbkdf2.
 
 Reason:
 - passlib+bcrypt can break in container builds when bcrypt's internal version
   metadata layout changes (e.g. bcrypt 4.x removed bcrypt.__about__).
-- PBKDF2 is implemented without native bcrypt bindings and is stable across
-  Windows/Docker environments.
+- argon2 is the winner of the Password Hashing Competition (PHC).
+- argon2-cffi compiles cleanly on all platforms (Windows, Linux, Alpine, Slim).
+- OWASP recommends argon2id as the first choice for password hashing.
 
 NOTE:
 - This is a local/dev product, but we still use a strong KDF and fail-fast
   if required secrets are missing.
 """
 
-# ~300k rounds is a good baseline on modern CPUs; adjust later if needed.
+# Using argon2 with default secure parameters.
 pwd_context = CryptContext(
-    schemes=["pbkdf2_sha256"],
+    schemes=["argon2"],
     deprecated="auto",
-    pbkdf2_sha256__rounds=300_000,
 )
 
 
