@@ -17,7 +17,8 @@ def test_hash_password():
 
     assert hashed != password
     assert len(hashed) > 0
-    assert "$argon2" in hashed
+    # Verify argon2id variant with OWASP-recommended parameters
+    assert "$argon2id$v=19$m=65536,t=3,p=4$" in hashed
 
 
 def test_verify_password_correct():
