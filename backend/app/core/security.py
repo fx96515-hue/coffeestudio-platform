@@ -21,9 +21,10 @@ Reason:
 NOTE:
 - This is a local/dev product, but we still use a strong KDF and fail-fast
   if required secrets are missing.
+- The default argon2 scheme in passlib uses argon2id variant with secure parameters.
 """
 
-# Using argon2 with default secure parameters.
+# Using argon2 with default secure parameters (argon2id variant).
 pwd_context = CryptContext(
     schemes=["argon2"],
     deprecated="auto",
