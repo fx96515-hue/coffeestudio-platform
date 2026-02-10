@@ -1,4 +1,4 @@
-.PHONY: up down logs migrate bootstrap smoke
+.PHONY: up down logs migrate bootstrap smoke smoke-win
 
 up:
 	docker compose up -d --build
@@ -17,3 +17,6 @@ bootstrap:
 
 smoke:
 	bash scripts/smoke.sh
+
+smoke-win:
+	powershell -ExecutionPolicy Bypass -File scripts/win/smoke.ps1

@@ -33,7 +33,8 @@ PowerShell als Administrator:
 
 ```powershell
 cd <deinPfad>\coffeestudio-platform
-.\scripts\win\```
+.\scripts\win\01_add_hosts.ps1
+```
 
 Das trägt folgende Domains in die HOSTS-Datei ein (127.0.0.1):
 `ui.localhost`, `api.localhost`, `traefik.localhost`, `ops.localhost`, `bi.localhost`, `docker.localhost`, `auth.localhost`, `app.localhost`.
