@@ -7,7 +7,7 @@ Create Date: 2025-12-29
 
 from alembic import op
 import sqlalchemy as sa
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 
 revision = "0010_seed_ml_data"
 down_revision = "0009_ml_prediction_tables"
@@ -192,7 +192,7 @@ def upgrade() -> None:
                 "model_name": "Freight Cost Predictor v1",
                 "model_type": "freight_prediction",
                 "model_version": "1.0.0",
-                "training_date": sa.text("now()"),
+                "training_date": datetime.now(),
                 "features_used": ["route", "weight", "container_type", "season"],
                 "performance_metrics": {
                     "mae": 250.0,
@@ -208,7 +208,7 @@ def upgrade() -> None:
                 "model_name": "Coffee Price Predictor v1",
                 "model_type": "price_prediction",
                 "model_version": "1.0.0",
-                "training_date": sa.text("now()"),
+                "training_date": datetime.now(),
                 "features_used": [
                     "origin",
                     "variety",
