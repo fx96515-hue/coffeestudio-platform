@@ -131,7 +131,7 @@ def test_backward_compatibility_pbkdf2():
 
     # Simulate an old pbkdf2 hash (like what existed before argon2 migration)
     old_context = CryptContext(
-        schemes=["pbkdf2_sha256"], deprecated="auto", pbkdf2_sha256__rounds=300_000
+        schemes=["pbkdf2_sha256"], deprecated="auto", pbkdf2_sha256__rounds=300000
     )
     password = "legacy_password"
     old_hash = old_context.hash(password)
