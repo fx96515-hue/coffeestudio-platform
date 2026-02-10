@@ -123,3 +123,19 @@ def test_different_roles_in_tokens():
         token = create_access_token(sub="test@example.com", role=role)
         decoded = decode_token(token)
         assert decoded["role"] == role
+
+
+def test_backward_compatibility_pbkdf2():
+    """Test that old pbkdf2 hashes can still be verified."""
+    from passlib.context import CryptContext
+
+    # Simulate an old pbkdf2 hash (like what existed before argon2 migration)
+    old_context = CryptContext(
+        schemes=["pbkdf2_sha256"], deprecated="auto", pbkdf2_sha256__rounds=300_000
+    )
+    password = "legacy_password"
+    old_hash = old_context.hash(password)
+
+    # Verify that the new hash_password context can still verify old hashes
+    assert verify_password(password, old_hash) is True
+    assert verify_password("wrong_password", old_hash) is False
