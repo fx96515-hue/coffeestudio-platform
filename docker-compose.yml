@@ -143,6 +143,6 @@ services:
     command:
     - sh
     - -c
-    - npm run start
+    - node server.js
 volumes:
   pgdata: null
