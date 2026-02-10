@@ -21,13 +21,19 @@ Reason:
 NOTE:
 - This is a local/dev product, but we still use a strong KDF and fail-fast
   if required secrets are missing.
-- The default argon2 scheme in passlib uses argon2id variant with secure parameters.
+- We use argon2id variant with OWASP-recommended parameters:
+  - memory_cost: 64 MB (65536 KiB)
+  - time_cost: 3 iterations
+  - parallelism: 4 threads
 """
 
-# Using argon2 with default secure parameters (argon2id variant).
+# Using argon2 with secure OWASP-recommended parameters.
 pwd_context = CryptContext(
     schemes=["argon2"],
     deprecated="auto",
+    argon2__memory_cost=65536,  # 64 MB
+    argon2__time_cost=3,  # 3 iterations
+    argon2__parallelism=4,  # 4 threads
 )
 
 
