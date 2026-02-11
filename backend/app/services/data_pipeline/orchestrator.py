@@ -241,7 +241,7 @@ class DataPipelineOrchestrator:
         log.info("market_pipeline_start")
         started_at = datetime.now(timezone.utc)
 
-        results = {"fx_rates": None, "coffee_prices": None}
+        results: dict[str, dict | None] = {"fx_rates": None, "coffee_prices": None}
         errors = []
 
         # FX rates (needed for price conversions)
@@ -288,7 +288,7 @@ class DataPipelineOrchestrator:
         log.info("intelligence_pipeline_start")
         started_at = datetime.now(timezone.utc)
 
-        results = {"peru_weather": None, "news": None}
+        results: dict[str, dict | None] = {"peru_weather": None, "news": None}
         errors = []
 
         # Seed Peru regions (idempotent)

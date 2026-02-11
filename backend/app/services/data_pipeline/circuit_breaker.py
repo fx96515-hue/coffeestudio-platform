@@ -68,6 +68,8 @@ class CircuitBreaker:
         if not state_str:
             return CircuitState.CLOSED
 
+        # Type assertion: redis.get returns bytes | None
+        assert isinstance(state_str, bytes)
         state = CircuitState(state_str.decode("utf-8"))
 
         # Check if OPEN circuit should transition to HALF_OPEN
@@ -75,6 +77,7 @@ class CircuitBreaker:
             last_failure_str = self.redis.get(self.last_failure_key)
             if last_failure_str:
                 try:
+                    assert isinstance(last_failure_str, bytes)
                     last_failure = datetime.fromisoformat(
                         last_failure_str.decode("utf-8")
                     )
@@ -142,7 +145,7 @@ class CircuitBreaker:
         state = self.get_state()
 
         # Increment failure count
-        failures = self.redis.incr(self.failures_key)
+        failures_int = self.redis.incr(self.failures_key)
         self.redis.expire(self.failures_key, 3600)  # 1h TTL
 
         # Record timestamp
@@ -152,7 +155,7 @@ class CircuitBreaker:
         log.warning(
             "circuit_breaker_failure",
             provider=self.provider_name,
-            failures=failures,
+            failures=failures_int,
             threshold=self.failure_threshold,
         )
 
@@ -160,7 +163,7 @@ class CircuitBreaker:
         if state == CircuitState.HALF_OPEN:
             # Failed during recovery test, go back to OPEN
             self._set_state(CircuitState.OPEN)
-        elif failures >= self.failure_threshold:
+        elif failures_int >= self.failure_threshold:
             # Too many failures, open circuit
             self._set_state(CircuitState.OPEN)
 
@@ -172,11 +175,11 @@ class CircuitBreaker:
         """
         state = self.get_state()
         failures_bytes = self.redis.get(self.failures_key)
-        failures = int(failures_bytes) if failures_bytes else 0
+        failures = int(failures_bytes) if failures_bytes and isinstance(failures_bytes, bytes) else 0
 
         last_failure_str = self.redis.get(self.last_failure_key)
         last_failure = None
-        if last_failure_str:
+        if last_failure_str and isinstance(last_failure_str, bytes):
             try:
                 last_failure = last_failure_str.decode("utf-8")
             except Exception:
