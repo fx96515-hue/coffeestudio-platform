@@ -140,10 +140,14 @@ export default function OpsPage() {
                 disabled={busy}
                 onClick={() =>
                   run("Seed discovery", async () => {
-                    return apiFetch<any>(
-                      `/discovery/seed?entity_type=${encodeURIComponent(entityType)}&max_entities=${max}&dry_run=false`,
-                      { method: "POST" }
-                    );
+                    return apiFetch<any>("/discovery/seed", {
+                      method: "POST",
+                      body: JSON.stringify({
+                        entity_type: entityType,
+                        max_entities: max,
+                        dry_run: false,
+                      }),
+                    });
                   })
                 }
               >

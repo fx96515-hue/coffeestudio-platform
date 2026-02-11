@@ -5,6 +5,7 @@ import {
   Cooperative,
   CooperativeFilters,
   Paged,
+  RegionIntelligence,
 } from "../types";
 
 // Fetch Peru Regions
@@ -15,6 +16,20 @@ export function usePeruRegions() {
       const data = await apiFetch<PeruRegion[]>("/regions/peru");
       return data;
     },
+  });
+}
+
+// Fetch Peru Region Intelligence
+export function usePeruRegionIntelligence(regionName: string) {
+  return useQuery({
+    queryKey: ["peru-region-intelligence", regionName],
+    queryFn: async () => {
+      const data = await apiFetch<RegionIntelligence>(
+        `/peru/regions/${encodeURIComponent(regionName)}/intelligence`
+      );
+      return data;
+    },
+    enabled: !!regionName,
   });
 }
 

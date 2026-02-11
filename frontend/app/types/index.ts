@@ -324,3 +324,61 @@ export interface DealFilters {
   date_from?: string;
   date_to?: string;
 }
+
+// Peru Region Intelligence types
+export interface RegionElevationRange {
+  min_m: number | null;
+  max_m: number | null;
+}
+
+export interface RegionClimate {
+  avg_temperature_c: number | null;
+  rainfall_mm: number | null;
+  humidity_pct: number | null;
+}
+
+export interface RegionProduction {
+  volume_kg: number | null;
+  share_pct: number | null;
+  harvest_months: string | null;
+}
+
+export interface RegionQuality {
+  typical_varieties: string | null;
+  typical_processing: string | null;
+  profile: string | null;
+  consistency_score: number | null;
+}
+
+export interface RegionLogistics {
+  main_port: string | null;
+  transport_time_hours: number | null;
+  cost_per_kg: number | null;
+  infrastructure_score: number | null;
+}
+
+export interface RegionRisks {
+  weather: string | null;
+  political: string | null;
+  logistics: string | null;
+}
+
+export interface RegionScores {
+  growing_conditions: number;
+  infrastructure: number;
+  quality_consistency: number;
+}
+
+export interface RegionIntelligence {
+  name: string;
+  country: string;
+  description: string | null;
+  elevation_range: RegionElevationRange;
+  climate: RegionClimate;
+  soil_type: string | null;
+  production: RegionProduction;
+  quality: RegionQuality;
+  logistics: RegionLogistics;
+  risks: RegionRisks;
+  scores: RegionScores;
+}
