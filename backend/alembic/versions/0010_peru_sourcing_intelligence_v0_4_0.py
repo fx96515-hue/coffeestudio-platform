@@ -4,9 +4,6 @@ NOOP to avoid duplicate creation of tables (e.g. "regions") on DBs where they al
 """
 from __future__ import annotations
 
-from alembic import op  # noqa: F401
-import sqlalchemy as sa  # noqa: F401
-
 revision = "0010_peru_sourcing_intelligence_v0_4_0"
 down_revision = "0009_ml_prediction_tables"
 branch_labels = None
