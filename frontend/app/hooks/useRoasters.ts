@@ -20,8 +20,13 @@ export function useRoasters(filters?: RoasterFilters & { limit?: number; page?: 
   return useQuery({
     queryKey: ["roasters", filters],
     queryFn: async () => {
-      const data = await apiFetch<Paged<Roaster>>(`/roasters?${params.toString()}`);
-      return data;
+      const response = await apiFetch<Roaster[] | Paged<Roaster>>(`/roasters?${params.toString()}`);
+      // Backend returns flat list, but we need Paged format
+      // Check if response is already in Paged format
+      if (Array.isArray(response)) {
+        return { items: response, total: response.length } as Paged<Roaster>;
+      }
+      return response;
     },
   });
 }

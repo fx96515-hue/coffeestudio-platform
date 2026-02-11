@@ -23,8 +23,13 @@ export default function RoastersPage() {
   useEffect(() => {
     (async () => {
       try {
-        const d = await apiFetch<RoasterList>("/roasters?limit=200");
-        setData(d);
+        const d = await apiFetch<Roaster[] | RoasterList>("/roasters?limit=200");
+        // Backend returns flat list, but we need { items, total } format
+        if (Array.isArray(d)) {
+          setData({ items: d, total: d.length });
+        } else {
+          setData(d);
+        }
       } catch (e: any) {
         setErr(e?.message ?? String(e));
       }

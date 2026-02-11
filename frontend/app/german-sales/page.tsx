@@ -41,14 +41,14 @@ export default function GermanSalesDashboard() {
     <div className="page">
       <div className="pageHeader">
         <div>
-          <div className="h1">German Roasters Sales Pipeline</div>
+          <div className="h1">Deutsche Röstereien Vertriebspipeline</div>
           <div className="muted">
-            Manage relationships and sales opportunities with German specialty roasters
+            Verwalten Sie Beziehungen und Vertriebsmöglichkeiten mit deutschen Spezialitätenröstern
           </div>
         </div>
         <div className="actions">
           <button type="button" className="btn btnPrimary" onClick={() => refetch()}>
-            Refresh
+            Aktualisieren
           </button>
         </div>
       </div>
@@ -56,33 +56,33 @@ export default function GermanSalesDashboard() {
       {/* KPI Cards */}
       <div className="grid gridCols4" style={{ marginBottom: "18px" }}>
         <div className="panel card">
-          <div className="cardLabel">Total Roasters</div>
+          <div className="cardLabel">Röstereien gesamt</div>
           <div className="cardValue">{stats.total}</div>
-          <div className="cardHint">In CRM database</div>
+          <div className="cardHint">In CRM-Datenbank</div>
         </div>
         <div className="panel card">
           <div className="cardLabel">In Pipeline</div>
           <div className="cardValue">{stats.contacted}</div>
-          <div className="cardHint">Contacted or in conversation</div>
+          <div className="cardHint">Kontaktiert oder im Gespräch</div>
         </div>
         <div className="panel card">
-          <div className="cardLabel">Qualified</div>
+          <div className="cardLabel">Qualifiziert</div>
           <div className="cardValue">{stats.qualified}</div>
-          <div className="cardHint">Ready for proposals</div>
+          <div className="cardHint">Bereit für Angebote</div>
         </div>
         <div className="panel card">
-          <div className="cardLabel">Avg Sales Score</div>
+          <div className="cardLabel">Durchschn. Vertriebs-Score</div>
           <div className="cardValue">{stats.avgSalesScore.toFixed(1)}</div>
-          <div className="cardHint">Out of 100</div>
+          <div className="cardHint">Von 100</div>
         </div>
       </div>
 
       <div className="grid gridCols2" style={{ marginBottom: "18px" }}>
         {/* Priority Contact List */}
         <div className="panel" style={{ padding: "18px" }}>
-          <div className="h2">Priority Contacts</div>
+          <div className="h2">Prioritätskontakte</div>
           <div className="muted" style={{ marginBottom: "14px" }}>
-            Top 10 roasters by sales fit score
+            Top 10 Röstereien nach Vertriebs-Fit-Score
           </div>
           {priorityRoasters.length > 0 ? (
             <div className="list">
@@ -103,28 +103,28 @@ export default function GermanSalesDashboard() {
                   <span
                     className="badge"
                     style={{
-                      background: "rgba(87,134,255,0.12)",
-                      borderColor: "rgba(87,134,255,0.35)",
+                      background: "rgba(200,149,108,0.12)",
+                      borderColor: "rgba(200,149,108,0.35)",
                     }}
                   >
                     Score: {roaster.sales_fit_score}
                   </span>
                   <Link href={`/roasters/${roaster.id}`} className="link">
-                    View →
+                    Ansehen →
                   </Link>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="empty">No priority contacts found</div>
+            <div className="empty">Keine Prioritätskontakte gefunden</div>
           )}
         </div>
 
         {/* Pending Followups */}
         <div className="panel" style={{ padding: "18px" }}>
-          <div className="h2">Pending Followups</div>
+          <div className="h2">Ausstehende Nachverfolgungen</div>
           <div className="muted" style={{ marginBottom: "14px" }}>
-            Roasters requiring followup today or overdue
+            Röstereien, die heute oder überfällig eine Nachverfolgung benötigen
           </div>
           {pendingFollowups.length > 0 ? (
             <div className="list">
@@ -137,36 +137,36 @@ export default function GermanSalesDashboard() {
                       {roaster.next_followup_date && (
                         <>
                           <span className="dot">•</span>
-                          <span>Due: {format(new Date(roaster.next_followup_date), "MMM dd")}</span>
+                          <span>Fällig: {format(new Date(roaster.next_followup_date), "MMM dd")}</span>
                         </>
                       )}
                     </div>
                   </div>
-                  <span className="badge badgeWarn">Followup</span>
+                  <span className="badge badgeWarn">Nachverfolgung</span>
                   <Link href={`/roasters/${roaster.id}`} className="link">
-                    Action →
+                    Aktion →
                   </Link>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="empty">All caught up! No pending followups.</div>
+            <div className="empty">Alles erledigt! Keine ausstehenden Nachverfolgungen.</div>
           )}
         </div>
       </div>
 
       {/* Filters */}
       <div className="panel" style={{ padding: "18px", marginBottom: "18px" }}>
-        <div className="h2">Filter Roasters</div>
+        <div className="h2">Röstereien filtern</div>
         <div className="grid gridCols4" style={{ marginTop: "14px", gap: "10px" }}>
           <div>
             <label style={{ fontSize: "12px", color: "var(--muted)", display: "block", marginBottom: "6px" }}>
-              City
+              Stadt
             </label>
             <input
               type="text"
               className="input"
-              placeholder="e.g., Berlin"
+              placeholder="z.B. Berlin"
               value={filters.city || ""}
               onChange={(e) =>
                 setFilters({ ...filters, city: e.target.value || undefined })
@@ -175,7 +175,7 @@ export default function GermanSalesDashboard() {
           </div>
           <div>
             <label style={{ fontSize: "12px", color: "var(--muted)", display: "block", marginBottom: "6px" }}>
-              Roaster Type
+              Röstertyp
             </label>
             <select
               className="input"
@@ -184,15 +184,15 @@ export default function GermanSalesDashboard() {
                 setFilters({ ...filters, roaster_type: e.target.value || undefined })
               }
             >
-              <option value="">All Types</option>
-              <option value="Specialty">Specialty</option>
-              <option value="Commercial">Commercial</option>
-              <option value="Micro">Micro</option>
+              <option value="">Alle Typen</option>
+              <option value="Specialty">Spezialität</option>
+              <option value="Commercial">Kommerziell</option>
+              <option value="Micro">Mikro</option>
             </select>
           </div>
           <div>
             <label style={{ fontSize: "12px", color: "var(--muted)", display: "block", marginBottom: "6px" }}>
-              Min Sales Score
+              Min. Vertriebs-Score
             </label>
             <input
               type="number"
@@ -216,7 +216,7 @@ export default function GermanSalesDashboard() {
               onClick={() => setFilters({ country: "Germany" })}
               style={{ width: "100%" }}
             >
-              Clear Filters
+              Filter löschen
             </button>
           </div>
         </div>
@@ -224,9 +224,9 @@ export default function GermanSalesDashboard() {
 
       {/* Roasters Table */}
       <div className="panel" style={{ padding: "18px" }}>
-        <div className="h2">All Roasters</div>
+        <div className="h2">Alle Röstereien</div>
         <div className="muted" style={{ marginBottom: "14px" }}>
-          {isLoading ? "Loading roasters..." : `${roasters.length} roasters found`}
+          {isLoading ? "Lade Röstereien..." : `${roasters.length} Röstereien gefunden`}
         </div>
 
         {roasters.length > 0 ? (
@@ -234,15 +234,15 @@ export default function GermanSalesDashboard() {
             <table className="table">
               <thead>
                 <tr>
-                  <th>Company</th>
-                  <th>City</th>
-                  <th>Type</th>
-                  <th>Capacity (kg)</th>
-                  <th>Sales Score</th>
-                  <th>Contact Status</th>
-                  <th>Last Contact</th>
-                  <th>Next Followup</th>
-                  <th>Actions</th>
+                  <th>Firma</th>
+                  <th>Stadt</th>
+                  <th>Typ</th>
+                  <th>Kapazität (kg)</th>
+                  <th>Vertriebs-Score</th>
+                  <th>Kontaktstatus</th>
+                  <th>Letzter Kontakt</th>
+                  <th>Nächste Nachverfolgung</th>
+                  <th>Aktionen</th>
                 </tr>
               </thead>
               <tbody>
@@ -281,7 +281,7 @@ export default function GermanSalesDashboard() {
                       {roaster.contact_status ? (
                         <span className="badge">{roaster.contact_status}</span>
                       ) : (
-                        <span className="badge">new</span>
+                        <span className="badge">neu</span>
                       )}
                     </td>
                     <td>
@@ -306,7 +306,7 @@ export default function GermanSalesDashboard() {
                     </td>
                     <td>
                       <Link href={`/roasters/${roaster.id}`} className="link">
-                        View →
+                        Ansehen →
                       </Link>
                     </td>
                   </tr>
@@ -316,7 +316,7 @@ export default function GermanSalesDashboard() {
           </div>
         ) : (
           <div className="empty" style={{ padding: "40px", textAlign: "center", color: "var(--muted)" }}>
-            No roasters found. Run the Discovery Seed in Operations to populate the database.
+            Keine Röstereien gefunden. Führen Sie Discovery Seed in Betrieb aus, um die Datenbank zu füllen.
           </div>
         )}
       </div>

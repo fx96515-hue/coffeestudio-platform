@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useDeals, useCalculateMargin } from "../hooks/useDeals";
-import { MarginCalcRequest, Deal } from "../types";
+import { MarginCalcRequest } from "../types";
 import PieChart from "../charts/PieChart";
 
 export default function DealsDashboard() {
@@ -45,9 +45,9 @@ export default function DealsDashboard() {
     <div className="page">
       <div className="pageHeader">
         <div>
-          <div className="h1">Deals & Margin Calculator</div>
+          <div className="h1">Deals & Margenrechner</div>
           <div className="muted">
-            Manage deals, calculate margins, and analyze profitability
+            Verwalten Sie Deals, berechnen Sie Margen und analysieren Sie die Rentabilität
           </div>
         </div>
         <div className="actions">
@@ -56,10 +56,10 @@ export default function DealsDashboard() {
             className="btn btnPrimary"
             onClick={() => setShowCalculator(!showCalculator)}
           >
-            {showCalculator ? "Hide Calculator" : "Margin Calculator"}
+            {showCalculator ? "Rechner verstecken" : "Margenrechner"}
           </button>
           <Link href="/lots" className="btn">
-            View All Lots
+            Alle Lots anzeigen
           </Link>
         </div>
       </div>
@@ -67,33 +67,33 @@ export default function DealsDashboard() {
       {/* Overview KPIs */}
       <div className="grid gridCols4" style={{ marginBottom: "18px" }}>
         <div className="panel card">
-          <div className="cardLabel">Total Deals</div>
+          <div className="cardLabel">Deals gesamt</div>
           <div className="cardValue">{stats.total}</div>
-          <div className="cardHint">Active and completed</div>
+          <div className="cardHint">Aktiv und abgeschlossen</div>
         </div>
         <div className="panel card">
-          <div className="cardLabel">Pipeline Value</div>
+          <div className="cardLabel">Pipeline-Wert</div>
           <div className="cardValue">€{stats.totalValue.toLocaleString()}</div>
-          <div className="cardHint">Total deal value</div>
+          <div className="cardHint">Gesamter Deal-Wert</div>
         </div>
         <div className="panel card">
-          <div className="cardLabel">Avg Margin</div>
+          <div className="cardLabel">Durchschn. Marge</div>
           <div className="cardValue">{stats.avgMargin.toFixed(1)}%</div>
-          <div className="cardHint">Average gross margin</div>
+          <div className="cardHint">Durchschnittliche Bruttomarge</div>
         </div>
         <div className="panel card">
-          <div className="cardLabel">Active Lots</div>
+          <div className="cardLabel">Aktive Lots</div>
           <div className="cardValue">{deals.filter((d) => (d as any).status !== "completed").length}</div>
-          <div className="cardHint">In progress</div>
+          <div className="cardHint">In Bearbeitung</div>
         </div>
       </div>
 
       {/* Margin Calculator */}
       {showCalculator && (
         <div className="panel" style={{ padding: "18px", marginBottom: "18px" }}>
-          <div className="h2">Real-time Margin Calculator</div>
+          <div className="h2">Echtzeit-Margenrechner</div>
           <div className="muted" style={{ marginBottom: "14px" }}>
-            Calculate profitability scenarios for coffee deals
+            Berechnen Sie Rentabilitätsszenarien für Kaffee-Deals
           </div>
 
           <div className="grid gridCols2" style={{ gap: "18px" }}>
@@ -102,7 +102,7 @@ export default function DealsDashboard() {
               <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                 <div>
                   <label style={{ fontSize: "12px", color: "var(--muted)", display: "block", marginBottom: "6px" }}>
-                    Purchase Price per kg (USD)
+                    Einkaufspreis pro kg (USD)
                   </label>
                   <input
                     type="number"
@@ -119,7 +119,7 @@ export default function DealsDashboard() {
                 </div>
                 <div>
                   <label style={{ fontSize: "12px", color: "var(--muted)", display: "block", marginBottom: "6px" }}>
-                    Landed Costs per kg (EUR)
+                    Landungskosten pro kg (EUR)
                   </label>
                   <input
                     type="number"
@@ -134,12 +134,12 @@ export default function DealsDashboard() {
                     }
                   />
                   <div style={{ fontSize: "11px", color: "var(--muted)", marginTop: "4px" }}>
-                    Includes freight, insurance, customs, handling
+                    Inkl. Fracht, Versicherung, Zoll, Handling
                   </div>
                 </div>
                 <div>
                   <label style={{ fontSize: "12px", color: "var(--muted)", display: "block", marginBottom: "6px" }}>
-                    Roast & Pack Costs per kg (EUR)
+                    Röst- & Verpackungskosten pro kg (EUR)
                   </label>
                   <input
                     type="number"
@@ -156,7 +156,7 @@ export default function DealsDashboard() {
                 </div>
                 <div>
                   <label style={{ fontSize: "12px", color: "var(--muted)", display: "block", marginBottom: "6px" }}>
-                    Yield Factor (Green to Roasted)
+                    Ertragsfaktor (Grün zu Geröstet)
                   </label>
                   <input
                     type="number"
@@ -170,12 +170,12 @@ export default function DealsDashboard() {
                     }
                   />
                   <div style={{ fontSize: "11px", color: "var(--muted)", marginTop: "4px" }}>
-                    0.84 = 16% weight loss during roasting
+                    0.84 = 16% Gewichtsverlust beim Rösten
                   </div>
                 </div>
                 <div>
                   <label style={{ fontSize: "12px", color: "var(--muted)", display: "block", marginBottom: "6px" }}>
-                    Selling Price per kg (EUR)
+                    Verkaufspreis pro kg (EUR)
                   </label>
                   <input
                     type="number"
@@ -197,7 +197,7 @@ export default function DealsDashboard() {
                   disabled={calculateMargin.isPending}
                   style={{ marginTop: "10px" }}
                 >
-                  {calculateMargin.isPending ? "Calculating..." : "Calculate Margin"}
+                  {calculateMargin.isPending ? "Berechne..." : "Marge berechnen"}
                 </button>
               </div>
             </div>
@@ -215,7 +215,7 @@ export default function DealsDashboard() {
                       marginBottom: "14px",
                     }}
                   >
-                    <div style={{ fontWeight: "700", marginBottom: "12px" }}>Margin Results</div>
+                    <div style={{ fontWeight: "700", marginBottom: "12px" }}>Margenergebnisse</div>
                     <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                       {Object.entries(calculateMargin.data.outputs).map(([key, value]) => (
                         <div key={key} style={{ display: "flex", justifyContent: "space-between" }}>
@@ -234,7 +234,7 @@ export default function DealsDashboard() {
                     data={costBreakdown}
                     dataKey="value"
                     nameKey="name"
-                    title="Cost Breakdown"
+                    title="Kostenaufschlüsselung"
                   />
                 </div>
               )}
@@ -249,7 +249,7 @@ export default function DealsDashboard() {
                     borderRadius: "12px",
                   }}
                 >
-                  Enter values and click &quot;Calculate Margin&quot; to see results
+                  Geben Sie Werte ein und klicken Sie auf &quot;Marge berechnen&quot;, um Ergebnisse zu sehen
                 </div>
               )}
             </div>
@@ -259,9 +259,9 @@ export default function DealsDashboard() {
 
       {/* Deals Table */}
       <div className="panel" style={{ padding: "18px" }}>
-        <div className="h2">Active Lots & Deals</div>
+        <div className="h2">Aktive Lots & Deals</div>
         <div className="muted" style={{ marginBottom: "14px" }}>
-          {isLoading ? "Loading deals..." : `${deals.length} lots in system`}
+          {isLoading ? "Lade Deals..." : `${deals.length} Lots im System`}
         </div>
 
         {deals.length > 0 ? (
@@ -269,15 +269,15 @@ export default function DealsDashboard() {
             <table className="table">
               <thead>
                 <tr>
-                  <th>Reference</th>
-                  <th>Origin</th>
-                  <th>Variety</th>
-                  <th>Process</th>
-                  <th>Grade</th>
-                  <th>Weight (kg)</th>
-                  <th>Cupping Score</th>
+                  <th>Referenz</th>
+                  <th>Herkunft</th>
+                  <th>Sorte</th>
+                  <th>Prozess</th>
+                  <th>Qualität</th>
+                  <th>Gewicht (kg)</th>
+                  <th>Cupping-Score</th>
                   <th>Status</th>
-                  <th>Actions</th>
+                  <th>Aktionen</th>
                 </tr>
               </thead>
               <tbody>
@@ -303,7 +303,7 @@ export default function DealsDashboard() {
                     </td>
                     <td>
                       <Link href={`/lots/${lot.id}`} className="link">
-                        View →
+                        Ansehen →
                       </Link>
                     </td>
                   </tr>
@@ -313,7 +313,7 @@ export default function DealsDashboard() {
           </div>
         ) : (
           <div className="empty" style={{ padding: "40px", textAlign: "center", color: "var(--muted)" }}>
-            No deals or lots found. Create a lot to start tracking deals and margins.
+            Keine Deals oder Lots gefunden. Erstellen Sie ein Lot, um Deals und Margen zu verfolgen.
           </div>
         )}
       </div>

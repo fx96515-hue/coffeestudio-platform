@@ -24,8 +24,13 @@ export default function CooperativesPage() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await apiFetch<CoopList>(`/cooperatives?limit=200`);
-        setData(res);
+        const res = await apiFetch<Coop[] | CoopList>(`/cooperatives?limit=200`);
+        // Backend returns flat list, but we need { items, total } format
+        if (Array.isArray(res)) {
+          setData({ items: res, total: res.length });
+        } else {
+          setData(res);
+        }
       } catch (e: any) {
         setErr(e?.message ?? String(e));
       }

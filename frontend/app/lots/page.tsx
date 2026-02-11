@@ -78,12 +78,12 @@ export default function LotsPage() {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 10, marginTop: 10 }}>
           <input placeholder="cooperative_id" value={form.cooperative_id} onChange={(e) => setForm({ ...form, cooperative_id: e.target.value })} />
           <input placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-          <input placeholder="Crop Year" value={form.crop_year} onChange={(e) => setForm({ ...form, crop_year: e.target.value })} />
+          <input placeholder="Erntejahr" value={form.crop_year} onChange={(e) => setForm({ ...form, crop_year: e.target.value })} />
           <input placeholder="Incoterm (FOB/CIF…)" value={form.incoterm} onChange={(e) => setForm({ ...form, incoterm: e.target.value })} />
           <input placeholder="Preis/kg" value={form.price_per_kg} onChange={(e) => setForm({ ...form, price_per_kg: e.target.value })} />
-          <input placeholder="Currency" value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })} />
-          <input placeholder="Weight (kg)" value={form.weight_kg} onChange={(e) => setForm({ ...form, weight_kg: e.target.value })} />
-          <input placeholder="Expected SCA" value={form.expected_cupping_score} onChange={(e) => setForm({ ...form, expected_cupping_score: e.target.value })} />
+          <input placeholder="Währung" value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })} />
+          <input placeholder="Gewicht (kg)" value={form.weight_kg} onChange={(e) => setForm({ ...form, weight_kg: e.target.value })} />
+          <input placeholder="Erwarteter SCA-Score" value={form.expected_cupping_score} onChange={(e) => setForm({ ...form, expected_cupping_score: e.target.value })} />
         </div>
         <button
           onClick={createLot}
@@ -105,7 +105,7 @@ export default function LotsPage() {
             <li key={l.id} style={{ marginBottom: 8 }}>
               <Link href={`/lots/${l.id}`}>{l.name}</Link>
               <div style={{ fontSize: 12, color: "#555" }}>
-                Coop #{l.cooperative_id}
+                Koop #{l.cooperative_id}
                 {l.crop_year ? ` — ${l.crop_year}` : ""}
                 {l.price_per_kg != null ? ` — ${l.price_per_kg} ${l.currency || ""}/kg` : ""}
               </div>
