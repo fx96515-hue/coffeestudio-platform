@@ -22,23 +22,23 @@ export default function PeruSourcingDashboard() {
     <div className="page">
       <div className="pageHeader">
         <div>
-          <div className="h1">Peru Sourcing Intelligence</div>
+          <div className="h1">Peru Einkaufs-Intelligence</div>
           <div className="muted">
-            Discover coffee regions, cooperatives, and sourcing opportunities in Peru
+            Entdecken Sie Kaffeeregionen, Kooperativen und Beschaffungsmöglichkeiten in Peru
           </div>
         </div>
         <div className="actions">
           <button type="button" className="btn btnPrimary" onClick={handleRefresh}>
-            Refresh
+            Aktualisieren
           </button>
         </div>
       </div>
 
       {/* Peru Regions Overview */}
       <div className="panel" style={{ padding: "18px", marginBottom: "18px" }}>
-        <div className="h2">Peru Coffee Regions</div>
+        <div className="h2">Peru-Kaffeeregionen</div>
         <div className="muted" style={{ marginBottom: "14px" }}>
-          {regionsLoading ? "Loading regions..." : `${regions?.length || 0} coffee-growing regions`}
+          {regionsLoading ? "Lade Regionen..." : `${regions?.length || 0} Kaffeeanbaugebiete`}
         </div>
         <div className="grid gridCols4">
           {regions?.map((region) => (
@@ -49,7 +49,7 @@ export default function PeruSourcingDashboard() {
             >
               <div style={{ fontWeight: "700", marginBottom: "6px" }}>{region.name}</div>
               <div className="muted" style={{ fontSize: "13px", marginBottom: "8px" }}>
-                {region.description_de || "Peru coffee region"}
+                {region.description_de || "Peru-Kaffeeregion"}
               </div>
               {region.altitude_range && (
                 <div className="badge" style={{ marginTop: "6px" }}>
@@ -58,7 +58,7 @@ export default function PeruSourcingDashboard() {
               )}
               {region.typical_varieties && (
                 <div style={{ fontSize: "12px", marginTop: "6px", color: "var(--muted)" }}>
-                  Varieties: {region.typical_varieties}
+                  Sorten: {region.typical_varieties}
                 </div>
               )}
             </div>
@@ -68,7 +68,7 @@ export default function PeruSourcingDashboard() {
 
       {/* Filters Section */}
       <div className="panel" style={{ padding: "18px", marginBottom: "18px" }}>
-        <div className="h2">Filter Cooperatives</div>
+        <div className="h2">Kooperativen filtern</div>
         <div className="grid gridCols4" style={{ marginTop: "14px", gap: "10px" }}>
           <div>
             <label style={{ fontSize: "12px", color: "var(--muted)", display: "block", marginBottom: "6px" }}>
@@ -81,7 +81,7 @@ export default function PeruSourcingDashboard() {
                 setFilters({ ...filters, region: e.target.value || undefined })
               }
             >
-              <option value="">All Regions</option>
+              <option value="">Alle Regionen</option>
               {regions?.map((r) => (
                 <option key={r.id} value={r.name}>
                   {r.name}
@@ -91,12 +91,12 @@ export default function PeruSourcingDashboard() {
           </div>
           <div>
             <label style={{ fontSize: "12px", color: "var(--muted)", display: "block", marginBottom: "6px" }}>
-              Min Capacity (kg)
+              Min. Kapazität (kg)
             </label>
             <input
               type="number"
               className="input"
-              placeholder="e.g., 10000"
+              placeholder="z.B. 10000"
               value={filters.min_capacity || ""}
               onChange={(e) =>
                 setFilters({
@@ -108,7 +108,7 @@ export default function PeruSourcingDashboard() {
           </div>
           <div>
             <label style={{ fontSize: "12px", color: "var(--muted)", display: "block", marginBottom: "6px" }}>
-              Min Score
+              Min. Score
             </label>
             <input
               type="number"
@@ -132,7 +132,7 @@ export default function PeruSourcingDashboard() {
               onClick={() => setFilters({})}
               style={{ width: "100%" }}
             >
-              Clear Filters
+              Filter löschen
             </button>
           </div>
         </div>
@@ -140,11 +140,11 @@ export default function PeruSourcingDashboard() {
 
       {/* Cooperatives Table */}
       <div className="panel" style={{ padding: "18px" }}>
-        <div className="h2">Cooperatives Directory</div>
+        <div className="h2">Kooperativen-Verzeichnis</div>
         <div className="muted" style={{ marginBottom: "14px" }}>
           {coopsLoading
-            ? "Loading cooperatives..."
-            : `${cooperatives.length} cooperatives found`}
+            ? "Lade Kooperativen..."
+            : `${cooperatives.length} Kooperativen gefunden`}
         </div>
 
         {cooperatives.length > 0 ? (
@@ -154,12 +154,12 @@ export default function PeruSourcingDashboard() {
                 <tr>
                   <th>Name</th>
                   <th>Region</th>
-                  <th>Members</th>
-                  <th>Capacity (kg)</th>
-                  <th>Certifications</th>
-                  <th>Quality Score</th>
-                  <th>Contact</th>
-                  <th>Actions</th>
+                  <th>Mitglieder</th>
+                  <th>Kapazität (kg)</th>
+                  <th>Zertifizierungen</th>
+                  <th>Qualitäts-Score</th>
+                  <th>Kontakt</th>
+                  <th>Aktionen</th>
                 </tr>
               </thead>
               <tbody>
@@ -212,14 +212,14 @@ export default function PeruSourcingDashboard() {
                     </td>
                     <td>
                       {coop.contact_email || coop.contact_phone ? (
-                        <span className="badge badgeOk">Yes</span>
+                        <span className="badge badgeOk">Ja</span>
                       ) : (
-                        <span className="badge">No</span>
+                        <span className="badge">Nein</span>
                       )}
                     </td>
                     <td>
                       <Link href={`/cooperatives/${coop.id}`} className="link">
-                        View →
+                        Ansehen →
                       </Link>
                     </td>
                   </tr>
@@ -229,7 +229,7 @@ export default function PeruSourcingDashboard() {
           </div>
         ) : (
           <div className="empty" style={{ padding: "40px", textAlign: "center", color: "var(--muted)" }}>
-            No cooperatives found. Try adjusting your filters or run the Discovery Seed in Operations.
+            Keine Kooperativen gefunden. Passen Sie Ihre Filter an oder führen Sie Discovery Seed in Betrieb aus.
           </div>
         )}
       </div>
