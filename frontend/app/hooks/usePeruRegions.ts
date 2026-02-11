@@ -36,10 +36,15 @@ export function useCooperatives(filters?: CooperativeFilters & { limit?: number;
   return useQuery({
     queryKey: ["cooperatives", filters],
     queryFn: async () => {
-      const data = await apiFetch<Paged<Cooperative>>(
+      const response = await apiFetch<Cooperative[] | Paged<Cooperative>>(
         `/cooperatives?${params.toString()}`
       );
-      return data;
+      // Backend returns flat list, but we need Paged format
+      // Check if response is already in Paged format
+      if (Array.isArray(response)) {
+        return { items: response, total: response.length } as Paged<Cooperative>;
+      }
+      return response;
     },
   });
 }

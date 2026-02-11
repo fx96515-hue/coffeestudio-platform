@@ -30,8 +30,12 @@ export function useDeals(filters?: DealFilters & { limit?: number; page?: number
     queryKey: ["deals", filters],
     queryFn: async () => {
       // Using lots endpoint as deals base
-      const data = await apiFetch<Paged<Deal>>(`/lots?${params.toString()}`);
-      return data;
+      const response = await apiFetch<Deal[] | Paged<Deal>>(`/lots?${params.toString()}`);
+      // Backend may return flat list, but we need Paged format
+      if (Array.isArray(response)) {
+        return { items: response, total: response.length } as Paged<Deal>;
+      }
+      return response;
     },
   });
 }
