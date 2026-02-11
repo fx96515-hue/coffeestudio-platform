@@ -6,7 +6,7 @@ is not available or for initial testing purposes.
 """
 
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, cast
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 
@@ -405,10 +405,11 @@ def seed_demo_market_data(db: Session) -> dict[str, Any]:
             # Update if data is older than 24 hours
             age_hours = (now - existing.observed_at).total_seconds() / 3600
             if age_hours > 24:
-                existing.value = obs_data["value"]
+                existing.value = cast(float, obs_data["value"])
                 existing.observed_at = now
-                if obs_data.get("meta"):
-                    existing.meta = obs_data["meta"]
+                meta_value = obs_data.get("meta")
+                if meta_value:
+                    existing.meta = cast(dict, meta_value)
                 updated += 1
         else:
             # Create new observation
