@@ -51,10 +51,10 @@ This comprehensive enterprise audit evaluates the CoffeeStudio Platform across m
    - **Effort**: 2-3 hours
 
 2. **Schema Validators** (Medium)
-   - Files: `schemas/cooperative.py`, `schemas/roaster.py`, `schemas/lot.py`
-   - Duplicated validators: `website_valid`, `validate_currency`, `validate_incoterm`
+   - Files: `schemas/cooperative.py`, `schemas/lot.py`, `schemas/logistics.py`, `schemas/margin.py`
+   - Duplicated validators: `website_valid` (2×), `validate_currency` (3×), `validate_incoterm` (3×)
    - **Recommendation**: Extract to `schemas/validators.py`
-   - **Impact**: ~1500 lines of duplicate code
+   - **Impact**: ~67 lines of duplicate code (108 total lines reducible to 41 lines)
    - **Effort**: 1-2 hours
 
 #### Code Complexity (Priority: Low-Medium)
