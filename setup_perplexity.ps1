@@ -240,7 +240,7 @@ Write-Host "======================================" -ForegroundColor Cyan
 Write-Host "`nNext Steps:" -ForegroundColor Cyan
 Write-Host "  1. Run a REAL discovery seed (not dry-run):" -ForegroundColor White
 Write-Host "     POST http://localhost:8000/discovery/seed" -ForegroundColor Yellow
-Write-Host "     Body: { ""entity_type"": ""both"", ""max_entities"": 100, ""dry_run"": false }" -ForegroundColor Yellow
+Write-Host "     Body: {""entity_type"": ""both"", ""max_entities"": 100, ""dry_run"": false}" -ForegroundColor Yellow
 
 Write-Host "`n  2. Refresh news data:" -ForegroundColor White
 Write-Host "     POST http://localhost:8000/news/refresh" -ForegroundColor Yellow
