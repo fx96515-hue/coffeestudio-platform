@@ -9,24 +9,34 @@ from app.core.config import settings
 
 """Security primitives.
 
-We intentionally use PBKDF2 (pbkdf2_sha256) instead of bcrypt.
+We use argon2 for password hashing instead of bcrypt or pbkdf2.
 
 Reason:
 - passlib+bcrypt can break in container builds when bcrypt's internal version
   metadata layout changes (e.g. bcrypt 4.x removed bcrypt.__about__).
-- PBKDF2 is implemented without native bcrypt bindings and is stable across
-  Windows/Docker environments.
+- argon2 is the winner of the Password Hashing Competition (PHC).
+- argon2-cffi compiles cleanly on all platforms (Windows, Linux, Alpine, Slim).
+- OWASP recommends argon2id as the first choice for password hashing.
 
 NOTE:
 - This is a local/dev product, but we still use a strong KDF and fail-fast
   if required secrets are missing.
+- We use argon2id variant with OWASP-recommended parameters:
+  - memory_cost: 64 MB (65536 KiB)
+  - time_cost: 3 iterations
+  - parallelism: 4 threads
+- We support pbkdf2_sha256 for backward compatibility (marked as deprecated).
+  Old hashes will still verify, but new hashes will use argon2.
 """
 
-# ~300k rounds is a good baseline on modern CPUs; adjust later if needed.
+# Using argon2 with secure OWASP-recommended parameters.
+# pbkdf2_sha256 is supported for backward compatibility but deprecated.
 pwd_context = CryptContext(
-    schemes=["pbkdf2_sha256"],
-    deprecated="auto",
-    pbkdf2_sha256__rounds=300_000,
+    schemes=["argon2", "pbkdf2_sha256"],
+    deprecated=["pbkdf2_sha256"],
+    argon2__memory_cost=65536,  # 64 MB
+    argon2__time_cost=3,  # 3 iterations
+    argon2__parallelism=4,  # 4 threads
 )
 
 

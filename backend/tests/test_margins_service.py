@@ -80,7 +80,9 @@ def test_margin_calculation_invalid_yield_factor():
 
 def test_margin_calculation_yield_factor_greater_than_one():
     """Test margin calculation with yield factor > 1."""
-    with pytest.raises(ValidationError, match="Input should be less than or equal to 1"):
+    with pytest.raises(
+        ValidationError, match="Input should be less than or equal to 1"
+    ):
         MarginCalcRequest(
             purchase_price_per_kg=10.0,
             landed_costs_per_kg=2.0,
