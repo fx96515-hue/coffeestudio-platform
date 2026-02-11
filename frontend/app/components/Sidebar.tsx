@@ -16,6 +16,9 @@ const items: { href: string; label: string; badge?: string }[] = [
   { href: "/news", label: "Marktradar" },
   { href: "/reports", label: "Berichte" },
   { href: "/ops", label: "Betrieb" },
+  { href: "/alerts", label: "Warnungen" },
+  { href: "/dedup", label: "Duplikate" },
+  { href: "/ml", label: "ML-Modelle" },
 ];
 
 export default function Sidebar({ authed }: { authed: boolean }) {
