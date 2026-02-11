@@ -288,3 +288,33 @@ def auto_outreach_follow_up(entity_type: str, days_threshold: int = 7):
         return result
     finally:
         db.close()
+
+
+@celery.task(name="app.workers.tasks.train_ml_model")
+def train_ml_model(model_type: str):
+    """Train ML model (freight or coffee price).
+
+    Args:
+        model_type: 'freight_cost' or 'coffee_price'
+    """
+    from app.services.ml.training_pipeline import train_freight_model, train_price_model
+
+    db = _db()
+    try:
+        if model_type == "freight_cost":
+            result = train_freight_model(db)
+        elif model_type == "coffee_price":
+            result = train_price_model(db)
+        else:
+            return {
+                "status": "error",
+                "message": f"Unknown model type: {model_type}",
+            }
+
+        log.info("ml_model_training", model_type=model_type, **result)
+        return result
+    except Exception as e:
+        log.error("ml_model_training_failed", model_type=model_type, error=str(e))
+        return {"status": "error", "model_type": model_type, "error": str(e)}
+    finally:
+        db.close()
