@@ -343,7 +343,7 @@ cd backend
 pytest tests/ -v
 
 # Output:
-369 passed, 3 skipped in 36.15s
+All tests passing ✅
 ✅ All tests passing
 ```
 
