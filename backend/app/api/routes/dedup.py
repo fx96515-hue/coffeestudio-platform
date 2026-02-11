@@ -3,8 +3,8 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import require_role
 from app.db.session import get_db
-from app.schemas.dedup import DedupPairOut
-from app.services.dedup import suggest_duplicates
+from app.schemas.dedup import DedupPairOut, MergeEntitiesIn, MergeResultOut, MergeHistoryOut
+from app.services.dedup import suggest_duplicates, merge_entities, get_merge_history
 
 
 router = APIRouter()
@@ -24,3 +24,33 @@ def suggest(
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post("/merge", response_model=MergeResultOut)
+def merge(
+    payload: MergeEntitiesIn,
+    db: Session = Depends(get_db),
+    _=Depends(require_role("admin")),
+):
+    """Merge two entities."""
+    try:
+        result = merge_entities(
+            db,
+            entity_type=payload.entity_type,
+            keep_id=payload.keep_id,
+            merge_id=payload.merge_id,
+        )
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.get("/history", response_model=list[MergeHistoryOut])
+def history(
+    entity_type: str,
+    limit: int = 50,
+    db: Session = Depends(get_db),
+    _=Depends(require_role("admin", "analyst")),
+):
+    """View merge history."""
+    return get_merge_history(db, entity_type=entity_type, limit=limit)
