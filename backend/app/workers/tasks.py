@@ -11,7 +11,7 @@ from app.models.cooperative import Cooperative
 from app.models.roaster import Roaster
 from app.services.reports import generate_daily_report
 from app.services.discovery import seed_discovery
-from app.services.enrichment import enrich_cooperative, enrich_roaster
+from app.services.enrichment import enrich_entity
 from app.services.data_pipeline.orchestrator import DataPipelineOrchestrator
 from app.services.data_pipeline.freshness import DataFreshnessMonitor
 from app.workers.celery_app import celery
@@ -134,7 +134,7 @@ def auto_enrich_stale():
             try:
                 coop = db.query(Cooperative).get(coop_id)
                 if coop:
-                    enrich_cooperative(db, coop)
+                    enrich_entity(db, coop)
                     enriched_coops += 1
             except Exception as e:
                 log.warning(
@@ -154,7 +154,7 @@ def auto_enrich_stale():
             try:
                 roaster = db.query(Roaster).get(roaster_id)
                 if roaster:
-                    enrich_roaster(db, roaster)
+                    enrich_entity(db, roaster)
                     enriched_roasters += 1
             except Exception as e:
                 log.warning(

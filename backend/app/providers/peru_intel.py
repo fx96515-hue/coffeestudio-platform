@@ -101,9 +101,10 @@ def fetch_openmeteo_weather(
     lon = coords["lon"]
 
     url = "https://api.open-meteo.com/v1/forecast"
-    params = {
-        "latitude": lat,
-        "longitude": lon,
+    # Type the params dict to avoid mypy issues
+    request_params: dict[str, str | int | float] = {
+        "latitude": str(lat),
+        "longitude": str(lon),
         "current_weather": "true",
         "daily": "temperature_2m_max,temperature_2m_min,precipitation_sum",
         "timezone": "America/Lima",
@@ -115,7 +116,7 @@ def fetch_openmeteo_weather(
             url,
             timeout=timeout_s,
             headers={"User-Agent": "CoffeeStudio/1.0"},
-            params=params,
+            params=request_params,
         )
         r.raise_for_status()
         data = r.json()

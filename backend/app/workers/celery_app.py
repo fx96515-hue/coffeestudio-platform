@@ -51,10 +51,11 @@ def _build_schedule() -> dict:
     # Auto-enrich stale entities (daily at 03:00 by default)
     auto_enrich_time = getattr(settings, "AUTO_ENRICH_TIME", "03:00")
     if auto_enrich_time:
-        hh, mm = auto_enrich_time.split(":")
+        parts = auto_enrich_time.split(":")
+        hh_str, mm_str = parts[0], parts[1]
         sched["auto_enrich_stale"] = {
             "task": "app.workers.tasks.auto_enrich_stale",
-            "schedule": crontab(minute=int(mm), hour=int(hh)),
+            "schedule": crontab(minute=int(mm_str), hour=int(hh_str)),
         }
 
     return sched

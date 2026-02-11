@@ -198,11 +198,11 @@ class PeruRegionIntelService:
                 region.avg_temperature_c = weather_info["current_temperature_c"]
                 updated_fields.append("avg_temperature_c")
 
-            # Update last_updated timestamp
+            # Update updated_at timestamp (from TimestampMixin)
             from datetime import datetime, timezone
 
-            region.last_updated_at = datetime.now(timezone.utc)
-            updated_fields.append("last_updated_at")
+            region.updated_at = datetime.now(timezone.utc)
+            updated_fields.append("updated_at")
 
             self.db.commit()
 
