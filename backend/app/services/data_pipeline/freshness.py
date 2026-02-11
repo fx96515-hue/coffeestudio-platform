@@ -11,9 +11,6 @@ from typing import Optional
 import structlog
 from sqlalchemy.orm import Session
 
-from app.models.market import MarketObservation
-from app.models.news import NewsItem
-
 log = structlog.get_logger()
 
 
@@ -37,6 +34,8 @@ class DataFreshnessMonitor:
         Returns:
             Dictionary with timestamp and age info, or None
         """
+        from app.models.market import MarketObservation
+
         obs = (
             self.db.query(MarketObservation)
             .filter(MarketObservation.key == key)
@@ -96,6 +95,8 @@ class DataFreshnessMonitor:
         Returns:
             Dictionary with freshness status for all data sources
         """
+        from app.models.news import NewsItem
+
         now = datetime.now(timezone.utc)
 
         # FX rates (expected to update daily)
