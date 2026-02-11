@@ -5,17 +5,17 @@ import { usePathname } from "next/navigation";
 import React from "react";
 
 const items: { href: string; label: string; badge?: string }[] = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/peru-sourcing", label: "Peru Sourcing" },
-  { href: "/german-sales", label: "German Sales" },
-  { href: "/shipments", label: "Shipments" },
-  { href: "/deals", label: "Deals & Margins" },
-  { href: "/analytics", label: "Analytics & ML" },
+  { href: "/dashboard", label: "Übersicht" },
+  { href: "/peru-sourcing", label: "Peru Einkauf" },
+  { href: "/german-sales", label: "Vertrieb Deutschland" },
+  { href: "/shipments", label: "Sendungen" },
+  { href: "/deals", label: "Deals & Margen" },
+  { href: "/analytics", label: "Analytik & ML" },
   { href: "/cooperatives", label: "Kooperativen" },
   { href: "/roasters", label: "Röstereien" },
   { href: "/news", label: "Marktradar" },
-  { href: "/reports", label: "Reports" },
-  { href: "/ops", label: "Operations" },
+  { href: "/reports", label: "Berichte" },
+  { href: "/ops", label: "Betrieb" },
 ];
 
 export default function Sidebar({ authed }: { authed: boolean }) {

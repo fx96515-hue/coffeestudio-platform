@@ -13,14 +13,14 @@ export default function Topbar({
   return (
     <div className="topbar">
       <div className="row" style={{ gap: 12 }}>
-        <div className="topbarTitle">Command Center</div>
+        <div className="topbarTitle">Steuerzentrale</div>
         <div className="pill">Daten • Workflows • Qualität</div>
       </div>
       <div className="topbarRight">
         {authed ? (
-          <button className="btn" onClick={onLogout}>Logout</button>
+          <button className="btn" onClick={onLogout}>Abmelden</button>
         ) : (
-          <Link className="btn btnPrimary" href="/login">Login</Link>
+          <Link className="btn btnPrimary" href="/login">Anmelden</Link>
         )}
       </div>
     </div>

@@ -24,7 +24,7 @@ export default function ReportsPage() {
     <div>
       <div className="pageHeader">
         <div>
-          <div className="pageTitle">Reports</div>
+          <div className="pageTitle">Berichte</div>
           <div className="pageSubtitle">Generierte Tages-/Systemreports (aus DB) – neueste oben.</div>
         </div>
         <a className="btn" href="http://prom.localhost" target="_blank" rel="noreferrer">
