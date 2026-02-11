@@ -329,7 +329,7 @@ def _extract_structured_with_llm(
         schema = _cooperative_enrichment_schema()
         system = (
             "Du extrahierst MAXIMAL detaillierte strukturierte Informationen über eine peruanische Kaffee-Kooperative aus einem Webseiten-Text. "
-            "Extrahiere JEDES Detail das du findest: Höhenlage, Sorten, Zertifizierungen, Mitgliederzahl, Exportmengen, "
+            "Extrahiere JEDES Detail, das Du findest: Höhenlage, Sorten, Zertifizierungen, Mitgliederzahl, Exportmengen, "
             "Cupping-Scores, Kontaktdaten, Social Media, Verarbeitungsmethoden, Lagerkapazitäten, Finanzinformationen, "
             "Export-Lizenzen, SENASA-Registrierung, Zahlungsbedingungen, soziale Programme, Frauenanteil, Logistik etc. "
             "NICHTS auslassen was verfügbar ist. Gib NUR valides JSON zurück (kein Markdown). "
@@ -619,15 +619,10 @@ def enrich_entity(
                     entity.peru_focus = bool(extracted["buys_from_peru"])
                     updated_fields.append("peru_focus")
 
-                if (
-                    extracted.get("specialty_focus") is not None
-                    and entity.specialty_focus
-                ):
+                if extracted.get("specialty_focus") is not None:
                     entity.specialty_focus = bool(extracted["specialty_focus"])
                     updated_fields.append("specialty_focus")
-                elif (
-                    extracted.get("third_wave") is not None and entity.specialty_focus
-                ):
+                elif extracted.get("third_wave") is not None:
                     entity.specialty_focus = bool(extracted["third_wave"])
                     updated_fields.append("specialty_focus")
 
