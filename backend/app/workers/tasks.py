@@ -9,7 +9,6 @@ from app.db.session import SessionLocal
 from app.models.report import Report
 from app.models.cooperative import Cooperative
 from app.models.roaster import Roaster
-from app.services.scoring import recompute_and_persist_cooperative
 from app.services.reports import generate_daily_report
 from app.services.discovery import seed_discovery
 from app.services.enrichment import enrich_cooperative, enrich_roaster

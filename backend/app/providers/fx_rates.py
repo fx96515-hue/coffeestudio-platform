@@ -142,7 +142,7 @@ def fetch_frankfurter_fx(
     if base == quote:
         return None
 
-    url = f"https://api.frankfurter.app/latest"
+    url = "https://api.frankfurter.app/latest"
 
     try:
         r = httpx.get(

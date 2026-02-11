@@ -4,11 +4,9 @@ Provides visibility into data freshness, circuit breaker status,
 and manual pipeline triggers.
 """
 
-from fastapi import APIRouter, Depends, BackgroundTasks
+from fastapi import APIRouter, Depends
 import redis
 from sqlalchemy.orm import Session
-
-from celery.result import AsyncResult
 
 from app.api.deps import require_role
 from app.core.config import settings
@@ -16,7 +14,6 @@ from app.db.session import get_db
 from app.models.user import User
 from app.services.data_pipeline.freshness import DataFreshnessMonitor
 from app.services.data_pipeline.orchestrator import DataPipelineOrchestrator
-from app.workers.celery_app import celery
 
 router = APIRouter()
 

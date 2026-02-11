@@ -17,10 +17,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.providers.coffee_prices import fetch_coffee_price
 from app.providers.fx_rates import fetch_fx_rate
-from app.providers.peru_intel import (
-    fetch_openmeteo_weather,
-    fetch_perplexity_production_intel,
-)
+from app.providers.peru_intel import fetch_openmeteo_weather
 from app.services.data_pipeline.circuit_breaker import CircuitBreaker
 from app.services.market_ingest import upsert_market_observation
 from app.services.news import refresh_news as refresh_news_service
@@ -191,7 +188,7 @@ class DataPipelineOrchestrator:
                 weather = fetch_openmeteo_weather(region)
                 if weather:
                     key = f"WEATHER:PERU_{region.upper().replace(' ', '_')}"
-                    obs = upsert_market_observation(
+                    upsert_market_observation(
                         self.db,
                         key=key,
                         value=weather.current_temp_c,
