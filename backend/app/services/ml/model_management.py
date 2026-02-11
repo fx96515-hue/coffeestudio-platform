@@ -113,24 +113,38 @@ class MLModelManagementService:
     async def trigger_model_retraining(self, model_type: str) -> dict[str, Any]:
         """Trigger model retraining job.
 
-        This is a placeholder for a background job that would:
-        1. Fetch latest historical data
-        2. Retrain model
-        3. Evaluate performance
-        4. If improved, set as active
-        5. Deprecate old model
+        This queues a Celery task for model retraining.
 
         Args:
-            model_type: Type of model to retrain
+            model_type: Type of model to retrain ('freight_cost' or 'coffee_price')
 
         Returns:
             Job status dictionary
         """
-        # This would typically queue a Celery task
+        from app.workers.celery_app import celery
+        from app.services.ml.training_pipeline import should_retrain
+
+        # Check if retraining is needed
+        needs_retrain = should_retrain(self.db, model_type, min_new_data=50)
+
+        if not needs_retrain:
+            return {
+                "status": "skipped",
+                "model_type": model_type,
+                "message": "Not enough new data for retraining. Minimum 50 new records required.",
+            }
+
+        # Queue Celery task
+        task = celery.send_task(
+            "app.workers.tasks.train_ml_model",
+            args=[model_type],
+        )
+
         return {
             "status": "queued",
             "model_type": model_type,
-            "message": "Model retraining job queued. This is a placeholder implementation.",
+            "task_id": task.id,
+            "message": "Model retraining job queued successfully.",
         }
 
     async def get_model_performance(self, model_id: int) -> dict[str, Any] | None:
