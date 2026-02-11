@@ -1,0 +1,321 @@
+"""Auto-outreach engine for automated outreach campaigns."""
+
+from __future__ import annotations
+
+from datetime import datetime, timezone
+from typing import Any, Literal
+from sqlalchemy import select, and_, or_
+from sqlalchemy.orm import Session
+
+from app.models.cooperative import Cooperative
+from app.models.roaster import Roaster
+from app.models.entity_event import EntityEvent
+from app.services.outreach import generate_outreach, Language, Purpose
+
+
+OutreachStatus = Literal["pending", "sent", "responded", "follow_up_needed"]
+
+
+def select_top_candidates(
+    db: Session,
+    *,
+    entity_type: str,
+    min_quality_score: float | None = None,
+    min_reliability_score: float | None = None,
+    min_economics_score: float | None = None,
+    region: str | None = None,
+    certification: str | None = None,
+    limit: int = 50,
+) -> list[dict[str, Any]]:
+    """Select top cooperative/roaster candidates for outreach.
+
+    Args:
+        db: Database session
+        entity_type: 'cooperative' or 'roaster'
+        min_quality_score: Minimum quality score filter
+        min_reliability_score: Minimum reliability score filter
+        min_economics_score: Minimum economics score filter
+        region: Region filter
+        certification: Certification filter (checks if contained in certifications)
+        limit: Max candidates to return
+
+    Returns:
+        List of candidate dicts with entity info
+    """
+    if entity_type not in {"cooperative", "roaster"}:
+        raise ValueError("entity_type must be cooperative|roaster")
+
+    # Build query
+    model = Cooperative if entity_type == "cooperative" else Roaster
+    stmt = select(model).filter(model.status == "active")
+
+    # Apply filters
+    if min_quality_score is not None:
+        stmt = stmt.filter(model.quality_score >= min_quality_score)
+    if min_reliability_score is not None:
+        stmt = stmt.filter(model.reliability_score >= min_reliability_score)
+    if min_economics_score is not None:
+        stmt = stmt.filter(model.economics_score >= min_economics_score)
+    if region:
+        stmt = stmt.filter(model.region == region)
+    if certification:
+        stmt = stmt.filter(model.certifications.ilike(f"%{certification}%"))
+
+    # Order by total score descending
+    stmt = stmt.order_by(
+        (model.total_score if hasattr(model, 'total_score') else 0).desc()
+    ).limit(limit)
+
+    result = db.execute(stmt)
+    entities = result.scalars().all()
+
+    return [
+        {
+            "entity_type": entity_type,
+            "entity_id": e.id,
+            "name": e.name,
+            "region": e.region,
+            "quality_score": e.quality_score,
+            "reliability_score": e.reliability_score,
+            "economics_score": e.economics_score,
+            "total_score": e.total_score,
+            "certifications": e.certifications,
+            "website": e.website,
+            "contact_email": e.contact_email,
+        }
+        for e in entities
+    ]
+
+
+def create_campaign(
+    db: Session,
+    *,
+    name: str,
+    entity_type: str,
+    language: Language = "de",
+    purpose: Purpose = "sourcing_pitch",
+    min_quality_score: float | None = None,
+    min_reliability_score: float | None = None,
+    min_economics_score: float | None = None,
+    region: str | None = None,
+    certification: str | None = None,
+    limit: int = 50,
+    refine_with_llm: bool = True,
+) -> dict[str, Any]:
+    """Create and launch an outreach campaign.
+
+    Args:
+        db: Database session
+        name: Campaign name
+        entity_type: 'cooperative' or 'roaster'
+        language: Outreach language
+        purpose: Outreach purpose
+        min_quality_score: Min quality score filter
+        min_reliability_score: Min reliability score filter
+        min_economics_score: Min economics score filter
+        region: Region filter
+        certification: Certification filter
+        limit: Max targets
+        refine_with_llm: Use AI enhancement
+
+    Returns:
+        Campaign result with targets and generated messages
+    """
+    # Select candidates
+    candidates = select_top_candidates(
+        db,
+        entity_type=entity_type,
+        min_quality_score=min_quality_score,
+        min_reliability_score=min_reliability_score,
+        min_economics_score=min_economics_score,
+        region=region,
+        certification=certification,
+        limit=limit,
+    )
+
+    # Generate outreach for each candidate
+    targets = []
+    for candidate in candidates:
+        try:
+            # Generate personalized outreach
+            outreach_result = generate_outreach(
+                db,
+                entity_type=entity_type,
+                entity_id=candidate["entity_id"],
+                language=language,
+                purpose=purpose,
+                refine_with_llm=refine_with_llm,
+            )
+
+            # Track outreach status
+            db.add(
+                EntityEvent(
+                    entity_type=entity_type,
+                    entity_id=candidate["entity_id"],
+                    event_type="outreach_campaign_added",
+                    payload={
+                        "campaign_name": name,
+                        "language": language,
+                        "purpose": purpose,
+                        "status": "pending",
+                    },
+                )
+            )
+
+            targets.append(
+                {
+                    "entity_id": candidate["entity_id"],
+                    "name": candidate["name"],
+                    "status": "pending",
+                    "message": outreach_result["text"],
+                    "used_llm": outreach_result["used_llm"],
+                }
+            )
+        except Exception as e:
+            targets.append(
+                {
+                    "entity_id": candidate["entity_id"],
+                    "name": candidate["name"],
+                    "status": "error",
+                    "error": str(e),
+                }
+            )
+
+    db.commit()
+
+    return {
+        "status": "ok",
+        "campaign_name": name,
+        "entity_type": entity_type,
+        "targets_count": len(targets),
+        "targets": targets,
+    }
+
+
+def get_outreach_suggestions(
+    db: Session, *, entity_type: str, limit: int = 20
+) -> list[dict[str, Any]]:
+    """Get AI-suggested outreach targets based on scores.
+
+    Suggests entities with high scores that haven't been contacted recently.
+
+    Args:
+        db: Database session
+        entity_type: 'cooperative' or 'roaster'
+        limit: Max suggestions
+
+    Returns:
+        List of suggested targets
+    """
+    # Get high-scoring candidates
+    candidates = select_top_candidates(
+        db,
+        entity_type=entity_type,
+        min_quality_score=70.0,
+        min_reliability_score=60.0,
+        limit=limit * 2,  # Get more to filter
+    )
+
+    # Filter out recently contacted entities
+    suggestions = []
+    for candidate in candidates:
+        # Check if entity was recently contacted
+        recent_outreach = (
+            db.query(EntityEvent)
+            .filter(
+                and_(
+                    EntityEvent.entity_type == entity_type,
+                    EntityEvent.entity_id == candidate["entity_id"],
+                    or_(
+                        EntityEvent.event_type == "outreach_generated",
+                        EntityEvent.event_type == "outreach_campaign_added",
+                    ),
+                )
+            )
+            .order_by(EntityEvent.created_at.desc())
+            .first()
+        )
+
+        # Only suggest if not contacted in last 30 days (simplified check)
+        if not recent_outreach or (
+            datetime.now(timezone.utc) - recent_outreach.created_at
+        ).days > 30:
+            suggestions.append(
+                {
+                    **candidate,
+                    "reason": "High scores, no recent outreach",
+                    "last_contact": (
+                        recent_outreach.created_at.isoformat()
+                        if recent_outreach
+                        else None
+                    ),
+                }
+            )
+
+        if len(suggestions) >= limit:
+            break
+
+    return suggestions
+
+
+def get_entity_outreach_status(
+    db: Session, *, entity_type: str, entity_id: int
+) -> dict[str, Any]:
+    """Get outreach status for a specific entity.
+
+    Args:
+        db: Database session
+        entity_type: 'cooperative' or 'roaster'
+        entity_id: Entity ID
+
+    Returns:
+        Outreach status dict
+    """
+    # Get all outreach events for entity
+    events = (
+        db.query(EntityEvent)
+        .filter(
+            and_(
+                EntityEvent.entity_type == entity_type,
+                EntityEvent.entity_id == entity_id,
+                or_(
+                    EntityEvent.event_type == "outreach_generated",
+                    EntityEvent.event_type == "outreach_campaign_added",
+                    EntityEvent.event_type == "outreach_response",
+                ),
+            )
+        )
+        .order_by(EntityEvent.created_at.desc())
+        .all()
+    )
+
+    if not events:
+        return {
+            "entity_type": entity_type,
+            "entity_id": entity_id,
+            "status": "not_contacted",
+            "events": [],
+        }
+
+    # Determine current status
+    latest_event = events[0]
+    status = "pending"
+    if latest_event.event_type == "outreach_response":
+        status = "responded"
+    elif (datetime.now(timezone.utc) - latest_event.created_at).days > 7:
+        status = "follow_up_needed"
+
+    return {
+        "entity_type": entity_type,
+        "entity_id": entity_id,
+        "status": status,
+        "last_contact": latest_event.created_at.isoformat(),
+        "events": [
+            {
+                "event_type": e.event_type,
+                "created_at": e.created_at.isoformat(),
+                "payload": e.payload,
+            }
+            for e in events
+        ],
+    }

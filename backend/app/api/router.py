@@ -4,7 +4,7 @@ from app.api.routes import auth, cooperatives, roasters, health, discovery
 from app.api.routes import sources, market, reports, lots, margins
 from app.api.routes import enrich, dedup, news, logistics, outreach, regions
 from app.api.routes import kb, cuppings, ml_predictions, peru_sourcing, shipments
-from app.api.routes import data_health
+from app.api.routes import data_health, quality_alerts, auto_outreach, ops_dashboard
 
 api_router = APIRouter()
 api_router.include_router(health.router, tags=["health"])
@@ -31,3 +31,6 @@ api_router.include_router(ml_predictions.router, prefix="/ml", tags=["ml"])
 api_router.include_router(peru_sourcing.router, prefix="/peru", tags=["peru-sourcing"])
 api_router.include_router(shipments.router, prefix="/shipments", tags=["shipments"])
 api_router.include_router(data_health.router, prefix="/data-health", tags=["data-health"])
+api_router.include_router(quality_alerts.router, prefix="/alerts", tags=["quality-alerts"])
+api_router.include_router(auto_outreach.router, prefix="/outreach/auto", tags=["auto-outreach"])
+api_router.include_router(ops_dashboard.router, prefix="/ops", tags=["ops-dashboard"])

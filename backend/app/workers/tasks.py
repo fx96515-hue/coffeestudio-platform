@@ -225,3 +225,66 @@ def seed_discovery_task(
         )
     finally:
         db.close()
+
+
+@celery.task(name="app.workers.tasks.check_quality_alerts")
+def check_quality_alerts(threshold: float = 5.0):
+    """Check for quality score changes and create alerts.
+
+    Args:
+        threshold: Minimum score change to trigger alert (default: 5.0)
+    """
+    from app.services.quality_alerts import check_all_entities
+
+    db = _db()
+    try:
+        result = check_all_entities(db, threshold=threshold)
+        log.info("quality_alerts_check", **result)
+        return result
+    finally:
+        db.close()
+
+
+@celery.task(name="app.workers.tasks.auto_outreach_follow_up")
+def auto_outreach_follow_up(entity_type: str, days_threshold: int = 7):
+    """Follow up on outreach campaigns for entities that haven't responded.
+
+    Args:
+        entity_type: 'cooperative' or 'roaster'
+        days_threshold: Days since last contact to trigger follow-up
+    """
+    from app.services.auto_outreach import get_outreach_suggestions
+    from app.models.entity_event import EntityEvent
+
+    db = _db()
+    try:
+        # Get entities needing follow-up
+        # This is a simplified implementation
+        # In production, would query EntityEvents more sophisticatedly
+        suggestions = get_outreach_suggestions(db, entity_type=entity_type, limit=10)
+
+        follow_ups = []
+        for suggestion in suggestions:
+            # Create follow-up event
+            db.add(
+                EntityEvent(
+                    entity_type=entity_type,
+                    entity_id=suggestion["entity_id"],
+                    event_type="outreach_follow_up",
+                    payload={"reason": "automated_follow_up"},
+                )
+            )
+            follow_ups.append(suggestion["entity_id"])
+
+        db.commit()
+
+        result = {
+            "status": "ok",
+            "entity_type": entity_type,
+            "follow_ups_created": len(follow_ups),
+            "entity_ids": follow_ups,
+        }
+        log.info("auto_outreach_follow_up", **result)
+        return result
+    finally:
+        db.close()
