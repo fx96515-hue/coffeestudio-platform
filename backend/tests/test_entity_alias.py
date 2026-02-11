@@ -112,8 +112,12 @@ def test_entity_alias_timestamp_mixin(db):
     
     # Verify timestamps are reasonable (within last minute)
     now = datetime.now(timezone.utc)
-    time_diff_created = (now - alias.created_at.replace(tzinfo=timezone.utc)).total_seconds()
-    time_diff_updated = (now - alias.updated_at.replace(tzinfo=timezone.utc)).total_seconds()
+    # Convert to UTC properly - handle both naive and aware datetimes
+    created_at_utc = alias.created_at if alias.created_at.tzinfo else alias.created_at.replace(tzinfo=timezone.utc)
+    updated_at_utc = alias.updated_at if alias.updated_at.tzinfo else alias.updated_at.replace(tzinfo=timezone.utc)
+    
+    time_diff_created = (now - created_at_utc).total_seconds()
+    time_diff_updated = (now - updated_at_utc).total_seconds()
     assert 0 <= time_diff_created < 60, "created_at should be recent"
     assert 0 <= time_diff_updated < 60, "updated_at should be recent"
 
