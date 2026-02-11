@@ -51,7 +51,7 @@ export default function OpsPage() {
     <div className="page">
       <div className="pageHeader">
         <div>
-          <div className="h1">Operations</div>
+          <div className="h1">Betrieb</div>
           <div className="muted">One-Click Workflows: Refresh + Discovery + Smoke.</div>
         </div>
         <div className="row gap" style={{ alignItems: "center" }}>
@@ -64,7 +64,7 @@ export default function OpsPage() {
 
       <div className="grid2">
         <div className="panel">
-          <div className="panelTitle">Refresh</div>
+          <div className="panelTitle">Aktualisieren</div>
           <div className="muted" style={{ marginBottom: 10 }}>
             Market-FX & Coffee-Price + News-Radar.
           </div>
@@ -80,7 +80,7 @@ export default function OpsPage() {
                 })
               }
             >
-              Market refresh
+              Market-Aktualisierung
             </button>
 
             <button
@@ -92,7 +92,7 @@ export default function OpsPage() {
                 })
               }
             >
-              News refresh
+              News-Aktualisierung
             </button>
           </div>
 
@@ -105,25 +105,25 @@ export default function OpsPage() {
         <div className="panel">
           <div className="panelTitle">Discovery</div>
           <div className="muted" style={{ marginBottom: 10 }}>
-            Seeds for Kooperativen/Röstereien (Web-Discovery). Läuft async über Celery.
+            Seeds für Kooperativen/Röstereien (Web-Discovery). Läuft async über Celery.
           </div>
 
           <div className="row gap" style={{ flexWrap: "wrap" }}>
             <div>
-              <div className="label">Entity type</div>
+              <div className="label">Entitätstyp</div>
               <select
                 className="input"
                 value={entityType}
                 onChange={(e) => setEntityType(e.target.value as any)}
                 style={{ width: 220 }}
               >
-                <option value="both">both</option>
-                <option value="cooperative">cooperative</option>
-                <option value="roaster">roaster</option>
+                <option value="both">beide</option>
+                <option value="cooperative">Kooperative</option>
+                <option value="roaster">Rösterei</option>
               </select>
             </div>
             <div>
-              <div className="label">Max entities</div>
+              <div className="label">Max. Entitäten</div>
               <input
                 className="input"
                 type="number"
@@ -155,7 +155,7 @@ export default function OpsPage() {
       </div>
 
       <div className="panel" style={{ marginTop: 14 }}>
-        <div className="panelTitle">Execution log</div>
+        <div className="panelTitle">Ausführungsprotokoll</div>
         <div className="codeBox">
           {log.length ? log.map((l, idx) => <div key={idx}>{l}</div>) : <div className="muted">Noch keine Aktionen.</div>}
         </div>

@@ -28,10 +28,10 @@ export default function LoginPage() {
 
   return (
     <div>
-      <h1>Login</h1>
+      <h1>Anmeldung</h1>
       <form onSubmit={onSubmit} style={{ display: "grid", gap: 8, maxWidth: 360 }}>
         <label>
-          Email
+          E-Mail
           <input value={email} onChange={(e) => setEmail(e.target.value)} style={{ width: "100%" }} />
         </label>
         <label>
