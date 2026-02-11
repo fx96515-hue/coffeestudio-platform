@@ -63,8 +63,8 @@ def test_margin_calculation_zero_selling_price():
     assert outputs["gross_margin_pct"] is None
 
 
-def test_margin_calculation_invalid_yield_factor():
-    """Test margin calculation with invalid yield factor."""
+def test_schema_validation_yield_factor_zero():
+    """Test schema validation rejects yield factor of zero."""
 
     from pydantic import ValidationError
 
@@ -80,8 +80,8 @@ def test_margin_calculation_invalid_yield_factor():
         )
 
 
-def test_margin_calculation_yield_factor_greater_than_one():
-    """Test margin calculation with yield factor > 1."""
+def test_schema_validation_yield_factor_greater_than_one():
+    """Test schema validation rejects yield factor > 1."""
     from pydantic import ValidationError
 
     with pytest.raises(
