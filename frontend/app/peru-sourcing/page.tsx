@@ -42,10 +42,11 @@ export default function PeruSourcingDashboard() {
         </div>
         <div className="grid gridCols4">
           {regions?.map((region) => (
-            <div
+            <Link
               key={region.id}
+              href={`/peru-sourcing/regions/${region.name}`}
               className="panel"
-              style={{ padding: "14px", background: "rgba(255,255,255,0.02)" }}
+              style={{ padding: "14px", background: "rgba(255,255,255,0.02)", cursor: "pointer" }}
             >
               <div style={{ fontWeight: "700", marginBottom: "6px" }}>{region.name}</div>
               <div className="muted" style={{ fontSize: "13px", marginBottom: "8px" }}>
@@ -61,7 +62,7 @@ export default function PeruSourcingDashboard() {
                   Sorten: {region.typical_varieties}
                 </div>
               )}
-            </div>
+            </Link>
           ))}
         </div>
       </div>
