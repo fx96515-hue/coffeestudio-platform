@@ -198,11 +198,7 @@ class PeruRegionIntelService:
                 region.avg_temperature_c = weather_info["current_temperature_c"]
                 updated_fields.append("avg_temperature_c")
 
-            # Update updated_at timestamp (from TimestampMixin)
-            from datetime import datetime, timezone
-
-            region.updated_at = datetime.now(timezone.utc)
-            updated_fields.append("updated_at")
+            # Note: updated_at is automatically updated by SQLAlchemy's onupdate trigger
 
             self.db.commit()
 
