@@ -133,8 +133,14 @@ def auto_enrich_stale():
         for coop_id in stale_coops:
             try:
                 coop = db.query(Cooperative).get(coop_id)
-                if coop:
-                    enrich_entity(db, coop)
+                if coop and coop.website:
+                    enrich_entity(
+                        db,
+                        entity_type="cooperative",
+                        entity_id=coop_id,
+                        url=coop.website,
+                        use_llm=True,
+                    )
                     enriched_coops += 1
             except Exception as e:
                 log.warning(
@@ -153,8 +159,14 @@ def auto_enrich_stale():
         for roaster_id in stale_roasters:
             try:
                 roaster = db.query(Roaster).get(roaster_id)
-                if roaster:
-                    enrich_entity(db, roaster)
+                if roaster and roaster.website:
+                    enrich_entity(
+                        db,
+                        entity_type="roaster",
+                        entity_id=roaster_id,
+                        url=roaster.website,
+                        use_llm=True,
+                    )
                     enriched_roasters += 1
             except Exception as e:
                 log.warning(
