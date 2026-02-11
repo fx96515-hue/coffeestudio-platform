@@ -42,9 +42,9 @@ export default function AnalyticsDashboard() {
     <div className="page">
       <div className="pageHeader">
         <div>
-          <div className="h1">Analytics & ML Predictions</div>
+          <div className="h1">Analytik & ML-Vorhersagen</div>
           <div className="muted">
-            Use machine learning models to predict freight costs, coffee prices, and trends
+            Verwenden Sie Machine-Learning-Modelle zur Vorhersage von Frachtkosten, Kaffeepreisen und Trends
           </div>
         </div>
       </div>
@@ -52,17 +52,17 @@ export default function AnalyticsDashboard() {
       {/* Business Intelligence Cards */}
       <div className="grid gridCols4" style={{ marginBottom: "18px" }}>
         <div className="panel card">
-          <div className="cardLabel">Active Cooperatives</div>
+          <div className="cardLabel">Aktive Kooperativen</div>
           <div className="cardValue">{coopsData?.total || 0}</div>
-          <div className="cardHint">In Peru sourcing database</div>
+          <div className="cardHint">In Peru Sourcing-Datenbank</div>
         </div>
         <div className="panel card">
-          <div className="cardLabel">German Roasters</div>
+          <div className="cardLabel">Deutsche Röstereien</div>
           <div className="cardValue">{roastersData?.total || 0}</div>
-          <div className="cardHint">In sales pipeline</div>
+          <div className="cardHint">In Vertriebspipeline</div>
         </div>
         <div className="panel card">
-          <div className="cardLabel">Avg Quality Score</div>
+          <div className="cardLabel">Durchschn. Qualitäts-Score</div>
           <div className="cardValue">
             {coopsData?.items.length
               ? (
@@ -71,10 +71,10 @@ export default function AnalyticsDashboard() {
                 ).toFixed(1)
               : "–"}
           </div>
-          <div className="cardHint">Cooperative quality</div>
+          <div className="cardHint">Kooperativen-Qualität</div>
         </div>
         <div className="panel card">
-          <div className="cardLabel">Avg Sales Score</div>
+          <div className="cardLabel">Durchschn. Vertriebs-Score</div>
           <div className="cardValue">
             {roastersData?.items.length
               ? (
@@ -83,22 +83,22 @@ export default function AnalyticsDashboard() {
                 ).toFixed(1)
               : "–"}
           </div>
-          <div className="cardHint">Roaster sales fit</div>
+          <div className="cardHint">Röstereien Sales-Fit</div>
         </div>
       </div>
 
       <div className="grid gridCols2" style={{ marginBottom: "18px" }}>
         {/* Freight Cost Predictor */}
         <div className="panel" style={{ padding: "18px" }}>
-          <div className="h2">Freight Cost Predictor</div>
+          <div className="h2">Frachtkostenvorhersage</div>
           <div className="muted" style={{ marginBottom: "14px" }}>
-            Predict shipping costs for coffee containers
+            Schätzung der Versandkosten für Kaffeecontainer
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "14px" }}>
             <div>
               <label style={{ fontSize: "12px", color: "var(--muted)", display: "block", marginBottom: "6px" }}>
-                Origin Port
+                Abgangshafen
               </label>
               <input
                 type="text"
@@ -109,7 +109,7 @@ export default function AnalyticsDashboard() {
             </div>
             <div>
               <label style={{ fontSize: "12px", color: "var(--muted)", display: "block", marginBottom: "6px" }}>
-                Destination Port
+                Zielhafen
               </label>
               <input
                 type="text"
@@ -123,7 +123,7 @@ export default function AnalyticsDashboard() {
             <div className="grid gridCols2" style={{ gap: "10px" }}>
               <div>
                 <label style={{ fontSize: "12px", color: "var(--muted)", display: "block", marginBottom: "6px" }}>
-                  Weight (kg)
+                  Gewicht (kg)
                 </label>
                 <input
                   type="number"
@@ -136,7 +136,7 @@ export default function AnalyticsDashboard() {
               </div>
               <div>
                 <label style={{ fontSize: "12px", color: "var(--muted)", display: "block", marginBottom: "6px" }}>
-                  Container Type
+                  Containertyp
                 </label>
                 <select
                   className="input"
@@ -152,7 +152,7 @@ export default function AnalyticsDashboard() {
             </div>
             <div>
               <label style={{ fontSize: "12px", color: "var(--muted)", display: "block", marginBottom: "6px" }}>
-                Departure Date
+                Abfahrtsdatum
               </label>
               <input
                 type="date"
@@ -172,7 +172,7 @@ export default function AnalyticsDashboard() {
             disabled={freightMutation.isPending}
             style={{ width: "100%" }}
           >
-            {freightMutation.isPending ? "Predicting..." : "Predict Freight Cost"}
+            {freightMutation.isPending ? "Berechne..." : "Frachtkosten vorhersagen"}
           </button>
 
           {freightMutation.isSuccess && freightMutation.data && (
@@ -181,24 +181,24 @@ export default function AnalyticsDashboard() {
               style={{
                 marginTop: "14px",
                 padding: "14px",
-                background: "rgba(87,134,255,0.08)",
-                border: "1px solid rgba(87,134,255,0.25)",
+                background: "rgba(200,149,108,0.08)",
+                border: "1px solid rgba(200,149,108,0.25)",
               }}
             >
-              <div style={{ fontWeight: "700", marginBottom: "8px" }}>Prediction Result</div>
+              <div style={{ fontWeight: "700", marginBottom: "8px" }}>Vorhersageergebnis</div>
               <div style={{ fontSize: "24px", fontWeight: "800", marginBottom: "8px" }}>
                 ${freightMutation.data.predicted_cost_usd.toLocaleString()}
               </div>
               <div style={{ fontSize: "13px", color: "var(--muted)" }}>
-                Confidence: {(freightMutation.data.confidence_score * 100).toFixed(1)}%
+                Konfidenz: {(freightMutation.data.confidence_score * 100).toFixed(1)}%
               </div>
               <div style={{ fontSize: "13px", color: "var(--muted)", marginTop: "4px" }}>
-                Range: ${freightMutation.data.confidence_interval_low.toLocaleString()} - $
+                Bereich: ${freightMutation.data.confidence_interval_low.toLocaleString()} - $
                 {freightMutation.data.confidence_interval_high.toLocaleString()}
               </div>
               {freightMutation.data.similar_historical_shipments > 0 && (
                 <div style={{ fontSize: "13px", color: "var(--muted)", marginTop: "4px" }}>
-                  Based on {freightMutation.data.similar_historical_shipments} similar shipments
+                  Basierend auf {freightMutation.data.similar_historical_shipments} ähnlichen Sendungen
                 </div>
               )}
             </div>
@@ -206,11 +206,11 @@ export default function AnalyticsDashboard() {
 
           {freightMutation.isError && (
             <div className="alert bad" style={{ marginTop: "14px" }}>
-              <div className="alertTitle">Prediction Failed</div>
+              <div className="alertTitle">Vorhersage fehlgeschlagen</div>
               <div className="alertText">
                 {freightMutation.error instanceof Error 
                   ? freightMutation.error.message 
-                  : "Could not predict freight cost"}
+                  : "Frachtkosten konnten nicht vorhergesagt werden"}
               </div>
             </div>
           )}
@@ -218,16 +218,16 @@ export default function AnalyticsDashboard() {
 
         {/* Coffee Price Predictor */}
         <div className="panel" style={{ padding: "18px" }}>
-          <div className="h2">Coffee Price Predictor</div>
+          <div className="h2">Kaffeepreisvorhersage</div>
           <div className="muted" style={{ marginBottom: "14px" }}>
-            Predict coffee prices based on quality and characteristics
+            Kaffeepreise basierend auf Qualität und Eigenschaften vorhersagen
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "14px" }}>
             <div className="grid gridCols2" style={{ gap: "10px" }}>
               <div>
                 <label style={{ fontSize: "12px", color: "var(--muted)", display: "block", marginBottom: "6px" }}>
-                  Origin
+                  Herkunft
                 </label>
                 <input
                   type="text"
@@ -238,7 +238,7 @@ export default function AnalyticsDashboard() {
               </div>
               <div>
                 <label style={{ fontSize: "12px", color: "var(--muted)", display: "block", marginBottom: "6px" }}>
-                  Variety
+                  Sorte
                 </label>
                 <input
                   type="text"
@@ -251,21 +251,21 @@ export default function AnalyticsDashboard() {
             <div className="grid gridCols2" style={{ gap: "10px" }}>
               <div>
                 <label style={{ fontSize: "12px", color: "var(--muted)", display: "block", marginBottom: "6px" }}>
-                  Process
+                  Prozess
                 </label>
                 <select
                   className="input"
                   value={priceForm.process}
                   onChange={(e) => setPriceForm({ ...priceForm, process: e.target.value })}
                 >
-                  <option value="Washed">Washed</option>
-                  <option value="Natural">Natural</option>
+                  <option value="Washed">Gewaschen</option>
+                  <option value="Natural">Natürlich</option>
                   <option value="Honey">Honey</option>
                 </select>
               </div>
               <div>
                 <label style={{ fontSize: "12px", color: "var(--muted)", display: "block", marginBottom: "6px" }}>
-                  Grade
+                  Qualität
                 </label>
                 <input
                   type="text"
@@ -292,7 +292,7 @@ export default function AnalyticsDashboard() {
             </div>
             <div>
               <label style={{ fontSize: "12px", color: "var(--muted)", display: "block", marginBottom: "6px" }}>
-                Forecast Date
+                Prognosedatum
               </label>
               <input
                 type="date"
@@ -310,7 +310,7 @@ export default function AnalyticsDashboard() {
             disabled={priceMutation.isPending}
             style={{ width: "100%" }}
           >
-            {priceMutation.isPending ? "Predicting..." : "Predict Price"}
+            {priceMutation.isPending ? "Berechne..." : "Preis vorhersagen"}
           </button>
 
           {priceMutation.isSuccess && priceMutation.data && (
@@ -323,15 +323,15 @@ export default function AnalyticsDashboard() {
                 border: "1px solid rgba(64,214,123,0.25)",
               }}
             >
-              <div style={{ fontWeight: "700", marginBottom: "8px" }}>Prediction Result</div>
+              <div style={{ fontWeight: "700", marginBottom: "8px" }}>Vorhersageergebnis</div>
               <div style={{ fontSize: "24px", fontWeight: "800", marginBottom: "8px" }}>
                 ${priceMutation.data.predicted_price_usd_per_kg.toFixed(2)}/kg
               </div>
               <div style={{ fontSize: "13px", color: "var(--muted)" }}>
-                Confidence: {(priceMutation.data.confidence_score * 100).toFixed(1)}%
+                Konfidenz: {(priceMutation.data.confidence_score * 100).toFixed(1)}%
               </div>
               <div style={{ fontSize: "13px", color: "var(--muted)", marginTop: "4px" }}>
-                Range: ${priceMutation.data.confidence_interval_low.toFixed(2)} - $
+                Bereich: ${priceMutation.data.confidence_interval_low.toFixed(2)} - $
                 {priceMutation.data.confidence_interval_high.toFixed(2)}/kg
               </div>
               {priceMutation.data.price_trend && (
@@ -349,11 +349,11 @@ export default function AnalyticsDashboard() {
 
           {priceMutation.isError && (
             <div className="alert bad" style={{ marginTop: "14px" }}>
-              <div className="alertTitle">Prediction Failed</div>
+              <div className="alertTitle">Vorhersage fehlgeschlagen</div>
               <div className="alertText">
                 {priceMutation.error instanceof Error 
                   ? priceMutation.error.message 
-                  : "Could not predict price"}
+                  : "Preis konnte nicht vorhergesagt werden"}
               </div>
             </div>
           )}
@@ -362,12 +362,12 @@ export default function AnalyticsDashboard() {
 
       {/* Info Panel */}
       <div className="panel" style={{ padding: "18px" }}>
-        <div className="h2">About ML Predictions</div>
+        <div className="h2">Über ML-Vorhersagen</div>
         <div className="muted" style={{ marginTop: "10px" }}>
-          These predictions are powered by machine learning models trained on historical data. The
-          freight cost predictor uses historical shipping data to estimate container costs, while
-          the coffee price predictor analyzes quality characteristics and market trends. All
-          predictions include confidence scores to help you assess reliability.
+          Diese Vorhersagen werden durch Machine-Learning-Modelle unterstützt, die auf historischen Daten trainiert wurden. 
+          Der Frachtkostenvorhersager verwendet historische Versanddaten zur Schätzung der Containerkosten, während 
+          der Kaffeepreisvorhersager Qualitätsmerkmale und Markttrends analysiert. Alle 
+          Vorhersagen enthalten Konfidenz-Scores, um Ihnen bei der Beurteilung der Zuverlässigkeit zu helfen.
         </div>
       </div>
     </div>

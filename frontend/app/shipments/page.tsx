@@ -110,46 +110,46 @@ export default function ShipmentsDashboard() {
     <div className="page">
       <div className="pageHeader">
         <div>
-          <div className="h1">Shipments Tracking</div>
+          <div className="h1">Sendungsverfolgung</div>
           <div className="muted">
-            Track coffee shipments from Peru to Germany and Europe
+            Verfolgen Sie Kaffeesendungen von Peru nach Deutschland und Europa
           </div>
         </div>
         <div className="actions">
-          <button type="button" className="btn btnPrimary">Add Shipment</button>
+          <button type="button" className="btn btnPrimary">Sendung hinzufügen</button>
         </div>
       </div>
 
       {/* Overview KPIs */}
       <div className="grid gridCols4" style={{ marginBottom: "18px" }}>
         <div className="panel card">
-          <div className="cardLabel">Total Shipments</div>
+          <div className="cardLabel">Sendungen gesamt</div>
           <div className="cardValue">{stats.total}</div>
-          <div className="cardHint">All time</div>
+          <div className="cardHint">Alle Zeiten</div>
         </div>
         <div className="panel card">
           <div className="cardLabel">In Transit</div>
           <div className="cardValue">{stats.inTransit}</div>
-          <div className="cardHint">Currently shipping</div>
+          <div className="cardHint">Aktuell im Versand</div>
         </div>
         <div className="panel card">
-          <div className="cardLabel">Arrived</div>
+          <div className="cardLabel">Angekommen</div>
           <div className="cardValue">{stats.arrived}</div>
-          <div className="cardHint">Completed deliveries</div>
+          <div className="cardHint">Abgeschlossene Lieferungen</div>
         </div>
         <div className="panel card">
-          <div className="cardLabel">Total Weight</div>
+          <div className="cardLabel">Gesamtgewicht</div>
           <div className="cardValue">{(stats.totalWeight / 1000).toFixed(1)}t</div>
-          <div className="cardHint">Coffee shipped</div>
+          <div className="cardHint">Kaffee verschifft</div>
         </div>
       </div>
 
       {/* Arriving Soon Widget */}
       {arrivingSoon.length > 0 && (
         <div className="panel" style={{ padding: "18px", marginBottom: "18px" }}>
-          <div className="h2">Arriving Soon</div>
+          <div className="h2">Bald ankommend</div>
           <div className="muted" style={{ marginBottom: "14px" }}>
-            Shipments arriving within 7 days
+            Sendungen, die innerhalb von 7 Tagen ankommen
           </div>
           <div className="grid gridCols3" style={{ gap: "12px" }}>
             {arrivingSoon.map((shipment) => {
@@ -171,10 +171,10 @@ export default function ShipmentsDashboard() {
                     {shipment.origin_port} → {shipment.destination_port}
                   </div>
                   <div style={{ fontSize: "20px", fontWeight: "800", marginBottom: "4px" }}>
-                    {daysUntilArrival} days
+                    {daysUntilArrival} Tage
                   </div>
                   <div style={{ fontSize: "12px", color: "var(--muted)" }}>
-                    ETA: {format(new Date(shipment.eta!), "MMM dd, yyyy")}
+                    ETA: {format(new Date(shipment.eta!), "dd. MMM yyyy")}
                   </div>
                 </div>
               );
@@ -185,9 +185,9 @@ export default function ShipmentsDashboard() {
 
       {/* Active Shipments Cards */}
       <div className="panel" style={{ padding: "18px", marginBottom: "18px" }}>
-        <div className="h2">Active Shipments</div>
+        <div className="h2">Aktive Sendungen</div>
         <div className="muted" style={{ marginBottom: "14px" }}>
-          Currently in transit
+          Aktuell in Transit
         </div>
         <div className="grid gridCols2" style={{ gap: "14px" }}>
           {shipments
@@ -223,13 +223,13 @@ export default function ShipmentsDashboard() {
                       <strong>Route:</strong> {shipment.origin_port} → {shipment.destination_port}
                     </div>
                     <div style={{ fontSize: "13px", color: "var(--muted)" }}>
-                      Current: {shipment.current_location}
+                      Aktuell: {shipment.current_location}
                     </div>
                   </div>
 
                   <div style={{ marginBottom: "12px" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "6px" }}>
-                      <span>Progress</span>
+                      <span>Fortschritt</span>
                       <span>{Math.min(100, Math.max(0, shipment.progress))}%</span>
                     </div>
                     <div style={{ width: "100%", height: "6px", background: "rgba(0,0,0,0.2)", borderRadius: "999px", overflow: "hidden" }}>
@@ -237,7 +237,7 @@ export default function ShipmentsDashboard() {
                         style={{
                           width: `${Math.min(100, Math.max(0, shipment.progress))}%`,
                           height: "100%",
-                          background: "rgba(87,134,255,0.8)",
+                          background: "rgba(200,149,108,0.8)",
                           transition: "width 0.3s ease",
                         }}
                       />
@@ -246,22 +246,22 @@ export default function ShipmentsDashboard() {
 
                   <div className="grid gridCols2" style={{ gap: "10px", fontSize: "12px" }}>
                     <div>
-                      <div style={{ color: "var(--muted)" }}>Departure</div>
+                      <div style={{ color: "var(--muted)" }}>Abfahrt</div>
                       <div style={{ fontWeight: "600" }}>
-                        {format(new Date(shipment.departure_date), "MMM dd")}
+                        {format(new Date(shipment.departure_date), "dd. MMM")}
                       </div>
                     </div>
                     <div>
                       <div style={{ color: "var(--muted)" }}>ETA</div>
                       <div style={{ fontWeight: "600" }}>
-                        {shipment.eta ? format(new Date(shipment.eta), "MMM dd") : "–"}
+                        {shipment.eta ? format(new Date(shipment.eta), "dd. MMM") : "–"}
                       </div>
                     </div>
                   </div>
 
                   <div style={{ marginTop: "12px", paddingTop: "12px", borderTop: "1px solid var(--border)" }}>
                     <button type="button" className="btn" style={{ width: "100%", fontSize: "12px" }}>
-                      View Details →
+                      Details anzeigen →
                     </button>
                   </div>
                 </div>
@@ -272,24 +272,24 @@ export default function ShipmentsDashboard() {
 
       {/* All Shipments Table */}
       <div className="panel" style={{ padding: "18px" }}>
-        <div className="h2">All Shipments</div>
+        <div className="h2">Alle Sendungen</div>
         <div className="muted" style={{ marginBottom: "14px" }}>
-          Complete shipment history
+          Vollständiger Sendungsverlauf
         </div>
 
         <div style={{ overflowX: "auto" }}>
           <table className="table">
             <thead>
               <tr>
-                <th>Reference</th>
+                <th>Referenz</th>
                 <th>Route</th>
-                <th>Carrier</th>
+                <th>Spediteur</th>
                 <th>Container</th>
-                <th>Weight (kg)</th>
-                <th>Departure</th>
-                <th>ETA / Arrival</th>
+                <th>Gewicht (kg)</th>
+                <th>Abfahrt</th>
+                <th>ETA / Ankunft</th>
                 <th>Status</th>
-                <th>Actions</th>
+                <th>Aktionen</th>
               </tr>
             </thead>
             <tbody>
@@ -326,7 +326,7 @@ export default function ShipmentsDashboard() {
                       </span>
                     </td>
                     <td>
-                      <button className="link">View →</button>
+                      <Link href={`/lots/${shipment.id}`} className="link">Ansehen →</Link>
                     </td>
                   </tr>
                 );
