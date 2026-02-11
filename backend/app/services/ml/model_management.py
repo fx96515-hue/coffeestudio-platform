@@ -113,13 +113,17 @@ class MLModelManagementService:
     async def trigger_model_retraining(self, model_type: str) -> dict[str, Any]:
         """Trigger model retraining job.
 
-        This queues a Celery task for model retraining.
+        This queues a Celery task for model retraining if sufficient new data is available.
 
         Args:
             model_type: Type of model to retrain ('freight_cost' or 'coffee_price')
 
         Returns:
-            Job status dictionary
+            Job status dictionary with keys:
+            - status: 'queued' if task started, 'skipped' if insufficient data
+            - model_type: The model type requested
+            - task_id: Celery task ID (only if status='queued')
+            - message: Descriptive message
         """
         from app.workers.celery_app import celery
         from app.services.ml.training_pipeline import should_retrain
