@@ -40,6 +40,15 @@ class Settings(BaseSettings):
     NEWS_REFRESH_TIMES: str = "07:30,14:00,20:00"
     MARKET_REFRESH_TIMES: str = "07:30,14:00,20:00"
 
+    # Data Pipeline settings
+    DATA_PIPELINE_CIRCUIT_BREAKER_THRESHOLD: int = 3
+    DATA_PIPELINE_CIRCUIT_BREAKER_TIMEOUT_S: int = 300
+    DATA_PIPELINE_MAX_RETRIES: int = 3
+
+    # Intelligence refresh schedule
+    INTELLIGENCE_REFRESH_TIMES: str = "06:00,12:00,18:00,00:00"
+    AUTO_ENRICH_TIME: str = "03:00"
+
     def cors_origins_list(self) -> List[str]:
         return [s.strip() for s in self.CORS_ORIGINS.split(",") if s.strip()]
 
