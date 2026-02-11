@@ -288,7 +288,7 @@ def _extract_entities_with_llm(
     if entity_type == "cooperative":
         system = (
             "Du extrahierst MAXIMAL detaillierte Informationen über peruanische Kaffee-Kooperativen aus Suchergebnissen. "
-            "Extrahiere JEDES Detail das du findest: Höhenlage, Sorten, Zertifizierungen, Mitgliederzahl, Exportmengen, "
+            "Extrahiere JEDES Detail, das Du findest: Höhenlage, Sorten, Zertifizierungen, Mitgliederzahl, Exportmengen, "
             "Cupping-Scores, Kontaktdaten, Social Media, Verarbeitungsmethoden, Lagerkapazitäten, Finanzinformationen, "
             "Export-Lizenzen, SENASA-Registrierung, Zahlungsbedingungen, soziale Programme, Frauenanteil etc. "
             "NICHTS auslassen was verfügbar ist. Unbekannt => null. "
@@ -661,12 +661,9 @@ def seed_discovery(
                 ):
                     roaster.peru_focus = bool(ent["buys_from_peru"])
 
-                if (
-                    ent.get("specialty_focus") is not None
-                    and roaster.specialty_focus
-                ):
+                if ent.get("specialty_focus") is not None:
                     roaster.specialty_focus = bool(ent["specialty_focus"])
-                elif ent.get("third_wave") is not None and roaster.specialty_focus:
+                elif ent.get("third_wave") is not None:
                     roaster.specialty_focus = bool(ent["third_wave"])
 
                 if ent.get("price_position") and not roaster.price_position:
