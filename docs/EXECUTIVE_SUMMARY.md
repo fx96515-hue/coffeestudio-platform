@@ -39,7 +39,7 @@ The CoffeeStudio Platform demonstrates strong engineering fundamentals with prod
 - **Tests Passing:** 362/363 (99.7%)
 - **Code Quality:** B (82/100)
 - **Security Issues:** Not assessed
-- **Code Duplicates:** ~250 lines
+- **Code Duplicates:** ~127 lines
 - **BOM Issues:** 9 files
 
 ### After Audit
@@ -54,7 +54,7 @@ The CoffeeStudio Platform demonstrates strong engineering fundamentals with prod
 - ✅ **+10 tests** added
 - ✅ **100% test pass rate** achieved
 - ✅ **+3 quality points** gained
-- ✅ **-250 lines** of duplicate code removed
+- ✅ **~127 lines** of duplicate code removed
 - ✅ **9 BOM issues** resolved
 - ✅ **0 security vulnerabilities** found
 
@@ -81,11 +81,11 @@ The CoffeeStudio Platform demonstrates strong engineering fundamentals with prod
 ### 1. Code Quality Improvements ✅
 
 **ML Model Refactoring:**
-- Created `BaseMLModel` abstract base class (170 lines)
-- Eliminated ~250 lines of duplicate code
-- Reduced FreightCostModel by 35% (143 → 93 lines)
-- Reduced CoffeePriceModel by 31% (163 → 113 lines)
-- Improved maintainability and consistency
+- Created `BaseMLModel` abstract base class (167 lines)
+- Eliminated ~127 lines of duplicate code across models
+- Reduced FreightCostModel by 37% (142 → 89 lines)
+- Reduced CoffeePriceModel by 32% (162 → 110 lines)
+- Improved maintainability and consistency (net +62 lines overall)
 
 **Code Cleanup:**
 - Removed UTF-8 BOM from 9 Python files
@@ -248,9 +248,10 @@ The CoffeeStudio Platform demonstrates strong engineering fundamentals with prod
 ### Eliminated ✅
 
 **ML Models:**
-- Before: ~250 lines of duplicate code
-- After: 0 lines
-- Reduction: 100%
+- Before: ~127 lines of duplicate code
+- After: 0 lines (abstracted to BaseMLModel)
+- Duplicate code removed: 100%
+- Note: Total lines increased by 62 due to new base class (167 lines)
 
 **Methods Unified:**
 - `__init__` - Initialization logic
@@ -487,7 +488,7 @@ The CoffeeStudio Platform has successfully completed a comprehensive enterprise 
 
 ### Code Improvements
 1. ✅ BaseMLModel abstract class
-2. ✅ Refactored ML models (-250 lines)
+2. ✅ Refactored ML models (~127 lines duplicate code removed)
 3. ✅ Fixed BOM issues (9 files)
 4. ✅ Fixed test validation (2 tests)
 5. ✅ Added entity alias tests (7 tests)
@@ -503,7 +504,7 @@ The CoffeeStudio Platform has successfully completed a comprehensive enterprise 
 - ✅ Tests passing: 362 → 372
 - ✅ Code quality: 82 → 85
 - ✅ Security score: 93 → 95
-- ✅ Duplicate code: -250 lines
+- ✅ Duplicate code: ~127 lines removed
 
 ---
 
