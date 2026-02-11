@@ -168,7 +168,7 @@ class PeruRegionIntelService:
 
     def refresh_region_data(self, region_name: str) -> dict[str, Any]:
         """
-        Refresh region data from external sources.
+        Refresh region data from external sources and update the database.
 
         Args:
             region_name: Name of the region
@@ -176,21 +176,48 @@ class PeruRegionIntelService:
         Returns:
             Dictionary with refresh status and data sources
         """
+        from sqlalchemy import select
+
         # Fetch from external sources
         jnc_data = fetch_jnc_data(region_name)
         minagri_data = fetch_minagri_data(region_name)
         weather_data = fetch_senamhi_weather(region_name)
 
-        # Currently just return status since sources are stubs
-        # Future: Update region model with fresh data
+        # Update region model with fresh data
+        stmt = select(Region).where(
+            Region.name == region_name, Region.country == "Peru"
+        )
+        region = self.db.scalar(stmt)
+
+        updated_fields = []
+
+        if region and weather_data.get("available"):
+            # Update weather-related fields
+            weather_info = weather_data.get("data", {})
+            if weather_info.get("current_temperature_c"):
+                region.avg_temperature_c = weather_info["current_temperature_c"]
+                updated_fields.append("avg_temperature_c")
+
+            # Update last_updated timestamp
+            from datetime import datetime, timezone
+
+            region.last_updated_at = datetime.now(timezone.utc)
+            updated_fields.append("last_updated_at")
+
+            self.db.commit()
 
         return {
             "region": region_name,
             "refreshed": True,
+            "updated_fields": updated_fields,
             "sources": {
                 "jnc": jnc_data,
                 "minagri": minagri_data,
-                "senamhi": weather_data,
+                "weather": weather_data,
             },
-            "note": "External data sources are stubs - integration pending",
+            "note": (
+                f"Updated {len(updated_fields)} fields in database"
+                if updated_fields
+                else "No database updates (data unavailable or region not found)"
+            ),
         }

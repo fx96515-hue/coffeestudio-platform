@@ -82,23 +82,100 @@ class DataCollectionService:
     async def enrich_freight_data(self, shipment_id: int) -> None:
         """Extract freight data from completed shipment.
 
-        This is a placeholder that would extract data from a shipment
-        record and add it to the training dataset.
+        Extracts data from a shipment record and adds it to the training dataset.
 
         Args:
             shipment_id: ID of completed shipment
         """
-        # Placeholder - would query shipment data and create FreightHistory record
-        pass
+        from app.models.shipment import Shipment
+
+        shipment = self.db.query(Shipment).get(shipment_id)
+        if not shipment:
+            return
+
+        # Only extract from completed shipments
+        if shipment.status != "delivered":
+            return
+
+        # Create FreightHistory record from shipment data
+        if (
+            shipment.origin_port
+            and shipment.destination_port
+            and shipment.freight_cost_usd
+        ):
+            freight = FreightHistory(
+                route=f"{shipment.origin_port}-{shipment.destination_port}",
+                origin_port=shipment.origin_port,
+                destination_port=shipment.destination_port,
+                carrier=shipment.carrier or "Unknown",
+                container_type=shipment.container_type or "20ft",
+                weight_kg=shipment.weight_kg or 0,
+                freight_cost_usd=shipment.freight_cost_usd,
+                transit_days=(
+                    (shipment.arrival_date - shipment.departure_date).days
+                    if shipment.arrival_date and shipment.departure_date
+                    else None
+                ),
+                departure_date=shipment.departure_date,
+                arrival_date=shipment.arrival_date,
+                season=(
+                    "high" if shipment.departure_date.month in [4, 5, 6, 7, 8] else "low"
+                    if shipment.departure_date
+                    else None
+                ),
+            )
+            self.db.add(freight)
+            self.db.commit()
 
     async def enrich_price_data(self, deal_id: int) -> None:
         """Extract price data from completed deal.
 
-        This is a placeholder that would extract data from a deal
-        record and add it to the training dataset.
+        Extracts data from a deal record and adds it to the training dataset.
 
         Args:
             deal_id: ID of completed deal
         """
-        # Placeholder - would query deal data and create CoffeePriceHistory record
-        pass
+        from app.models.deal import Deal
+
+        deal = self.db.query(Deal).get(deal_id)
+        if not deal:
+            return
+
+        # Only extract from closed deals
+        if deal.status != "closed":
+            return
+
+        # Get current ICE C price for differential calculation
+        from app.models.market import MarketObservation
+
+        ice_price_obs = (
+            self.db.query(MarketObservation)
+            .filter(MarketObservation.key == "COFFEE_C:USD_LB")
+            .order_by(MarketObservation.observed_at.desc())
+            .first()
+        )
+        ice_price = ice_price_obs.value if ice_price_obs else 2.0
+
+        # Create CoffeePriceHistory record from deal data
+        if deal.price_per_kg and deal.cooperative:
+            price_usd_per_kg = deal.price_per_kg
+            price_usd_per_lb = price_usd_per_kg * 0.453592  # kg to lb
+            differential = price_usd_per_lb - ice_price
+
+            price_record = CoffeePriceHistory(
+                date=deal.closed_at or deal.created_at,
+                origin_country="Peru",
+                origin_region=deal.cooperative.region or "Unknown",
+                variety=deal.variety or "Unknown",
+                process_method=deal.process_method or "Unknown",
+                quality_grade=deal.quality_grade or "Unknown",
+                cupping_score=deal.cupping_score,
+                certifications=deal.certifications,
+                price_usd_per_kg=price_usd_per_kg,
+                price_usd_per_lb=price_usd_per_lb,
+                ice_c_price_usd_per_lb=ice_price,
+                differential_usd_per_lb=differential,
+                market_source=f"Deal #{deal_id}",
+            )
+            self.db.add(price_record)
+            self.db.commit()
