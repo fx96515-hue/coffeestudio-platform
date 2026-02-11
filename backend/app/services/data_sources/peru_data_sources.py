@@ -13,7 +13,7 @@ from app.core.config import settings
 from app.providers.peru_intel import (
     fetch_openmeteo_weather,
     fetch_perplexity_production_intel,
-    fetch_ico_price_data,
+    fetch_ico_price_data as fetch_ico_price_data_impl,
 )
 
 
@@ -129,7 +129,19 @@ def fetch_senamhi_weather(region_name: str) -> dict[str, Any]:
         }
 
 
-# Keep the original function signature but with real implementation
+def fetch_ico_price_data() -> dict[str, Any]:
+    """
+    Fetch price data from International Coffee Organization (ICO).
+
+    Wraps the peru_intel implementation for backward compatibility.
+
+    Returns:
+        Dictionary with ICO price data and fallback values
+    """
+    return fetch_ico_price_data_impl()
+
+
+# Export public API
 __all__ = [
     "fetch_jnc_data",
     "fetch_minagri_data",

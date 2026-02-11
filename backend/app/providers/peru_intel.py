@@ -29,6 +29,23 @@ PERU_REGION_COORDS = {
 }
 
 
+def _safe_float(value: Optional[Any]) -> Optional[float]:
+    """Safely convert value to float.
+
+    Args:
+        value: Value to convert
+
+    Returns:
+        Float value or None if conversion fails
+    """
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except (ValueError, TypeError):
+        return None
+
+
 @dataclass(frozen=True)
 class WeatherData:
     """Weather data for a region."""
@@ -131,11 +148,11 @@ def fetch_openmeteo_weather(
             precip_list = daily.get("precipitation_sum", [])
 
             if temp_max_list:
-                temp_max = temp_max_list[0]
+                temp_max = _safe_float(temp_max_list[0])
             if temp_min_list:
-                temp_min = temp_min_list[0]
+                temp_min = _safe_float(temp_min_list[0])
             if precip_list:
-                precipitation = precip_list[0]
+                precipitation = _safe_float(precip_list[0])
 
         # Parse timestamp
         time_str = current.get("time")
@@ -152,9 +169,9 @@ def fetch_openmeteo_weather(
         return WeatherData(
             region_name=region_name,
             current_temp_c=float(current_temp),
-            temp_max_c=float(temp_max) if temp_max is not None else None,
-            temp_min_c=float(temp_min) if temp_min is not None else None,
-            precipitation_mm=float(precipitation) if precipitation is not None else None,
+            temp_max_c=temp_max,
+            temp_min_c=temp_min,
+            precipitation_mm=precipitation,
             observed_at=observed_at,
             source_name="OpenMeteo",
             source_url=url,

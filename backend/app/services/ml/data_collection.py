@@ -89,6 +89,9 @@ class DataCollectionService:
         """
         from app.models.shipment import Shipment
 
+        # High season months for Peru coffee (April-August)
+        HIGH_SEASON_MONTHS = [4, 5, 6, 7, 8]
+
         shipment = self.db.query(Shipment).get(shipment_id)
         if not shipment:
             return
@@ -119,7 +122,9 @@ class DataCollectionService:
                 departure_date=shipment.departure_date,
                 arrival_date=shipment.arrival_date,
                 season=(
-                    "high" if shipment.departure_date.month in [4, 5, 6, 7, 8] else "low"
+                    "high"
+                    if shipment.departure_date and shipment.departure_date.month in HIGH_SEASON_MONTHS
+                    else "low"
                     if shipment.departure_date
                     else None
                 ),

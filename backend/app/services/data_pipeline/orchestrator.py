@@ -64,19 +64,34 @@ class DataPipelineOrchestrator:
 
         self.breakers = {
             "fx_rates": CircuitBreaker(
-                redis_client, "fx_rates", threshold, timeout
+                redis_client,
+                "fx_rates",
+                failure_threshold=threshold,
+                cooldown_seconds=timeout,
             ),
             "coffee_prices": CircuitBreaker(
-                redis_client, "coffee_prices", threshold, timeout
+                redis_client,
+                "coffee_prices",
+                failure_threshold=threshold,
+                cooldown_seconds=timeout,
             ),
             "peru_weather": CircuitBreaker(
-                redis_client, "peru_weather", threshold, timeout
+                redis_client,
+                "peru_weather",
+                failure_threshold=threshold,
+                cooldown_seconds=timeout,
             ),
             "peru_intel": CircuitBreaker(
-                redis_client, "peru_intel", threshold, timeout
+                redis_client,
+                "peru_intel",
+                failure_threshold=threshold,
+                cooldown_seconds=timeout,
             ),
             "news": CircuitBreaker(
-                redis_client, "news", threshold, timeout
+                redis_client,
+                "news",
+                failure_threshold=threshold,
+                cooldown_seconds=timeout,
             ),
         }
 
