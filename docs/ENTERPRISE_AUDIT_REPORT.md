@@ -47,7 +47,7 @@ This comprehensive enterprise audit evaluates the CoffeeStudio Platform across m
    - Files: `ml/price_model.py`, `ml/freight_model.py`
    - Duplicated methods: `__init__`, `predict_with_confidence`, `save`, `load`
    - **Recommendation**: Extract common base class `BaseMLModel`
-   - **Impact**: 710 lines of duplicate code
+   - **Impact**: ~127 lines of duplicate code
    - **Effort**: 2-3 hours
 
 2. **Schema Validators** (Medium)
@@ -411,7 +411,7 @@ This comprehensive enterprise audit evaluates the CoffeeStudio Platform across m
 ### 🟡 High Priority (Complete in 1 month)
 
 3. **Refactor ML Model Base Classes**
-   - Remove 710 lines of duplication
+   - Remove ~127 lines of duplication
    - Effort: 3 hours
    - Impact: Medium - Maintainability
 
