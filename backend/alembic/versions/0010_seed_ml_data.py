@@ -1,4 +1,4 @@
-﻿"""Seed ML training data
+"""Seed ML training data
 
 Revision ID: 0010_seed_ml_data
 Revises: 0009_ml_prediction_tables
@@ -97,7 +97,7 @@ def upgrade() -> None:
         ("Peru", "Cusco"),
         ("Peru", "Amazonas"),
         ("Colombia", "Huila"),
-        ("Colombia", "NariÃ±o"),
+        ("Colombia", "Nariño"),
     ]
 
     varieties = ["Caturra", "Bourbon", "Typica", "Catimor"]
