@@ -78,15 +78,15 @@ async def startup_seed_data():
     from app.services.seed_peru_regions import seed_peru_regions
     from app.services.seed_demo_data import seed_all_demo_data
     from sqlalchemy import inspect
-    
+
     db = SessionLocal()
     try:
         log.info("startup_seed", status="starting")
-        
+
         # Seed PeruRegion table (for regions API)
         peru_region_result = seed_default_regions(db)
         log.info("startup_seed_peru_regions", result=peru_region_result)
-        
+
         # Seed Region table (for Peru Sourcing Intelligence)
         # Only if the table exists (it may not be in all deployments)
         inspector = inspect(db.get_bind())
@@ -94,12 +94,16 @@ async def startup_seed_data():
             region_result = seed_peru_regions(db)
             log.info("startup_seed_regions", result=region_result)
         else:
-            log.info("startup_seed_regions", status="skipped", reason="regions table not found")
-        
+            log.info(
+                "startup_seed_regions",
+                status="skipped",
+                reason="regions table not found",
+            )
+
         # Seed demo data (cooperatives, roasters, market observations)
         demo_result = seed_all_demo_data(db)
         log.info("startup_seed_demo", result=demo_result)
-        
+
         log.info("startup_seed", status="completed")
     except Exception as e:
         log.error("startup_seed", error=str(e), exc_info=True)

@@ -315,10 +315,10 @@ DEMO_MARKET_OBSERVATIONS = [
 def seed_demo_cooperatives(db: Session) -> dict[str, Any]:
     """
     Seed demo cooperatives if table is empty.
-    
+
     Args:
         db: Database session
-        
+
     Returns:
         Dictionary with operation results
     """
@@ -330,15 +330,15 @@ def seed_demo_cooperatives(db: Session) -> dict[str, Any]:
             "reason": "cooperatives table not empty",
             "existing_count": count,
         }
-    
+
     created = 0
     for coop_data in DEMO_COOPERATIVES:
         coop = Cooperative(**coop_data)
         db.add(coop)
         created += 1
-    
+
     db.commit()
-    
+
     return {
         "status": "success",
         "created": created,
@@ -349,10 +349,10 @@ def seed_demo_cooperatives(db: Session) -> dict[str, Any]:
 def seed_demo_roasters(db: Session) -> dict[str, Any]:
     """
     Seed demo roasters if table is empty.
-    
+
     Args:
         db: Database session
-        
+
     Returns:
         Dictionary with operation results
     """
@@ -364,15 +364,15 @@ def seed_demo_roasters(db: Session) -> dict[str, Any]:
             "reason": "roasters table not empty",
             "existing_count": count,
         }
-    
+
     created = 0
     for roaster_data in DEMO_ROASTERS:
         roaster = Roaster(**roaster_data)
         db.add(roaster)
         created += 1
-    
+
     db.commit()
-    
+
     return {
         "status": "success",
         "created": created,
@@ -383,24 +383,22 @@ def seed_demo_roasters(db: Session) -> dict[str, Any]:
 def seed_demo_market_data(db: Session) -> dict[str, Any]:
     """
     Seed demo market observations if they don't exist.
-    
+
     Args:
         db: Database session
-        
+
     Returns:
         Dictionary with operation results
     """
     created = 0
     updated = 0
     now = datetime.now(timezone.utc)
-    
+
     for obs_data in DEMO_MARKET_OBSERVATIONS:
         # Check if observation with this key already exists
-        stmt = select(MarketObservation).where(
-            MarketObservation.key == obs_data["key"]
-        )
+        stmt = select(MarketObservation).where(MarketObservation.key == obs_data["key"])
         existing = db.scalar(stmt)
-        
+
         if existing:
             # Update if data is older than 24 hours
             age_hours = (now - existing.observed_at).total_seconds() / 3600
@@ -423,9 +421,9 @@ def seed_demo_market_data(db: Session) -> dict[str, Any]:
             )
             db.add(obs)
             created += 1
-    
+
     db.commit()
-    
+
     return {
         "status": "success",
         "created": created,
@@ -437,17 +435,17 @@ def seed_demo_market_data(db: Session) -> dict[str, Any]:
 def seed_all_demo_data(db: Session) -> dict[str, Any]:
     """
     Seed all demo data (cooperatives, roasters, market observations).
-    
+
     Args:
         db: Database session
-        
+
     Returns:
         Dictionary with combined operation results
     """
     coops_result = seed_demo_cooperatives(db)
     roasters_result = seed_demo_roasters(db)
     market_result = seed_demo_market_data(db)
-    
+
     return {
         "cooperatives": coops_result,
         "roasters": roasters_result,
