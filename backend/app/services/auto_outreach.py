@@ -61,10 +61,8 @@ def select_top_candidates(
     if certification:
         stmt = stmt.filter(model.certifications.ilike(f"%{certification}%"))
 
-    # Order by total score descending
-    stmt = stmt.order_by(
-        (model.total_score if hasattr(model, 'total_score') else 0).desc()
-    ).limit(limit)
+    # Order by total score descending, handling None values
+    stmt = stmt.order_by(model.total_score.desc().nullslast()).limit(limit)
 
     result = db.execute(stmt)
     entities = result.scalars().all()
