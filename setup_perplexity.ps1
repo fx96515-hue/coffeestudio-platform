@@ -6,7 +6,8 @@ $ErrorActionPreference = "Stop"
 Write-Host "== CoffeeStudio: Perplexity API Setup ==" -ForegroundColor Cyan
 
 # Determine script directory (fallback to current directory for PowerShell 5 compatibility)
-$ScriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { Get-Location }
+$ScriptDir = $PSScriptRoot
+if (-not $ScriptDir) { $ScriptDir = (Get-Location).Path }
 
 # Ensure we are in the script directory
 Set-Location -Path $ScriptDir
@@ -39,7 +40,7 @@ function Set-EnvValue {
     [Parameter(Mandatory=$true)][string]$Key,
     [Parameter(Mandatory=$true)][string]$Value
   )
-  $envPath = if ($ScriptDir -ne (Get-Location)) { Join-Path $ScriptDir ".env" } else { ".\.env" }
+  $envPath = ".\.env"
   $lines = Get-Content $envPath
   $re = "^$([regex]::Escape($Key))=.*$"
   if ($lines -match $re) {
@@ -52,7 +53,7 @@ function Set-EnvValue {
 
 function Get-EnvValue {
   param([Parameter(Mandatory=$true)][string]$Key)
-  $envPath = if ($ScriptDir -ne (Get-Location)) { Join-Path $ScriptDir ".env" } else { ".\.env" }
+  $envPath = ".\.env"
   if (-not (Test-Path $envPath)) { return $null }
   $line = (Get-Content $envPath | Where-Object { $_ -match "^$([regex]::Escape($Key))=" } | Select-Object -First 1)
   if (-not $line) { return $null }
@@ -119,7 +120,7 @@ Write-Host "  ✓ Wait complete" -ForegroundColor Green
 # ====== Step 8: Verify the key is available inside the container ======
 Write-Host "`n[8/10] Verifying API key inside backend container..." -ForegroundColor Cyan
 try {
-  $checkCmd = "import os; key = os.getenv('PERPLEXITY_API_KEY', ''); print('OK' if key and len(key) > 0 else 'MISSING')"
+  $checkCmd = 'import os; key = os.getenv("PERPLEXITY_API_KEY", ""); print("OK" if key and len(key) > 0 else "MISSING")'
   $result = & docker compose exec -T backend python -c $checkCmd 2>&1
   $result = $result | Out-String
   if ($result -match "OK") {
@@ -200,7 +201,10 @@ try {
   $statusResponse = Invoke-RestMethod -Method Get -Uri "http://localhost:8000/discovery/seed/$taskId" -Headers $headers
   
   Write-Host "`n  Task Status:" -ForegroundColor Cyan
-  Write-Host "    State: $($statusResponse.state)" -ForegroundColor $(if ($statusResponse.state -eq "SUCCESS") { "Green" } elseif ($statusResponse.state -eq "FAILURE") { "Red" } else { "Yellow" })
+  $stateColor = "Yellow"
+  if ($statusResponse.state -eq "SUCCESS") { $stateColor = "Green" }
+  elseif ($statusResponse.state -eq "FAILURE") { $stateColor = "Red" }
+  Write-Host "    State: $($statusResponse.state)" -ForegroundColor $stateColor
   
   if ($statusResponse.result) {
     Write-Host "    Result:" -ForegroundColor Cyan
