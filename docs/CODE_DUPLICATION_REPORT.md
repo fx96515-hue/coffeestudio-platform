@@ -14,8 +14,9 @@ This report documents code duplications identified in the CoffeeStudio Platform 
 
 | Metric | Before | After | Improvement |
 |--------|--------|-------|-------------|
-| Duplicate ML Code | ~250 lines | 0 lines | **100%** |
-| ML Model Files | 143-163 lines | 93-113 lines | **35-40% reduction** |
+| Duplicate ML Code | ~127 lines | 0 lines | **100%** |
+| ML Model Files | 142-162 lines | 89-110 lines | **32-37% reduction** |
+| Total ML Lines | 304 lines | 366 lines | **+62 lines (includes 167-line base class)** |
 | Schema Validators | ~50 lines duplicated | ~50 lines duplicated | **0%** (pending) |
 | Code Quality Score | B (82/100) | B+ (85/100) | **+3 points** |
 
@@ -37,7 +38,7 @@ This report documents code duplications identified in the CoffeeStudio Platform 
 7. Categorical encoding logic (~100 lines)
 
 **Impact**: 
-- ~250 lines of duplicate code
+- ~127 lines of duplicate code
 - Maintenance burden: Changes need to be made in multiple places
 - Risk of inconsistencies
 
@@ -66,7 +67,9 @@ class BaseMLModel(ABC):
 - Easier testing and maintenance
 - Type safety with abstract methods
 
-**Lines Saved**: ~250 lines
+**Duplicate Code Removed**: ~127 lines  
+**New Base Class Added**: 167 lines  
+**Net Lines**: +62 lines (improved maintainability despite increased LOC)
 
 ---
 
@@ -299,7 +302,7 @@ def find_similar_functions(root_path):
    - Status: Done
    - Impact: High
    - Effort: 3 hours
-   - LOC Saved: ~250
+   - Duplicate Code Removed: ~127 lines
 
 ### Medium Priority
 2. ⚠️ **Extract schema validators** - PENDING
@@ -344,7 +347,7 @@ Consider adding duplication detection to CI:
 
 ## Conclusion
 
-The CoffeeStudio Platform had manageable levels of code duplication, primarily in ML models and schema validators. The ML duplication has been successfully eliminated through the creation of a `BaseMLModel` class, reducing ~250 lines of duplicate code and improving maintainability.
+The CoffeeStudio Platform had manageable levels of code duplication, primarily in ML models and schema validators. The ML duplication has been successfully eliminated through the creation of a `BaseMLModel` class, removing ~127 lines of duplicate code and significantly improving maintainability. While total lines increased by 62 (due to the 167-line base class), the refactoring provides a single source of truth for ML model behavior.
 
 The remaining schema validator duplications are low priority and can be addressed in future refactoring cycles.
 
