@@ -187,7 +187,8 @@ export interface FreightPredictionResponse {
 }
 
 export interface PricePredictionRequest {
-  origin: string;
+  origin_country: string;
+  origin_region: string;
   variety: string;
   process: string;
   grade: string;

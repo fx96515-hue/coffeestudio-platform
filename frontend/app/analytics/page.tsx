@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useFreightPrediction, usePricePrediction } from "../hooks/usePredictions";
 import { useCooperatives } from "../hooks/usePeruRegions";
 import { useRoasters } from "../hooks/useRoasters";
+import MarketPriceWidget from "../components/MarketPriceWidget";
 
 export default function AnalyticsDashboard() {
   const [freightForm, setFreightForm] = useState({
@@ -15,7 +16,8 @@ export default function AnalyticsDashboard() {
   });
 
   const [priceForm, setPriceForm] = useState({
-    origin: "Peru",
+    origin_country: "Peru",
+    origin_region: "Cajamarca",
     variety: "Arabica",
     process: "Washed",
     grade: "SHG",
@@ -51,6 +53,7 @@ export default function AnalyticsDashboard() {
 
       {/* Business Intelligence Cards */}
       <div className="grid gridCols4" style={{ marginBottom: "18px" }}>
+        <MarketPriceWidget />
         <div className="panel card">
           <div className="cardLabel">Aktive Kooperativen</div>
           <div className="cardValue">{coopsData?.total || 0}</div>
@@ -72,18 +75,6 @@ export default function AnalyticsDashboard() {
               : "–"}
           </div>
           <div className="cardHint">Kooperativen-Qualität</div>
-        </div>
-        <div className="panel card">
-          <div className="cardLabel">Durchschn. Vertriebs-Score</div>
-          <div className="cardValue">
-            {roastersData?.items.length
-              ? (
-                  roastersData.items.reduce((sum, r) => sum + (r.sales_fit_score || 0), 0) /
-                  roastersData.items.length
-                ).toFixed(1)
-              : "–"}
-          </div>
-          <div className="cardHint">Röstereien Sales-Fit</div>
         </div>
       </div>
 
@@ -227,15 +218,28 @@ export default function AnalyticsDashboard() {
             <div className="grid gridCols2" style={{ gap: "10px" }}>
               <div>
                 <label style={{ fontSize: "12px", color: "var(--muted)", display: "block", marginBottom: "6px" }}>
-                  Herkunft
+                  Herkunftsland
                 </label>
                 <input
                   type="text"
                   className="input"
-                  value={priceForm.origin}
-                  onChange={(e) => setPriceForm({ ...priceForm, origin: e.target.value })}
+                  value={priceForm.origin_country}
+                  onChange={(e) => setPriceForm({ ...priceForm, origin_country: e.target.value })}
                 />
               </div>
+              <div>
+                <label style={{ fontSize: "12px", color: "var(--muted)", display: "block", marginBottom: "6px" }}>
+                  Region
+                </label>
+                <input
+                  type="text"
+                  className="input"
+                  value={priceForm.origin_region}
+                  onChange={(e) => setPriceForm({ ...priceForm, origin_region: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="grid gridCols2" style={{ gap: "10px" }}>
               <div>
                 <label style={{ fontSize: "12px", color: "var(--muted)", display: "block", marginBottom: "6px" }}>
                   Sorte
@@ -247,8 +251,6 @@ export default function AnalyticsDashboard() {
                   onChange={(e) => setPriceForm({ ...priceForm, variety: e.target.value })}
                 />
               </div>
-            </div>
-            <div className="grid gridCols2" style={{ gap: "10px" }}>
               <div>
                 <label style={{ fontSize: "12px", color: "var(--muted)", display: "block", marginBottom: "6px" }}>
                   Prozess
@@ -263,17 +265,17 @@ export default function AnalyticsDashboard() {
                   <option value="Honey">Honey</option>
                 </select>
               </div>
-              <div>
-                <label style={{ fontSize: "12px", color: "var(--muted)", display: "block", marginBottom: "6px" }}>
-                  Qualität
-                </label>
-                <input
-                  type="text"
-                  className="input"
-                  value={priceForm.grade}
-                  onChange={(e) => setPriceForm({ ...priceForm, grade: e.target.value })}
-                />
-              </div>
+            </div>
+            <div>
+              <label style={{ fontSize: "12px", color: "var(--muted)", display: "block", marginBottom: "6px" }}>
+                Qualität
+              </label>
+              <input
+                type="text"
+                className="input"
+                value={priceForm.grade}
+                onChange={(e) => setPriceForm({ ...priceForm, grade: e.target.value })}
+              />
             </div>
             <div>
               <label style={{ fontSize: "12px", color: "var(--muted)", display: "block", marginBottom: "6px" }}>
