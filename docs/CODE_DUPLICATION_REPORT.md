@@ -32,10 +32,10 @@ This report documents code duplications identified in the CoffeeStudio Platform 
 1. `__init__` method (identical logic, different hyperparameters)
 2. `train` method (identical implementation)
 3. `predict` method (identical implementation)
-4. `predict_with_confidence` method (710 lines duplicate)
+4. `predict_with_confidence` method (duplicate logic)
 5. `save` method (identical)
 6. `load` method (identical)
-7. Categorical encoding logic (~100 lines)
+7. Categorical encoding logic
 
 **Impact**: 
 - ~127 lines of duplicate code

@@ -94,6 +94,8 @@ def test_entity_alias_optional_fields(db):
 
 def test_entity_alias_timestamp_mixin(db):
     """Test that TimestampMixin fields work."""
+    from datetime import datetime, timezone
+    
     alias = EntityAlias(entity_type="cooperative", entity_id=1, alias="Test Alias")
     db.add(alias)
     db.commit()
@@ -101,6 +103,19 @@ def test_entity_alias_timestamp_mixin(db):
     # TimestampMixin should add created_at and updated_at
     assert hasattr(alias, "created_at")
     assert hasattr(alias, "updated_at")
+    
+    # Verify timestamps are valid datetime objects
+    assert alias.created_at is not None
+    assert alias.updated_at is not None
+    assert isinstance(alias.created_at, datetime)
+    assert isinstance(alias.updated_at, datetime)
+    
+    # Verify timestamps are reasonable (within last minute)
+    now = datetime.now(timezone.utc)
+    time_diff_created = (now - alias.created_at.replace(tzinfo=timezone.utc)).total_seconds()
+    time_diff_updated = (now - alias.updated_at.replace(tzinfo=timezone.utc)).total_seconds()
+    assert 0 <= time_diff_created < 60, "created_at should be recent"
+    assert 0 <= time_diff_updated < 60, "updated_at should be recent"
 
 
 def test_query_aliases_by_entity(db):
