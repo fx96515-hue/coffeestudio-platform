@@ -63,8 +63,8 @@ export default function DashboardPage() {
         const [h, m, coops, roasters, n, r] = await Promise.all([
           apiFetch<ApiStatus>("/health", { skipAuth: true }),
           apiFetch<MarketSnapshot>("/market/latest"),
-          apiFetch<Paged<any>>("/cooperatives?limit=1"),
-          apiFetch<Paged<any>>("/roasters?limit=1"),
+          apiFetch<Paged<any> | any[]>("/cooperatives?limit=1"),
+          apiFetch<Paged<any> | any[]>("/roasters?limit=1"),
           apiFetch<NewsItem[]>("/news?limit=6"),
           apiFetch<Report[]>("/reports?limit=6"),
         ]);
@@ -72,8 +72,9 @@ export default function DashboardPage() {
         if (!alive) return;
         setHealth(h);
         setMarket(m);
-        setCoopsTotal(coops?.total ?? null);
-        setRoastersTotal(roasters?.total ?? null);
+        // Handle both flat list and Paged format
+        setCoopsTotal(Array.isArray(coops) ? coops.length : coops?.total ?? null);
+        setRoastersTotal(Array.isArray(roasters) ? roasters.length : roasters?.total ?? null);
         setNews(Array.isArray(n) ? n : []);
         setReports(Array.isArray(r) ? r : []);
       } catch (e: any) {
