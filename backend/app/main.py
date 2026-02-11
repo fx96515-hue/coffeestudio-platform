@@ -8,10 +8,11 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from sqlalchemy.exc import IntegrityError, OperationalError
 from starlette.exceptions import HTTPException as StarletteHTTPException
+import structlog
 
 from app.api.router import api_router
 from app.core.config import settings
-from app.core.logging import setup_logging, get_logger
+from app.core.logging import setup_logging
 from app.core.error_handlers import (
     validation_exception_handler,
     http_exception_handler,
@@ -22,7 +23,7 @@ from app.core.error_handlers import (
 from app.middleware import InputValidationMiddleware, SecurityHeadersMiddleware
 
 setup_logging()
-log = get_logger(__name__)
+log = structlog.get_logger(__name__)
 
 app = FastAPI(title="CoffeeStudio API", version="0.1.0")
 
@@ -76,6 +77,7 @@ async def startup_seed_data():
     from app.services.peru_regions import seed_default_regions
     from app.services.seed_peru_regions import seed_peru_regions
     from app.services.seed_demo_data import seed_all_demo_data
+    from sqlalchemy import inspect
     
     db = SessionLocal()
     try:
@@ -86,8 +88,13 @@ async def startup_seed_data():
         log.info("startup_seed_peru_regions", result=peru_region_result)
         
         # Seed Region table (for Peru Sourcing Intelligence)
-        region_result = seed_peru_regions(db)
-        log.info("startup_seed_regions", result=region_result)
+        # Only if the table exists (it may not be in all deployments)
+        inspector = inspect(db.get_bind())
+        if "regions" in inspector.get_table_names():
+            region_result = seed_peru_regions(db)
+            log.info("startup_seed_regions", result=region_result)
+        else:
+            log.info("startup_seed_regions", status="skipped", reason="regions table not found")
         
         # Seed demo data (cooperatives, roasters, market observations)
         demo_result = seed_all_demo_data(db)
