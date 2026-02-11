@@ -1,49 +1,67 @@
-# Use official Python runtime as base image
-FROM python:3.11-slim
+# syntax=docker/dockerfile:1
 
-# Set working directory in container
+# =============================================================================
+# Build stage: Install dependencies
+# =============================================================================
+FROM python:3.12-slim AS builder
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
-    postgresql-client \
+    g++ \
     && rm -rf /var/lib/apt/lists/*
 
-# Create virtual environment
+# Install dependencies in a virtual environment
 RUN python -m venv /opt/venv
-
-# Activate virtual environment
 ENV PATH="/opt/venv/bin:$PATH"
 
-# Copy requirements first for better caching
-COPY requirements.txt .
+# Copy requirements and install
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Install Python dependencies
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+# =============================================================================
+# Runtime stage: Use slim base with minimal dependencies
+# =============================================================================
+FROM python:3.12-slim AS runtime
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PATH="/opt/venv/bin:$PATH"
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    libpq5 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy virtual environment from builder
+COPY --from=builder /opt/venv /opt/venv
 
 # Copy application code
-COPY . .
+COPY alembic.ini ./
+COPY alembic ./alembic
+COPY app ./app
 
-# Create non-root user for security
-RUN useradd -m -u 1000 appuser && \
+# Create non-root user
+RUN groupadd -r appuser && \
+    useradd -r -g appuser appuser && \
     chown -R appuser:appuser /app
 
-# Switch to non-root user
 USER appuser
 
-# Expose port
 EXPOSE 8000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8000/health')"
+    CMD curl -fsS http://localhost:8000/health || exit 1
 
-# Set environment variables
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PATH="/opt/venv/bin:$PATH"
-
-# Run the application
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
