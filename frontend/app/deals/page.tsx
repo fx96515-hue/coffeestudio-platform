@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useDeals, useCalculateMargin } from "../hooks/useDeals";
-import { MarginCalcRequest, Deal } from "../types";
+import { MarginCalcRequest } from "../types";
 import PieChart from "../charts/PieChart";
 
 export default function DealsDashboard() {

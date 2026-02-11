@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { apiFetch } from "../../lib/api";
 import KpiCard from "../components/KpiCard";
 import Badge from "../components/Badge";

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { format, differenceInDays } from "date-fns";
 
 export default function ShipmentsDashboard() {
