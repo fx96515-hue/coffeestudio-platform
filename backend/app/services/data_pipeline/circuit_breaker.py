@@ -145,7 +145,7 @@ class CircuitBreaker:
         state = self.get_state()
 
         # Increment failure count
-        failures_int = self.redis.incr(self.failures_key)
+        failures_int: int = int(self.redis.incr(self.failures_key))
         self.redis.expire(self.failures_key, 3600)  # 1h TTL
 
         # Record timestamp

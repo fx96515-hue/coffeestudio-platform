@@ -54,7 +54,7 @@ class DataFreshnessMonitor:
             "last_updated": obs.observed_at.isoformat(),
             "age_hours": round(age_hours, 2),
             "value": obs.value,
-            "source": obs.source.name if obs.source_id and obs.source else None,
+            "source": None,  # TODO: Add relationship or query separately
         }
 
     def _check_staleness(
