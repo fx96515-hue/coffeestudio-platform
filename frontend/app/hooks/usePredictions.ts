@@ -27,13 +27,9 @@ export function usePricePrediction() {
   return useMutation({
     mutationFn: async (data: PricePredictionRequest) => {
       // Map frontend field names to backend API
-      const parts = data.origin.split(",");
-      const origin_country = parts[0]?.trim() || data.origin;
-      const origin_region = parts.length > 1 ? parts[1]?.trim() || "" : "";
-      
       const backendRequest = {
-        origin_country,
-        origin_region,
+        origin_country: data.origin_country,
+        origin_region: data.origin_region,
         variety: data.variety,
         process_method: data.process,
         quality_grade: data.grade,

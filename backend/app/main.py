@@ -11,7 +11,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.api.router import api_router
 from app.core.config import settings
-from app.core.logging import setup_logging
+from app.core.logging import setup_logging, get_logger
 from app.core.error_handlers import (
     validation_exception_handler,
     http_exception_handler,
@@ -22,6 +22,7 @@ from app.core.error_handlers import (
 from app.middleware import InputValidationMiddleware, SecurityHeadersMiddleware
 
 setup_logging()
+log = get_logger(__name__)
 
 app = FastAPI(title="CoffeeStudio API", version="0.1.0")
 
@@ -65,3 +66,35 @@ app.add_middleware(
 app.include_router(api_router)
 
 Instrumentator().instrument(app).expose(app)
+
+
+# Startup event for auto-seeding
+@app.on_event("startup")
+async def startup_seed_data():
+    """Seed default regions and demo data on startup if tables are empty."""
+    from app.db.session import SessionLocal
+    from app.services.peru_regions import seed_default_regions
+    from app.services.seed_peru_regions import seed_peru_regions
+    from app.services.seed_demo_data import seed_all_demo_data
+    
+    db = SessionLocal()
+    try:
+        log.info("startup_seed", status="starting")
+        
+        # Seed PeruRegion table (for regions API)
+        peru_region_result = seed_default_regions(db)
+        log.info("startup_seed_peru_regions", result=peru_region_result)
+        
+        # Seed Region table (for Peru Sourcing Intelligence)
+        region_result = seed_peru_regions(db)
+        log.info("startup_seed_regions", result=region_result)
+        
+        # Seed demo data (cooperatives, roasters, market observations)
+        demo_result = seed_all_demo_data(db)
+        log.info("startup_seed_demo", result=demo_result)
+        
+        log.info("startup_seed", status="completed")
+    except Exception as e:
+        log.error("startup_seed", error=str(e), exc_info=True)
+    finally:
+        db.close()

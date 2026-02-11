@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { apiFetch } from "../../lib/api";
 import KpiCard from "../components/KpiCard";
 import Badge from "../components/Badge";
+import MarketPriceWidget from "../components/MarketPriceWidget";
 
 type ApiStatus = { status: string };
 
@@ -140,15 +141,11 @@ export default function DashboardPage() {
           value={roastersTotal ?? (loading ? "…" : "–")}
           hint="CRM-Pipeline"
         />
+        <MarketPriceWidget />
         <KpiCard
           label="USD/EUR"
           value={fx ? fx.value.toFixed(4) : loading ? "…" : "–"}
           hint={fx ? `Stand: ${fmtDate(fx.observed_at)}` : "FX Feed"}
-        />
-        <KpiCard
-          label="Coffee (KC)"
-          value={kc ? kc.value.toFixed(2) : loading ? "…" : "–"}
-          hint={kc ? `Stand: ${fmtDate(kc.observed_at)}` : "CME / Stooq"}
         />
       </div>
 

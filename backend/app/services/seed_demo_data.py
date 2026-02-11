@@ -1,0 +1,454 @@
+"""
+Seed demo data for cooperatives, roasters, and market observations.
+
+This module provides idempotent demo data seeding for when PERPLEXITY_API_KEY
+is not available or for initial testing purposes.
+"""
+
+from datetime import datetime, timezone
+from typing import Any
+from sqlalchemy.orm import Session
+from sqlalchemy import select
+
+from app.models.cooperative import Cooperative
+from app.models.roaster import Roaster
+from app.models.market import MarketObservation
+
+
+# Demo cooperatives data - realistic Peru coffee cooperatives
+DEMO_COOPERATIVES = [
+    {
+        "name": "Cooperativa Agraria Cafetalera Frontera San Ignacio",
+        "region": "Cajamarca",
+        "altitude_m": 1600,
+        "varieties": "Caturra, Bourbon, Typica",
+        "certifications": "Organic, Fair Trade, Rainforest Alliance",
+        "contact_email": "info@cafrontera.com",
+        "website": "https://www.cafrontera.com",
+        "status": "active",
+        "quality_score": 88.5,
+        "reliability_score": 92.0,
+        "economics_score": 85.0,
+        "meta": {
+            "country": "Peru",
+            "members_count": 1200,
+            "annual_production_kg": 800000,
+        },
+    },
+    {
+        "name": "CENFROCAFE - Central Fronteriza del Norte de Cafetaleros",
+        "region": "Cajamarca",
+        "altitude_m": 1700,
+        "varieties": "Caturra, Catimor, Bourbon",
+        "certifications": "Organic, Fair Trade, UTZ",
+        "contact_email": "exportaciones@cenfrocafe.com.pe",
+        "website": "https://www.cenfrocafe.com.pe",
+        "status": "active",
+        "quality_score": 86.0,
+        "reliability_score": 89.0,
+        "economics_score": 87.5,
+        "meta": {
+            "country": "Peru",
+            "members_count": 2000,
+            "annual_production_kg": 1200000,
+        },
+    },
+    {
+        "name": "Sol y Café",
+        "region": "Cusco",
+        "altitude_m": 1800,
+        "varieties": "Bourbon, Typica, Caturra",
+        "certifications": "Organic, Fair Trade",
+        "contact_email": "info@solycafe.com",
+        "website": "https://www.solycafe.com",
+        "status": "active",
+        "quality_score": 90.0,
+        "reliability_score": 91.0,
+        "economics_score": 83.0,
+        "meta": {
+            "country": "Peru",
+            "members_count": 650,
+            "annual_production_kg": 450000,
+        },
+    },
+    {
+        "name": "Cooperativa Agraria Norandino",
+        "region": "Cajamarca",
+        "altitude_m": 1500,
+        "varieties": "Caturra, Bourbon, Pache",
+        "certifications": "Organic, Fair Trade, Rainforest Alliance, UTZ",
+        "contact_email": "norandino@norandino.com.pe",
+        "website": "https://www.norandino.com.pe",
+        "status": "active",
+        "quality_score": 87.5,
+        "reliability_score": 94.0,
+        "economics_score": 90.0,
+        "meta": {
+            "country": "Peru",
+            "members_count": 7000,
+            "annual_production_kg": 3500000,
+        },
+    },
+    {
+        "name": "CAC Pangoa",
+        "region": "Junín",
+        "altitude_m": 1400,
+        "varieties": "Caturra, Catimor, Bourbon",
+        "certifications": "Organic, Fair Trade",
+        "contact_email": "exportaciones@cacpangoa.com.pe",
+        "website": "https://www.cacpangoa.com.pe",
+        "status": "active",
+        "quality_score": 84.0,
+        "reliability_score": 87.0,
+        "economics_score": 86.0,
+        "meta": {
+            "country": "Peru",
+            "members_count": 900,
+            "annual_production_kg": 600000,
+        },
+    },
+    {
+        "name": "Cooperativa Agraria Cafetalera Huadquiña",
+        "region": "Cusco",
+        "altitude_m": 1650,
+        "varieties": "Typica, Bourbon, Caturra",
+        "certifications": "Organic, Fair Trade, Rainforest Alliance",
+        "contact_email": "info@huadquina.org",
+        "website": "https://www.huadquina.org",
+        "status": "active",
+        "quality_score": 89.0,
+        "reliability_score": 88.0,
+        "economics_score": 84.0,
+        "meta": {
+            "country": "Peru",
+            "members_count": 550,
+            "annual_production_kg": 380000,
+        },
+    },
+    {
+        "name": "Cooperativa de Servicios Múltiples Valle de Incahuasi",
+        "region": "San Martín",
+        "altitude_m": 1300,
+        "varieties": "Caturra, Catimor",
+        "certifications": "Organic, Fair Trade",
+        "contact_email": "incahuasi@gmail.com",
+        "website": None,
+        "status": "active",
+        "quality_score": 82.0,
+        "reliability_score": 85.0,
+        "economics_score": 80.0,
+        "meta": {
+            "country": "Peru",
+            "members_count": 400,
+            "annual_production_kg": 250000,
+        },
+    },
+    {
+        "name": "CECOCAFEN - Central de Cooperativas Agrarias Cafetaleras",
+        "region": "Amazonas",
+        "altitude_m": 1550,
+        "varieties": "Caturra, Bourbon, Catimor",
+        "certifications": "Organic, Fair Trade",
+        "contact_email": "cecocafen@cecocafen.com.pe",
+        "website": "https://www.cecocafen.com.pe",
+        "status": "active",
+        "quality_score": 85.5,
+        "reliability_score": 86.0,
+        "economics_score": 82.5,
+        "meta": {
+            "country": "Peru",
+            "members_count": 1500,
+            "annual_production_kg": 900000,
+        },
+    },
+]
+
+# Demo roasters data - realistic German coffee roasters
+DEMO_ROASTERS = [
+    {
+        "name": "Kaffeerösterei Speicherstadt",
+        "city": "Hamburg",
+        "website": "https://www.speicherstadt-kaffee.de",
+        "contact_email": "kontakt@speicherstadt-kaffee.de",
+        "peru_focus": True,
+        "specialty_focus": True,
+        "price_position": "premium",
+        "status": "active",
+        "total_score": 85.0,
+        "meta": {
+            "country": "DE",
+            "founded_year": 1999,
+        },
+    },
+    {
+        "name": "The Barn Berlin",
+        "city": "Berlin",
+        "website": "https://thebarn.de",
+        "contact_email": "hello@thebarn.de",
+        "peru_focus": False,
+        "specialty_focus": True,
+        "price_position": "premium",
+        "status": "active",
+        "total_score": 92.0,
+        "meta": {
+            "country": "DE",
+            "founded_year": 2010,
+        },
+    },
+    {
+        "name": "Hoppenworth & Ploch",
+        "city": "Frankfurt",
+        "website": "https://www.hoppenworth-ploch.de",
+        "contact_email": "info@hoppenworth-ploch.de",
+        "peru_focus": False,
+        "specialty_focus": True,
+        "price_position": "mid",
+        "status": "active",
+        "total_score": 78.0,
+        "meta": {
+            "country": "DE",
+            "founded_year": 2011,
+        },
+    },
+    {
+        "name": "Mahlefitz Kaffeerösterei",
+        "city": "München",
+        "website": "https://www.mahlefitz.de",
+        "contact_email": "info@mahlefitz.de",
+        "peru_focus": True,
+        "specialty_focus": True,
+        "price_position": "premium",
+        "status": "active",
+        "total_score": 88.0,
+        "meta": {
+            "country": "DE",
+            "founded_year": 2015,
+        },
+    },
+    {
+        "name": "Five Elephant",
+        "city": "Berlin",
+        "website": "https://www.fiveelephant.com",
+        "contact_email": "hello@fiveelephant.com",
+        "peru_focus": False,
+        "specialty_focus": True,
+        "price_position": "premium",
+        "status": "active",
+        "total_score": 90.0,
+        "meta": {
+            "country": "DE",
+            "founded_year": 2010,
+        },
+    },
+    {
+        "name": "Bonanza Coffee",
+        "city": "Berlin",
+        "website": "https://www.bonanzacoffee.de",
+        "contact_email": "info@bonanzacoffee.de",
+        "peru_focus": False,
+        "specialty_focus": True,
+        "price_position": "premium",
+        "status": "active",
+        "total_score": 91.0,
+        "meta": {
+            "country": "DE",
+            "founded_year": 2006,
+        },
+    },
+    {
+        "name": "Elephants & Butterflies Coffee",
+        "city": "Stuttgart",
+        "website": "https://www.elephants-butterflies.de",
+        "contact_email": "info@elephants-butterflies.de",
+        "peru_focus": True,
+        "specialty_focus": True,
+        "price_position": "mid",
+        "status": "active",
+        "total_score": 82.0,
+        "meta": {
+            "country": "DE",
+            "founded_year": 2018,
+        },
+    },
+    {
+        "name": "Quijote Kaffee",
+        "city": "Hamburg",
+        "website": "https://www.quijote-kaffee.de",
+        "contact_email": "info@quijote-kaffee.de",
+        "peru_focus": True,
+        "specialty_focus": True,
+        "price_position": "mid",
+        "status": "active",
+        "total_score": 80.0,
+        "meta": {
+            "country": "DE",
+            "founded_year": 1998,
+        },
+    },
+]
+
+# Demo market observations - reference prices
+DEMO_MARKET_OBSERVATIONS = [
+    {
+        "key": "COFFEE_C:USD_LB",
+        "value": 3.50,
+        "unit": "lb",
+        "currency": "USD",
+        "meta": {
+            "source": "Demo/Reference",
+            "description": "ICE Coffee C Futures reference price",
+        },
+    },
+    {
+        "key": "EUR_USD",
+        "value": 1.08,
+        "unit": None,
+        "currency": None,
+        "meta": {
+            "source": "Demo/Reference",
+            "description": "EUR/USD exchange rate reference",
+        },
+    },
+]
+
+
+def seed_demo_cooperatives(db: Session) -> dict[str, Any]:
+    """
+    Seed demo cooperatives if table is empty.
+    
+    Args:
+        db: Database session
+        
+    Returns:
+        Dictionary with operation results
+    """
+    # Check if cooperatives table is empty
+    count = db.query(Cooperative).count()
+    if count > 0:
+        return {
+            "status": "skipped",
+            "reason": "cooperatives table not empty",
+            "existing_count": count,
+        }
+    
+    created = 0
+    for coop_data in DEMO_COOPERATIVES:
+        coop = Cooperative(**coop_data)
+        db.add(coop)
+        created += 1
+    
+    db.commit()
+    
+    return {
+        "status": "success",
+        "created": created,
+        "total": len(DEMO_COOPERATIVES),
+    }
+
+
+def seed_demo_roasters(db: Session) -> dict[str, Any]:
+    """
+    Seed demo roasters if table is empty.
+    
+    Args:
+        db: Database session
+        
+    Returns:
+        Dictionary with operation results
+    """
+    # Check if roasters table is empty
+    count = db.query(Roaster).count()
+    if count > 0:
+        return {
+            "status": "skipped",
+            "reason": "roasters table not empty",
+            "existing_count": count,
+        }
+    
+    created = 0
+    for roaster_data in DEMO_ROASTERS:
+        roaster = Roaster(**roaster_data)
+        db.add(roaster)
+        created += 1
+    
+    db.commit()
+    
+    return {
+        "status": "success",
+        "created": created,
+        "total": len(DEMO_ROASTERS),
+    }
+
+
+def seed_demo_market_data(db: Session) -> dict[str, Any]:
+    """
+    Seed demo market observations if they don't exist.
+    
+    Args:
+        db: Database session
+        
+    Returns:
+        Dictionary with operation results
+    """
+    created = 0
+    updated = 0
+    now = datetime.now(timezone.utc)
+    
+    for obs_data in DEMO_MARKET_OBSERVATIONS:
+        # Check if observation with this key already exists
+        stmt = select(MarketObservation).where(
+            MarketObservation.key == obs_data["key"]
+        )
+        existing = db.scalar(stmt)
+        
+        if existing:
+            # Update if data is older than 24 hours
+            age_hours = (now - existing.observed_at).total_seconds() / 3600
+            if age_hours > 24:
+                existing.value = obs_data["value"]
+                existing.observed_at = now
+                if obs_data.get("meta"):
+                    existing.meta = obs_data["meta"]
+                updated += 1
+        else:
+            # Create new observation
+            obs = MarketObservation(
+                key=obs_data["key"],
+                value=obs_data["value"],
+                unit=obs_data.get("unit"),
+                currency=obs_data.get("currency"),
+                observed_at=now,
+                meta=obs_data.get("meta"),
+            )
+            db.add(obs)
+            created += 1
+    
+    db.commit()
+    
+    return {
+        "status": "success",
+        "created": created,
+        "updated": updated,
+        "total": len(DEMO_MARKET_OBSERVATIONS),
+    }
+
+
+def seed_all_demo_data(db: Session) -> dict[str, Any]:
+    """
+    Seed all demo data (cooperatives, roasters, market observations).
+    
+    Args:
+        db: Database session
+        
+    Returns:
+        Dictionary with combined operation results
+    """
+    coops_result = seed_demo_cooperatives(db)
+    roasters_result = seed_demo_roasters(db)
+    market_result = seed_demo_market_data(db)
+    
+    return {
+        "cooperatives": coops_result,
+        "roasters": roasters_result,
+        "market": market_result,
+    }
