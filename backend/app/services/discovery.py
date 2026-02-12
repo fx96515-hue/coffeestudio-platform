@@ -656,9 +656,7 @@ def seed_discovery(
                 # Classification fields
                 if ent.get("peru_focus") is not None and not roaster.peru_focus:
                     roaster.peru_focus = bool(ent["peru_focus"])
-                elif (
-                    ent.get("buys_from_peru") is not None and not roaster.peru_focus
-                ):
+                elif ent.get("buys_from_peru") is not None and not roaster.peru_focus:
                     roaster.peru_focus = bool(ent["buys_from_peru"])
 
                 if ent.get("specialty_focus") is not None:

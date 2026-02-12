@@ -264,9 +264,13 @@ def get_alert_summary(db: Session) -> dict[str, Any]:
         Dict with counts by severity and acknowledgment status
     """
     total = db.query(QualityAlert).count()
-    unacknowledged = db.query(QualityAlert).filter(QualityAlert.acknowledged.is_(False)).count()
-    
-    critical = db.query(QualityAlert).filter(QualityAlert.severity == "critical").count()
+    unacknowledged = (
+        db.query(QualityAlert).filter(QualityAlert.acknowledged.is_(False)).count()
+    )
+
+    critical = (
+        db.query(QualityAlert).filter(QualityAlert.severity == "critical").count()
+    )
     warning = db.query(QualityAlert).filter(QualityAlert.severity == "warning").count()
     info = db.query(QualityAlert).filter(QualityAlert.severity == "info").count()
 

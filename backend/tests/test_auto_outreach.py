@@ -51,7 +51,9 @@ def test_select_top_candidates_cooperatives(db):
 
     # Should only return coop1 and coop2
     assert len(candidates) == 2
-    assert candidates[0]["total_score"] >= candidates[1]["total_score"]  # Sorted by score
+    assert (
+        candidates[0]["total_score"] >= candidates[1]["total_score"]
+    )  # Sorted by score
 
 
 def test_select_top_candidates_with_region_filter(db):
@@ -121,9 +123,7 @@ def test_select_top_candidates_roasters(db):
     db.add_all([roaster1, roaster2])
     db.commit()
 
-    candidates = select_top_candidates(
-        db, entity_type="roaster", limit=10
-    )
+    candidates = select_top_candidates(db, entity_type="roaster", limit=10)
 
     assert len(candidates) >= 1
     assert candidates[0]["name"] == "High Quality Roaster"
