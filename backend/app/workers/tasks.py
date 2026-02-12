@@ -457,4 +457,3 @@ def update_entity_embedding(entity_type: str, entity_id: int):
         return {"status": "error", "error": str(e)}
     finally:
         db.close()
-

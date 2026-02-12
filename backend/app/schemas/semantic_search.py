@@ -1,7 +1,7 @@
 """Schemas for semantic search functionality."""
 
 from pydantic import BaseModel, Field
-from typing import Any, Literal
+from typing import Literal
 
 
 class SemanticSearchParams(BaseModel):
