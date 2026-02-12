@@ -331,67 +331,108 @@ def compare_models(
     Returns:
         Comparison results with metrics for both models
     """
-    # Collect data based on model type
-    if model_type_name == "freight_cost":
-        data = collect_freight_training_data(db)
-        rf_model: FreightCostModel | FreightCostModelXGB = get_freight_model("random_forest")
-        xgb_model: FreightCostModel | FreightCostModelXGB = get_freight_model("xgboost")
-    elif model_type_name == "coffee_price":
-        data = collect_price_training_data(db)
-        rf_model_coffee: CoffeePriceModel | CoffeePriceModelXGB = get_coffee_price_model("random_forest")
-        xgb_model_coffee: CoffeePriceModel | CoffeePriceModelXGB = get_coffee_price_model("xgboost")
-        # Use same variable names for consistency
-        rf_model = rf_model_coffee  # type: ignore[assignment]
-        xgb_model = xgb_model_coffee  # type: ignore[assignment]
-    else:
-        raise ValueError(f"Invalid model_type_name: {model_type_name}")
-
-    # Prepare features (using RF model's prepare_features, which is identical)
-    X, y = rf_model.prepare_features(data)
-
-    if X is None or y is None:
-        raise ValueError("Failed to prepare features")
-
-    # Split data
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=test_size, random_state=random_state
-    )
-
     results: dict[str, Any] = {
         "model_type": model_type_name,
-        "training_samples": len(X_train),
-        "test_samples": len(X_test),
         "models": {},
     }
 
-    # Train and evaluate Random Forest
-    try:
-        rf_model.train(X_train, y_train)
-        y_pred_rf = rf_model.predict(X_test)
-        rf_metrics = {
-            "rmse": float(np.sqrt(mean_squared_error(y_test, y_pred_rf))),
-            "mae": float(mean_absolute_error(y_test, y_pred_rf)),
-            "r2": float(r2_score(y_test, y_pred_rf)),
-        }
-        results["models"]["random_forest"] = rf_metrics
-    except Exception as e:
-        results["models"]["random_forest"] = {"error": str(e)}
+    # Collect data and train models based on model type
+    if model_type_name == "freight_cost":
+        data = collect_freight_training_data(db)
+        rf_model = get_freight_model("random_forest")
+        xgb_model = get_freight_model("xgboost")
+        
+        # Prepare features
+        X, y = rf_model.prepare_features(data)
+        
+        if X is None or y is None:
+            raise ValueError("Failed to prepare features")
 
-    # Train and evaluate XGBoost
-    try:
-        xgb_model.train(X_train, y_train)
-        y_pred_xgb = xgb_model.predict(X_test)
-        xgb_metrics = {
-            "rmse": float(np.sqrt(mean_squared_error(y_test, y_pred_xgb))),
-            "mae": float(mean_absolute_error(y_test, y_pred_xgb)),
-            "r2": float(r2_score(y_test, y_pred_xgb)),
-        }
-        results["models"]["xgboost"] = xgb_metrics
-    except Exception as e:
-        results["models"]["xgboost"] = {"error": str(e)}
+        # Split data
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=test_size, random_state=random_state
+        )
+        
+        results["training_samples"] = len(X_train)
+        results["test_samples"] = len(X_test)
+
+        # Train and evaluate Random Forest
+        try:
+            rf_model.train(X_train, y_train)
+            y_pred_rf = rf_model.predict(X_test)
+            rf_metrics = {
+                "rmse": float(np.sqrt(mean_squared_error(y_test, y_pred_rf))),
+                "mae": float(mean_absolute_error(y_test, y_pred_rf)),
+                "r2": float(r2_score(y_test, y_pred_rf)),
+            }
+            results["models"]["random_forest"] = rf_metrics
+        except Exception as e:
+            results["models"]["random_forest"] = {"error": str(e)}
+
+        # Train and evaluate XGBoost
+        try:
+            xgb_model.train(X_train, y_train)
+            y_pred_xgb = xgb_model.predict(X_test)
+            xgb_metrics = {
+                "rmse": float(np.sqrt(mean_squared_error(y_test, y_pred_xgb))),
+                "mae": float(mean_absolute_error(y_test, y_pred_xgb)),
+                "r2": float(r2_score(y_test, y_pred_xgb)),
+            }
+            results["models"]["xgboost"] = xgb_metrics
+        except Exception as e:
+            results["models"]["xgboost"] = {"error": str(e)}
+            
+    elif model_type_name == "coffee_price":
+        data = collect_price_training_data(db)
+        rf_model_coffee = get_coffee_price_model("random_forest")
+        xgb_model_coffee = get_coffee_price_model("xgboost")
+        
+        # Prepare features
+        X, y = rf_model_coffee.prepare_features(data)
+        
+        if X is None or y is None:
+            raise ValueError("Failed to prepare features")
+
+        # Split data
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=test_size, random_state=random_state
+        )
+        
+        results["training_samples"] = len(X_train)
+        results["test_samples"] = len(X_test)
+
+        # Train and evaluate Random Forest
+        try:
+            rf_model_coffee.train(X_train, y_train)
+            y_pred_rf = rf_model_coffee.predict(X_test)
+            rf_metrics = {
+                "rmse": float(np.sqrt(mean_squared_error(y_test, y_pred_rf))),
+                "mae": float(mean_absolute_error(y_test, y_pred_rf)),
+                "r2": float(r2_score(y_test, y_pred_rf)),
+            }
+            results["models"]["random_forest"] = rf_metrics
+        except Exception as e:
+            results["models"]["random_forest"] = {"error": str(e)}
+
+        # Train and evaluate XGBoost
+        try:
+            xgb_model_coffee.train(X_train, y_train)
+            y_pred_xgb = xgb_model_coffee.predict(X_test)
+            xgb_metrics = {
+                "rmse": float(np.sqrt(mean_squared_error(y_test, y_pred_xgb))),
+                "mae": float(mean_absolute_error(y_test, y_pred_xgb)),
+                "r2": float(r2_score(y_test, y_pred_xgb)),
+            }
+            results["models"]["xgboost"] = xgb_metrics
+        except Exception as e:
+            results["models"]["xgboost"] = {"error": str(e)}
+    else:
+        raise ValueError(f"Invalid model_type_name: {model_type_name}")
 
     # Determine winner
     if "error" not in results["models"]["random_forest"] and "error" not in results["models"]["xgboost"]:
+        rf_metrics = results["models"]["random_forest"]
+        xgb_metrics = results["models"]["xgboost"]
         # Lower RMSE is better
         if xgb_metrics["rmse"] < rf_metrics["rmse"]:
             results["winner"] = "xgboost"

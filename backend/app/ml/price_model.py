@@ -304,7 +304,7 @@ class CoffeePriceModelXGB:
         
         # For XGBoost, we can't directly get tree predictions like RF
         # Instead, we estimate uncertainty using a simple approach:
-        # Use 10% margin as a confidence interval (can be improved with quantile regression)
+        # Use 5% standard deviation estimate to create a ~10% confidence interval (±5%)
         std_estimate = predictions * 0.05  # 5% standard deviation estimate
         
         lower_bound = predictions - 1.96 * std_estimate
