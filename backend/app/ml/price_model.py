@@ -8,7 +8,7 @@ import joblib
 try:
     from xgboost import XGBRegressor
 except ImportError:
-    XGBRegressor = None  # type: ignore
+    XGBRegressor = None
 
 
 class CoffeePriceModel:

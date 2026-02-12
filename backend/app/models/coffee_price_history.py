@@ -1,3 +1,4 @@
+from datetime import date
 from sqlalchemy import String, Float, Date, JSON
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -11,7 +12,7 @@ class CoffeePriceHistory(Base, TimestampMixin):
     __tablename__ = "coffee_price_history"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    date: Mapped[Date] = mapped_column(Date, nullable=False, index=True)
+    date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
     origin_country: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     origin_region: Mapped[str] = mapped_column(String(255), nullable=False)
     variety: Mapped[str] = mapped_column(String(255), nullable=False)

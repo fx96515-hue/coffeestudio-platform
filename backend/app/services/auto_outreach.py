@@ -46,6 +46,7 @@ def select_top_candidates(
         raise ValueError("entity_type must be cooperative|roaster")
 
     # Build query - handle different models separately for proper typing
+    entities: list[Any]
     if entity_type == "cooperative":
         stmt = select(Cooperative).filter(Cooperative.status == "active")
         
@@ -63,15 +64,18 @@ def select_top_candidates(
         
         # Order by total score descending, handling None values
         stmt = stmt.order_by(Cooperative.total_score.desc().nullslast()).limit(limit)
+        
+        result = db.execute(stmt)
+        entities = result.scalars().all()
     else:
         # Roaster doesn't have region, certifications, or individual score fields
-        stmt = select(Roaster).filter(Roaster.status == "active")
+        stmt_roaster = select(Roaster).filter(Roaster.status == "active")
         
         # Order by total score descending, handling None values
-        stmt = stmt.order_by(Roaster.total_score.desc().nullslast()).limit(limit)
-
-    result = db.execute(stmt)
-    entities = result.scalars().all()
+        stmt_roaster = stmt_roaster.order_by(Roaster.total_score.desc().nullslast()).limit(limit)
+        
+        result_roaster = db.execute(stmt_roaster)
+        entities = result_roaster.scalars().all()
 
     return [
         {
@@ -245,14 +249,13 @@ def get_outreach_suggestions(
         if not recent_outreach:
             should_suggest = True
         else:
-            # Handle both timezone-aware and naive datetimes
+            # created_at is now properly typed as datetime
             created_at = recent_outreach.created_at
-            if hasattr(created_at, 'tzinfo'):
-                if created_at.tzinfo is None:
-                    days_since = (datetime.utcnow() - created_at).days
-                else:
-                    days_since = (datetime.now(timezone.utc) - created_at).days
-                should_suggest = days_since > 30
+            if created_at.tzinfo is None:
+                days_since = (datetime.utcnow() - created_at).days
+            else:
+                days_since = (datetime.now(timezone.utc) - created_at).days
+            should_suggest = days_since > 30
         
         if should_suggest:
             suggestions.append(
@@ -261,7 +264,7 @@ def get_outreach_suggestions(
                     "reason": "High scores, no recent outreach",
                     "last_contact": (
                         recent_outreach.created_at.isoformat()
-                        if recent_outreach and hasattr(recent_outreach.created_at, 'isoformat')
+                        if recent_outreach
                         else None
                     ),
                 }
