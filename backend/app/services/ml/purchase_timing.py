@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 from typing import Any, Literal
 from sqlalchemy import select
 from sqlalchemy.orm import Session
