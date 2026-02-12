@@ -69,7 +69,6 @@ def select_top_candidates(
     else:
         # Roaster doesn't have region, certifications, or individual score fields
         stmt_roaster = select(Roaster).filter(Roaster.status == "active")
-        stmt = select(Roaster).filter(Roaster.status == "active")
 
         # Order by total score descending, handling None values
         stmt_roaster = stmt_roaster.order_by(
