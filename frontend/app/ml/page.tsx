@@ -46,7 +46,6 @@ export default function MLPage() {
     null
   );
   const [forecast, setForecast] = useState<PriceForecast | null>(null);
-  const [loading, setLoading] = useState(false);
   const [trainingModel, setTrainingModel] = useState<string | null>(null);
 
   async function fetchModels() {
