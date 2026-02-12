@@ -40,6 +40,15 @@ def create_roaster(
         entity_data=payload.model_dump(),
     )
 
+    # Queue embedding generation task (async, non-blocking)
+    try:
+        from app.workers.tasks import update_entity_embedding
+
+        update_entity_embedding.delay("roaster", r.id)
+    except Exception:
+        # Graceful degradation - don't fail entity creation if task queue fails
+        pass
+
     return r
 
 
@@ -83,6 +92,15 @@ def update_roaster(
         old_data=old_data,
         new_data=payload.model_dump(exclude_unset=True),
     )
+
+    # Queue embedding generation task (async, non-blocking)
+    try:
+        from app.workers.tasks import update_entity_embedding
+
+        update_entity_embedding.delay("roaster", roaster_id)
+    except Exception:
+        # Graceful degradation - don't fail entity update if task queue fails
+        pass
 
     return r
 
