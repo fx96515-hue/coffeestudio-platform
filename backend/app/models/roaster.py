@@ -1,6 +1,7 @@
 from datetime import datetime
 from sqlalchemy import String, Text, JSON, Float, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
+from pgvector.sqlalchemy import Vector
 
 from app.db.session import Base
 from app.models.common import TimestampMixin
@@ -37,3 +38,8 @@ class Roaster(Base, TimestampMixin):
         DateTime(timezone=True), nullable=True
     )
     meta: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+
+    # Semantic search embedding (v0.5.0)
+    embedding: Mapped[list[float] | None] = mapped_column(
+        Vector(1536), nullable=True
+    )  # OpenAI text-embedding-3-small dimension
