@@ -52,12 +52,8 @@ class DataPipelineOrchestrator:
         self.redis = redis_client
 
         # Initialize circuit breakers for each provider
-        threshold = getattr(
-            settings, "DATA_PIPELINE_CIRCUIT_BREAKER_THRESHOLD", 3
-        )
-        timeout = getattr(
-            settings, "DATA_PIPELINE_CIRCUIT_BREAKER_TIMEOUT_S", 300
-        )
+        threshold = getattr(settings, "DATA_PIPELINE_CIRCUIT_BREAKER_THRESHOLD", 3)
+        timeout = getattr(settings, "DATA_PIPELINE_CIRCUIT_BREAKER_TIMEOUT_S", 300)
 
         self.breakers = {
             "fx_rates": CircuitBreaker(
@@ -262,7 +258,9 @@ class DataPipelineOrchestrator:
         status = (
             "success"
             if results["fx_rates"] and results["coffee_prices"]
-            else "partial" if any(results.values()) else "failed"
+            else "partial"
+            if any(results.values())
+            else "failed"
         )
 
         log.info(
@@ -326,7 +324,9 @@ class DataPipelineOrchestrator:
         status = (
             "success"
             if results["peru_weather"] and results["news"]
-            else "partial" if any(results.values()) else "failed"
+            else "partial"
+            if any(results.values())
+            else "failed"
         )
 
         log.info(
@@ -427,7 +427,4 @@ class DataPipelineOrchestrator:
         Returns:
             Dictionary with status of each circuit breaker
         """
-        return {
-            name: breaker.get_status()
-            for name, breaker in self.breakers.items()
-        }
+        return {name: breaker.get_status() for name, breaker in self.breakers.items()}

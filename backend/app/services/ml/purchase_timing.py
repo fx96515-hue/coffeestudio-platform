@@ -68,7 +68,13 @@ def analyze_price_trends(
     if len(df) > 1:
         x = np.arange(len(df))
         slope = np.polyfit(x, df["price"].values, 1)[0]
-        trend = "increasing" if slope > 0.01 else "decreasing" if slope < -0.01 else "stable"
+        trend = (
+            "increasing"
+            if slope > 0.01
+            else "decreasing"
+            if slope < -0.01
+            else "stable"
+        )
     else:
         trend = "unknown"
         slope = 0.0
@@ -204,7 +210,9 @@ def get_purchase_timing_recommendation(
         else:
             recommendation = "wait"
             confidence = 0.70
-            reason = f"Prices increasing, wait for better season. Best months: {best_months}"
+            reason = (
+                f"Prices increasing, wait for better season. Best months: {best_months}"
+            )
 
     # Price above average and increasing
     elif current_price > avg_price * 1.05 and trend == "increasing":
@@ -281,7 +289,9 @@ def get_price_forecast(
     ]
 
     # Confidence decreases with time
-    confidence = [float(max(0.3, 0.9 - (i / days_ahead) * 0.5)) for i in range(days_ahead)]
+    confidence = [
+        float(max(0.3, 0.9 - (i / days_ahead) * 0.5)) for i in range(days_ahead)
+    ]
 
     return {
         "status": "ok",
