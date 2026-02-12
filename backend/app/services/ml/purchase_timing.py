@@ -130,13 +130,8 @@ def get_seasonal_patterns(
     # Group by month
     monthly_prices: dict[int, list[float]] = {i: [] for i in range(1, 13)}
     for record in records:
-        # Convert SQLAlchemy Date to Python date if needed
-        record_date = (
-            record.date
-            if isinstance(record.date, date)
-            else date.fromisoformat(str(record.date))
-        )
-        month = record_date.month
+        # record.date is a Python date object from SQLAlchemy
+        month = record.date.month  # type: ignore[attr-defined]
         monthly_prices[month].append(record.price_usd_per_kg)
 
     # Calculate average by month
