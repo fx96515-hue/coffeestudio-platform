@@ -102,7 +102,11 @@ def collect_price_training_data(db: Session) -> pd.DataFrame:
 
 
 def train_freight_model(
-    db: Session, *, test_size: float = 0.2, random_state: int = 42, model_type: str | None = None
+    db: Session,
+    *,
+    test_size: float = 0.2,
+    random_state: int = 42,
+    model_type: str | None = None,
 ) -> dict[str, Any]:
     """Train the freight cost model.
 
@@ -118,7 +122,7 @@ def train_freight_model(
     # Use configured model type if not specified
     if model_type is None:
         model_type = settings.ML_MODEL_TYPE
-    
+
     # Collect data
     data = collect_freight_training_data(db)
 
@@ -148,7 +152,9 @@ def train_freight_model(
     # Save model
     model_dir = Path("models")
     model_dir.mkdir(exist_ok=True)
-    model_path = model_dir / f"freight_model_{datetime.now().strftime('%Y%m%d_%H%M%S')}.joblib"
+    model_path = (
+        model_dir / f"freight_model_{datetime.now().strftime('%Y%m%d_%H%M%S')}.joblib"
+    )
     model.save(str(model_path))
 
     # Save metadata to DB
@@ -192,7 +198,11 @@ def train_freight_model(
 
 
 def train_price_model(
-    db: Session, *, test_size: float = 0.2, random_state: int = 42, model_type: str | None = None
+    db: Session,
+    *,
+    test_size: float = 0.2,
+    random_state: int = 42,
+    model_type: str | None = None,
 ) -> dict[str, Any]:
     """Train the coffee price model.
 
@@ -208,7 +218,7 @@ def train_price_model(
     # Use configured model type if not specified
     if model_type is None:
         model_type = settings.ML_MODEL_TYPE
-    
+
     # Collect data
     data = collect_price_training_data(db)
 
@@ -238,7 +248,9 @@ def train_price_model(
     # Save model
     model_dir = Path("models")
     model_dir.mkdir(exist_ok=True)
-    model_path = model_dir / f"price_model_{datetime.now().strftime('%Y%m%d_%H%M%S')}.joblib"
+    model_path = (
+        model_dir / f"price_model_{datetime.now().strftime('%Y%m%d_%H%M%S')}.joblib"
+    )
     model.save(str(model_path))
 
     # Save metadata to DB
@@ -346,10 +358,10 @@ def compare_models(
         data = collect_freight_training_data(db)
         rf_model = get_freight_model("random_forest")
         xgb_model = get_freight_model("xgboost")
-        
+
         # Prepare features
         X, y = rf_model.prepare_features(data)
-        
+
         if X is None or y is None:
             raise ValueError("Failed to prepare features")
 
@@ -357,7 +369,7 @@ def compare_models(
         X_train, X_test, y_train, y_test = train_test_split(
             X, y, test_size=test_size, random_state=random_state
         )
-        
+
         results["training_samples"] = len(X_train)
         results["test_samples"] = len(X_test)
 
@@ -386,15 +398,15 @@ def compare_models(
             results["models"]["xgboost"] = xgb_metrics
         except Exception as e:
             results["models"]["xgboost"] = {"error": str(e)}
-            
+
     elif model_type_name == "coffee_price":
         data = collect_price_training_data(db)
         rf_model_coffee = get_coffee_price_model("random_forest")
         xgb_model_coffee = get_coffee_price_model("xgboost")
-        
+
         # Prepare features
         X, y = rf_model_coffee.prepare_features(data)
-        
+
         if X is None or y is None:
             raise ValueError("Failed to prepare features")
 
@@ -402,7 +414,7 @@ def compare_models(
         X_train, X_test, y_train, y_test = train_test_split(
             X, y, test_size=test_size, random_state=random_state
         )
-        
+
         results["training_samples"] = len(X_train)
         results["test_samples"] = len(X_test)
 
@@ -435,7 +447,10 @@ def compare_models(
         raise ValueError(f"Invalid model_type_name: {model_type_name}")
 
     # Determine winner
-    if "error" not in results["models"]["random_forest"] and "error" not in results["models"]["xgboost"]:
+    if (
+        "error" not in results["models"]["random_forest"]
+        and "error" not in results["models"]["xgboost"]
+    ):
         rf_metrics = results["models"]["random_forest"]
         xgb_metrics = results["models"]["xgboost"]
         # Lower RMSE is better

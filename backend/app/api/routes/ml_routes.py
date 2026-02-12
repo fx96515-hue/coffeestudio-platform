@@ -23,7 +23,6 @@ from app.services.ml.purchase_timing import (
 )
 from app.services.ml.model_management import MLModelManagementService
 
-
 router = APIRouter()
 
 
@@ -44,7 +43,8 @@ def train_model(
             result = train_price_model(db)
         else:
             raise HTTPException(
-                status_code=400, detail="model_type must be 'freight_cost' or 'coffee_price'"
+                status_code=400,
+                detail="model_type must be 'freight_cost' or 'coffee_price'",
             )
         return result
     except ValueError as e:
@@ -91,7 +91,9 @@ def price_forecast(
     return result
 
 
-@router.get("/models/{model_id}/feature-importance", response_model=FeatureImportanceOut)
+@router.get(
+    "/models/{model_id}/feature-importance", response_model=FeatureImportanceOut
+)
 def get_feature_importance(
     model_id: int,
     db: Session = Depends(get_db),
@@ -115,12 +117,12 @@ def get_feature_importance(
 
     # Determine algorithm from performance metrics
     algorithm = ml_model.performance_metrics.get("algorithm", "random_forest")
-    
+
     # Only XGBoost models have feature importance
     if algorithm != "xgboost":
         raise HTTPException(
             status_code=400,
-            detail="Feature importance is only available for XGBoost models"
+            detail="Feature importance is only available for XGBoost models",
         )
 
     # Load the model and get feature importance
@@ -133,7 +135,9 @@ def get_feature_importance(
             if isinstance(loaded_model, CoffeePriceModelXGB):
                 feature_importance = loaded_model.get_feature_importance()
             else:
-                raise HTTPException(status_code=500, detail="Model does not support feature importance")
+                raise HTTPException(
+                    status_code=500, detail="Model does not support feature importance"
+                )
         elif ml_model.model_type == "freight_cost":
             loaded_model_freight = get_freight_model(algorithm)
             loaded_model_freight.load(ml_model.model_file_path)
@@ -141,7 +145,9 @@ def get_feature_importance(
             if isinstance(loaded_model_freight, FreightCostModelXGB):
                 feature_importance = loaded_model_freight.get_feature_importance()
             else:
-                raise HTTPException(status_code=500, detail="Model does not support feature importance")
+                raise HTTPException(
+                    status_code=500, detail="Model does not support feature importance"
+                )
         else:
             raise HTTPException(status_code=400, detail="Unknown model type")
 
@@ -152,7 +158,9 @@ def get_feature_importance(
             feature_importance=feature_importance,
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get feature importance: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to get feature importance: {str(e)}"
+        )
 
 
 @router.post("/compare-models/{model_type}", response_model=ModelComparisonOut)
@@ -162,7 +170,7 @@ def compare_model_types(
     _=Depends(require_role("admin")),
 ):
     """Compare Random Forest vs XGBoost models on the same dataset.
-    
+
     model_type: 'freight_cost' or 'coffee_price'
     """
     try:

@@ -10,7 +10,6 @@ from app.core.config import settings
 from app.models.news_item import NewsItem
 from app.providers.perplexity import PerplexityClient
 
-
 DEFAULT_NEWS_QUERIES: list[str] = [
     "Peru coffee news export",
     "Peru specialty coffee cooperative export",

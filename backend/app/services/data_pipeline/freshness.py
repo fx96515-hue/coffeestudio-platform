@@ -57,9 +57,7 @@ class DataFreshnessMonitor:
             "source": None,  # TODO: Add relationship or query separately
         }
 
-    def _check_staleness(
-        self, data: Optional[dict], max_age_hours: float
-    ) -> dict:
+    def _check_staleness(self, data: Optional[dict], max_age_hours: float) -> dict:
         """Check if data is stale.
 
         Args:
@@ -113,9 +111,7 @@ class DataFreshnessMonitor:
 
         # News (expected to update frequently)
         latest_news = (
-            self.db.query(NewsItem)
-            .order_by(NewsItem.published_at.desc())
-            .first()
+            self.db.query(NewsItem).order_by(NewsItem.published_at.desc()).first()
         )
 
         if latest_news:
@@ -156,9 +152,7 @@ class DataFreshnessMonitor:
             "overall_status": (
                 "healthy"
                 if not (
-                    fx_status["stale"]
-                    or coffee_status["stale"]
-                    or news_status["stale"]
+                    fx_status["stale"] or coffee_status["stale"] or news_status["stale"]
                 )
                 else "degraded"
             ),
@@ -191,9 +185,7 @@ class DataFreshnessMonitor:
             },
         }
 
-    def get_stale_entities(
-        self, entity_type: str, stale_days: int
-    ) -> list:
+    def get_stale_entities(self, entity_type: str, stale_days: int) -> list:
         """Get entities that haven't been updated recently.
 
         Args:

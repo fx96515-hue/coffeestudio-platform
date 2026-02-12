@@ -11,7 +11,6 @@ from sqlalchemy import select
 
 from app.models.region import Region
 
-
 # Comprehensive seed data for Peru regions
 PERU_REGIONS_DATA: list[dict[str, Any]] = [
     {

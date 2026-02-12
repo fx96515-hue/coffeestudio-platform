@@ -6,7 +6,6 @@ from app.db.session import get_db
 from app.schemas.logistics import LandedCostRequest, LandedCostResponse
 from app.services.logistics import calc_landed_cost
 
-
 router = APIRouter()
 
 

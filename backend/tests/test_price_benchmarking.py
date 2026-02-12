@@ -15,9 +15,7 @@ def test_competitive_pricing(db):
     coop = Cooperative(
         name="Competitive Price Coop",
         region="Cajamarca",
-        financial_data={
-            "fob_price_per_kg": 4.80  # Very close to benchmark
-        },
+        financial_data={"fob_price_per_kg": 4.80},  # Very close to benchmark
     )
     db.add(coop)
     db.commit()
@@ -39,9 +37,7 @@ def test_expensive_pricing(db):
     coop = Cooperative(
         name="Expensive Price Coop",
         region="Cusco",
-        financial_data={
-            "fob_price_per_kg": 6.00  # 23.7% above benchmark
-        },
+        financial_data={"fob_price_per_kg": 6.00},  # 23.7% above benchmark
     )
     db.add(coop)
     db.commit()

@@ -3,9 +3,13 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import require_role
 from app.db.session import get_db
-from app.schemas.dedup import DedupPairOut, MergeEntitiesIn, MergeResultOut, MergeHistoryOut
+from app.schemas.dedup import (
+    DedupPairOut,
+    MergeEntitiesIn,
+    MergeResultOut,
+    MergeHistoryOut,
+)
 from app.services.dedup import suggest_duplicates, merge_entities, get_merge_history
-
 
 router = APIRouter()
 

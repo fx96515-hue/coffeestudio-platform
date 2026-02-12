@@ -7,7 +7,6 @@ from app.models.peru_region import PeruRegion
 from app.schemas.regions import PeruRegionOut
 from app.services.peru_regions import seed_default_regions
 
-
 router = APIRouter()
 
 

@@ -23,7 +23,6 @@ from app.services.peru_sourcing_intel import PeruRegionIntelService
 from app.services.cooperative_sourcing_analyzer import CooperativeSourcingAnalyzer
 from app.services.seed_peru_regions import seed_peru_regions
 
-
 router = APIRouter()
 
 

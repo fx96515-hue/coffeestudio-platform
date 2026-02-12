@@ -7,7 +7,6 @@ from sqlalchemy import select
 
 from app.models.peru_region import PeruRegion
 
-
 DEFAULT_REGIONS: list[dict[str, Any]] = [
     {
         "code": "CAJ",

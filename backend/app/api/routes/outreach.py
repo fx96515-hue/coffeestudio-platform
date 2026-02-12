@@ -6,7 +6,6 @@ from app.db.session import get_db
 from app.schemas.outreach import OutreachRequest, OutreachResponse
 from app.services.outreach import generate_outreach
 
-
 router = APIRouter()
 
 

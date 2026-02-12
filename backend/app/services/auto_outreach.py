@@ -12,7 +12,6 @@ from app.models.roaster import Roaster
 from app.models.entity_event import EntityEvent
 from app.services.outreach import generate_outreach, Language, Purpose
 
-
 OutreachStatus = Literal["pending", "sent", "responded", "follow_up_needed"]
 
 
@@ -49,7 +48,7 @@ def select_top_candidates(
     entities: list[Any]
     if entity_type == "cooperative":
         stmt = select(Cooperative).filter(Cooperative.status == "active")
-        
+
         # Apply filters
         if min_quality_score is not None:
             stmt = stmt.filter(Cooperative.quality_score >= min_quality_score)
@@ -61,19 +60,21 @@ def select_top_candidates(
             stmt = stmt.filter(Cooperative.region == region)
         if certification:
             stmt = stmt.filter(Cooperative.certifications.ilike(f"%{certification}%"))
-        
+
         # Order by total score descending, handling None values
         stmt = stmt.order_by(Cooperative.total_score.desc().nullslast()).limit(limit)
-        
+
         result = db.execute(stmt)
         entities = list(result.scalars().all())
     else:
         # Roaster doesn't have region, certifications, or individual score fields
         stmt_roaster = select(Roaster).filter(Roaster.status == "active")
-        
+
         # Order by total score descending, handling None values
-        stmt_roaster = stmt_roaster.order_by(Roaster.total_score.desc().nullslast()).limit(limit)
-        
+        stmt_roaster = stmt_roaster.order_by(
+            Roaster.total_score.desc().nullslast()
+        ).limit(limit)
+
         result_roaster = db.execute(stmt_roaster)
         entities = list(result_roaster.scalars().all())
 
@@ -256,7 +257,7 @@ def get_outreach_suggestions(
             else:
                 days_since = (datetime.now(timezone.utc) - created_at).days
             should_suggest = days_since > 30
-        
+
         if should_suggest:
             suggestions.append(
                 {
@@ -329,7 +330,7 @@ def get_entity_outreach_status(
         else:
             # If created_at is aware, use aware datetime for comparison
             days_since = (datetime.now(timezone.utc) - created_at).days
-        
+
         if days_since > 7:
             status = "follow_up_needed"
 

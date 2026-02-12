@@ -156,8 +156,10 @@ class FreightCostModelXGB:
 
     def __init__(self) -> None:
         if XGBRegressor is None:
-            raise ImportError("xgboost is not installed. Install it with: pip install xgboost>=2.0.0")
-        
+            raise ImportError(
+                "xgboost is not installed. Install it with: pip install xgboost>=2.0.0"
+            )
+
         self.model = XGBRegressor(
             n_estimators=200,
             max_depth=6,
@@ -266,12 +268,12 @@ class FreightCostModelXGB:
             Tuple of (predictions, lower_bound, upper_bound)
         """
         predictions = self.predict(X)
-        
+
         # For XGBoost, we can't directly get tree predictions like RF
         # Instead, we estimate uncertainty using a simple approach:
         # Use 5% standard deviation estimate to create a ~10% confidence interval (±5%)
         std_estimate = predictions * 0.05  # 5% standard deviation estimate
-        
+
         lower_bound = predictions - 1.96 * std_estimate
         upper_bound = predictions + 1.96 * std_estimate
 
@@ -285,7 +287,7 @@ class FreightCostModelXGB:
         """
         if not hasattr(self.model, "feature_importances_"):
             return {}
-        
+
         importance = self.model.feature_importances_
         feature_names = [
             "route",
@@ -295,7 +297,7 @@ class FreightCostModelXGB:
             "fuel_price_index",
             "port_congestion_score",
         ]
-        
+
         return dict(zip(feature_names, importance.tolist()))
 
     def save(self, path: str) -> None:

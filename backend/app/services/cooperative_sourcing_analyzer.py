@@ -13,7 +13,6 @@ from sqlalchemy.orm import Session
 from app.models.cooperative import Cooperative
 from app.services.data_sources.peru_data_sources import fetch_ico_price_data
 
-
 # Constants for default values
 MAX_RESPONSE_TIME_HOURS = 999  # Default for missing response time data (>40 days)
 
@@ -196,11 +195,9 @@ class CooperativeSourcingAnalyzer:
             "score": round(score, 2),
             "max_score": 100,
             "breakdown": breakdown,
-            "assessment": "strong"
-            if score >= 75
-            else "adequate"
-            if score >= 50
-            else "limited",
+            "assessment": (
+                "strong" if score >= 75 else "adequate" if score >= 50 else "limited"
+            ),
         }
 
     def check_export_readiness(self, coop: Cooperative) -> dict[str, Any]:
@@ -288,11 +285,11 @@ class CooperativeSourcingAnalyzer:
             "score": round(score, 2),
             "max_score": 100,
             "breakdown": breakdown,
-            "assessment": "ready"
-            if score >= 75
-            else "partially_ready"
-            if score >= 50
-            else "not_ready",
+            "assessment": (
+                "ready"
+                if score >= 75
+                else "partially_ready" if score >= 50 else "not_ready"
+            ),
         }
 
     def assess_communication_quality(self, coop: Cooperative) -> dict[str, Any]:
@@ -388,11 +385,11 @@ class CooperativeSourcingAnalyzer:
             "score": round(score, 2),
             "max_score": 100,
             "breakdown": breakdown,
-            "assessment": "excellent"
-            if score >= 80
-            else "good"
-            if score >= 60
-            else "needs_improvement",
+            "assessment": (
+                "excellent"
+                if score >= 80
+                else "good" if score >= 60 else "needs_improvement"
+            ),
         }
 
     def benchmark_pricing(self, coop: Cooperative) -> dict[str, Any]:
@@ -449,11 +446,11 @@ class CooperativeSourcingAnalyzer:
             "benchmark_price": benchmark_price,
             "benchmark_source": benchmark_source,
             "price_difference_pct": round(price_diff_pct, 2),
-            "assessment": "competitive"
-            if competitiveness_score >= 70
-            else "market_rate"
-            if competitiveness_score >= 50
-            else "expensive",
+            "assessment": (
+                "competitive"
+                if competitiveness_score >= 70
+                else "market_rate" if competitiveness_score >= 50 else "expensive"
+            ),
         }
 
     def calculate_sourcing_risk(self, coop: Cooperative) -> dict[str, Any]:

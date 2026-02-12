@@ -14,7 +14,6 @@ from app.models.cooperative import Cooperative
 from app.models.roaster import Roaster
 from app.models.market import MarketObservation
 
-
 # Demo cooperatives data - realistic Peru coffee cooperatives
 DEMO_COOPERATIVES = [
     {

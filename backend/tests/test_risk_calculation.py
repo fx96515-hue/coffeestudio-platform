@@ -43,15 +43,9 @@ def test_high_risk_cooperative(db):
         region="Puno",
         altitude_m=2200,  # High altitude = higher geo risk
         quality_score=55,  # Low quality = high quality risk
-        operational_data={
-            "years_exporting": 1  # Low experience
-        },
-        export_readiness={
-            "customs_issues_count": 8  # Many issues
-        },
-        financial_data={
-            "annual_revenue_usd": 30000  # Very low revenue
-        },
+        operational_data={"years_exporting": 1},  # Low experience
+        export_readiness={"customs_issues_count": 8},  # Many issues
+        financial_data={"annual_revenue_usd": 30000},  # Very low revenue
         communication_metrics={
             "avg_response_hours": 120,  # Very slow
             "missed_meetings": 5,  # Many missed
@@ -76,15 +70,9 @@ def test_moderate_risk_cooperative(db):
         region="Cajamarca",
         altitude_m=1400,  # Lower altitude → 5 risk
         quality_score=75,  # Better quality → 10 risk
-        operational_data={
-            "years_exporting": 5  # More experience → 15 risk
-        },
-        export_readiness={
-            "customs_issues_count": 1  # Fewer issues
-        },
-        financial_data={
-            "annual_revenue_usd": 300000  # Better revenue → 10 risk
-        },
+        operational_data={"years_exporting": 5},  # More experience → 15 risk
+        export_readiness={"customs_issues_count": 1},  # Fewer issues
+        financial_data={"annual_revenue_usd": 300000},  # Better revenue → 10 risk
         communication_metrics={
             "avg_response_hours": 40,  # Better response → 0 risk
             "missed_meetings": 1,  # Fewer missed → 1 risk

@@ -6,7 +6,6 @@ from app.db.session import get_db
 from app.schemas.enrichment import EnrichRequest, EnrichResponse
 from app.services.enrichment import enrich_entity
 
-
 router = APIRouter()
 
 

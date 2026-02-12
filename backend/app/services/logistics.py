@@ -7,7 +7,6 @@ from sqlalchemy.orm import Session
 
 from app.models.market import MarketObservation
 
-
 DEFAULT_USD_EUR = 0.92
 
 

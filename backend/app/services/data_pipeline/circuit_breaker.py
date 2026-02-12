@@ -180,7 +180,11 @@ class CircuitBreaker:
         """
         state = self.get_state()
         failures_bytes = self.redis.get(self.failures_key)
-        failures = int(failures_bytes) if failures_bytes and isinstance(failures_bytes, bytes) else 0
+        failures = (
+            int(failures_bytes)
+            if failures_bytes and isinstance(failures_bytes, bytes)
+            else 0
+        )
 
         last_failure_str = self.redis.get(self.last_failure_key)
         last_failure = None

@@ -5,7 +5,9 @@ from app.ml.price_model import CoffeePriceModel, CoffeePriceModelXGB
 from app.ml.freight_model import FreightCostModel, FreightCostModelXGB
 
 
-def get_coffee_price_model(model_type: str = "xgboost") -> Union[CoffeePriceModel, CoffeePriceModelXGB]:
+def get_coffee_price_model(
+    model_type: str = "xgboost",
+) -> Union[CoffeePriceModel, CoffeePriceModelXGB]:
     """Factory function to create coffee price prediction models.
 
     Args:
@@ -22,10 +24,14 @@ def get_coffee_price_model(model_type: str = "xgboost") -> Union[CoffeePriceMode
     elif model_type == "random_forest":
         return CoffeePriceModel()
     else:
-        raise ValueError(f"Unsupported model_type: {model_type}. Use 'xgboost' or 'random_forest'")
+        raise ValueError(
+            f"Unsupported model_type: {model_type}. Use 'xgboost' or 'random_forest'"
+        )
 
 
-def get_freight_model(model_type: str = "xgboost") -> Union[FreightCostModel, FreightCostModelXGB]:
+def get_freight_model(
+    model_type: str = "xgboost",
+) -> Union[FreightCostModel, FreightCostModelXGB]:
     """Factory function to create freight cost prediction models.
 
     Args:
@@ -42,5 +48,6 @@ def get_freight_model(model_type: str = "xgboost") -> Union[FreightCostModel, Fr
     elif model_type == "random_forest":
         return FreightCostModel()
     else:
-        raise ValueError(f"Unsupported model_type: {model_type}. Use 'xgboost' or 'random_forest'")
-
+        raise ValueError(
+            f"Unsupported model_type: {model_type}. Use 'xgboost' or 'random_forest'"
+        )

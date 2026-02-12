@@ -8,7 +8,6 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from app.models.knowledge_doc import KnowledgeDoc
 
-
 DEFAULT_DOCS: list[dict[str, Any]] = [
     {
         "category": "logistics",

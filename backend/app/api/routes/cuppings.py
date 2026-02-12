@@ -6,7 +6,6 @@ from app.db.session import get_db
 from app.models.cupping import CuppingResult
 from app.schemas.cupping import CuppingCreate, CuppingOut
 
-
 router = APIRouter()
 
 

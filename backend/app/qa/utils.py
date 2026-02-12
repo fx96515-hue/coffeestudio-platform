@@ -190,9 +190,11 @@ def check_ruff() -> dict[str, Any]:
 
         return {
             "passed": result.returncode == 0,
-            "message": "No issues found"
-            if result.returncode == 0
-            else f"Issues found: {result.stdout}",
+            "message": (
+                "No issues found"
+                if result.returncode == 0
+                else f"Issues found: {result.stdout}"
+            ),
         }
     except Exception as e:
         return {"passed": False, "message": f"Error running Ruff: {e}"}
@@ -215,9 +217,11 @@ def check_mypy() -> dict[str, Any]:
 
         return {
             "passed": result.returncode == 0,
-            "message": "No type errors"
-            if result.returncode == 0
-            else f"Type errors found: {result.stdout}",
+            "message": (
+                "No type errors"
+                if result.returncode == 0
+                else f"Type errors found: {result.stdout}"
+            ),
         }
     except Exception as e:
         return {"passed": False, "message": f"Error running MyPy: {e}"}
@@ -238,9 +242,11 @@ def check_bandit() -> dict[str, Any]:
 
         return {
             "passed": result.returncode == 0,
-            "message": "No security issues"
-            if result.returncode == 0
-            else f"Security issues found: {result.stdout}",
+            "message": (
+                "No security issues"
+                if result.returncode == 0
+                else f"Security issues found: {result.stdout}"
+            ),
         }
     except FileNotFoundError:
         return {"passed": True, "message": "Bandit not installed (optional)"}
@@ -266,9 +272,11 @@ def check_safety() -> dict[str, Any]:
 
         return {
             "passed": len(vulnerabilities) == 0,
-            "message": "No vulnerabilities"
-            if len(vulnerabilities) == 0
-            else f"{len(vulnerabilities)} vulnerabilities found",
+            "message": (
+                "No vulnerabilities"
+                if len(vulnerabilities) == 0
+                else f"{len(vulnerabilities)} vulnerabilities found"
+            ),
         }
     except FileNotFoundError:
         return {"passed": True, "message": "Safety not installed (optional)"}

@@ -9,7 +9,6 @@ from app.models.news_item import NewsItem
 from app.schemas.news import NewsItemOut, NewsRefreshResponse
 from app.services.news import refresh_news
 
-
 router = APIRouter()
 
 

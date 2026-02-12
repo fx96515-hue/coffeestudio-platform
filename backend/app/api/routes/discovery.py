@@ -8,7 +8,6 @@ from typing import Literal, Optional, Any
 from app.api.deps import require_role
 from app.workers.celery_app import celery
 
-
 router = APIRouter()
 
 

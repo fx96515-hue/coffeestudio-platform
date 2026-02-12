@@ -12,7 +12,6 @@ from app.schemas.auto_outreach import (
 )
 from app.services import auto_outreach
 
-
 router = APIRouter()
 
 
@@ -43,6 +42,7 @@ def create_campaign(
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         import structlog
+
         structlog.get_logger().error("create_campaign_failed", error=str(e))
         raise HTTPException(status_code=500, detail="Campaign creation failed")
 
@@ -62,8 +62,11 @@ def get_suggestions(
         return suggestions
     except Exception as e:
         import structlog
+
         structlog.get_logger().error("get_suggestions_failed", error=str(e))
-        raise HTTPException(status_code=500, detail="Failed to get outreach suggestions")
+        raise HTTPException(
+            status_code=500, detail="Failed to get outreach suggestions"
+        )
 
 
 @router.get("/status/{entity_type}/{entity_id}", response_model=EntityOutreachStatusOut)
@@ -81,5 +84,8 @@ def get_entity_status(
         return status
     except Exception as e:
         import structlog
+
         structlog.get_logger().error("get_entity_status_failed", error=str(e))
-        raise HTTPException(status_code=500, detail="Failed to get entity outreach status")
+        raise HTTPException(
+            status_code=500, detail="Failed to get entity outreach status"
+        )

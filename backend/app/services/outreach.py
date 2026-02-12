@@ -10,7 +10,6 @@ from app.models.roaster import Roaster
 from app.models.entity_event import EntityEvent
 from app.providers.perplexity import PerplexityClient
 
-
 Language = Literal["de", "en", "es"]
 Purpose = Literal["sourcing_pitch", "sample_request"]
 

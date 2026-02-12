@@ -12,7 +12,6 @@ from app.schemas.quality_alerts import (
 )
 from app.services import quality_alerts
 
-
 router = APIRouter()
 
 

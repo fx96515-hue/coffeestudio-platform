@@ -145,7 +145,7 @@ def merge_entities(
 
     # Get entities with proper typing using Union to avoid type mismatch
     EntityType = Union[Cooperative, Roaster]
-    
+
     if entity_type == "cooperative":
         keep_entity: EntityType = cast(Cooperative, db.get(Cooperative, keep_id))
         merge_entity: EntityType = cast(Cooperative, db.get(Cooperative, merge_id))
@@ -198,7 +198,12 @@ def merge_entities(
             merged_fields.append(field)
 
     # Merge scores: keep higher scores
-    score_fields = ["quality_score", "reliability_score", "economics_score", "total_score"]
+    score_fields = [
+        "quality_score",
+        "reliability_score",
+        "economics_score",
+        "total_score",
+    ]
     for field in score_fields:
         # Use getattr with default None to handle fields that don't exist
         keep_val = getattr(keep_entity, field, None) or 0
@@ -287,7 +292,11 @@ def get_merge_history(
     return [
         {
             "entity_id": e.entity_id,
-            "created_at": e.created_at.isoformat() if hasattr(e.created_at, 'isoformat') else str(e.created_at),
+            "created_at": (
+                e.created_at.isoformat()
+                if hasattr(e.created_at, "isoformat")
+                else str(e.created_at)
+            ),
             "payload": e.payload,
         }
         for e in events

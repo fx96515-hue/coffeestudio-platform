@@ -7,7 +7,6 @@ from app.models.knowledge_doc import KnowledgeDoc
 from app.schemas.kb import KnowledgeDocOut, KBSeedResponse
 from app.services.kb import seed_default_kb
 
-
 router = APIRouter()
 
 

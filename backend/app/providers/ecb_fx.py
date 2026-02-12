@@ -7,7 +7,6 @@ from xml.etree import ElementTree as ET
 
 import httpx
 
-
 # ECB publishes a daily XML with reference rates where EUR is the base currency.
 ECB_DAILY_XML = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
 
