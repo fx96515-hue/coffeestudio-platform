@@ -1,6 +1,5 @@
 """Tests for quality alerts service."""
 
-import pytest
 from app.services.quality_alerts import (
     detect_score_changes,
     detect_certification_changes,
