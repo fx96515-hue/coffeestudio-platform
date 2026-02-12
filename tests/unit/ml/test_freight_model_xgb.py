@@ -3,8 +3,15 @@
 import pytest
 import pandas as pd
 import numpy as np
-from backend.app.ml.freight_model import FreightCostModelXGB
-from backend.app.ml import get_freight_model
+import sys
+from pathlib import Path
+
+# Add backend to path
+backend_path = Path(__file__).parent.parent.parent.parent / "backend"
+sys.path.insert(0, str(backend_path))
+
+from app.ml.freight_model import FreightCostModelXGB, FreightCostModel
+from app.ml import get_freight_model
 
 
 def test_freight_cost_model_xgb_initialization():
@@ -180,7 +187,6 @@ def test_model_factory_xgboost():
 
 def test_model_factory_random_forest():
     """Test model factory creates Random Forest model."""
-    from backend.app.ml.freight_model import FreightCostModel
     model = get_freight_model("random_forest")
     assert isinstance(model, FreightCostModel)
 

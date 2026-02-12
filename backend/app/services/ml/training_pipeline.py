@@ -12,8 +12,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sqlalchemy.orm import Session
 
-from app.ml.freight_model import FreightCostModel
-from app.ml.price_model import CoffeePriceModel
+from app.ml.freight_model import FreightCostModel, FreightCostModelXGB
+from app.ml.price_model import CoffeePriceModel, CoffeePriceModelXGB
 from app.ml import get_freight_model, get_coffee_price_model
 from app.core.config import settings
 from app.models.freight_history import FreightHistory
@@ -334,12 +334,15 @@ def compare_models(
     # Collect data based on model type
     if model_type_name == "freight_cost":
         data = collect_freight_training_data(db)
-        rf_model = get_freight_model("random_forest")
-        xgb_model = get_freight_model("xgboost")
+        rf_model: FreightCostModel | FreightCostModelXGB = get_freight_model("random_forest")
+        xgb_model: FreightCostModel | FreightCostModelXGB = get_freight_model("xgboost")
     elif model_type_name == "coffee_price":
         data = collect_price_training_data(db)
-        rf_model = get_coffee_price_model("random_forest")
-        xgb_model = get_coffee_price_model("xgboost")
+        rf_model_coffee: CoffeePriceModel | CoffeePriceModelXGB = get_coffee_price_model("random_forest")
+        xgb_model_coffee: CoffeePriceModel | CoffeePriceModelXGB = get_coffee_price_model("xgboost")
+        # Use same variable names for consistency
+        rf_model = rf_model_coffee  # type: ignore[assignment]
+        xgb_model = xgb_model_coffee  # type: ignore[assignment]
     else:
         raise ValueError(f"Invalid model_type_name: {model_type_name}")
 

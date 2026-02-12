@@ -100,6 +100,8 @@ def get_feature_importance(
     """Get feature importance for a trained XGBoost model."""
     from app.models.ml_model import MLModel
     from app.ml import get_coffee_price_model, get_freight_model
+    from app.ml.price_model import CoffeePriceModelXGB
+    from app.ml.freight_model import FreightCostModelXGB
     import os
 
     # Get model metadata
@@ -123,15 +125,25 @@ def get_feature_importance(
 
     # Load the model and get feature importance
     try:
+        feature_importance: dict[str, float]
         if ml_model.model_type == "coffee_price":
-            model = get_coffee_price_model(algorithm)
+            loaded_model = get_coffee_price_model(algorithm)
+            loaded_model.load(ml_model.model_file_path)
+            # Type narrowing: we know it's XGB if algorithm == "xgboost"
+            if isinstance(loaded_model, CoffeePriceModelXGB):
+                feature_importance = loaded_model.get_feature_importance()
+            else:
+                raise HTTPException(status_code=500, detail="Model does not support feature importance")
         elif ml_model.model_type == "freight_cost":
-            model = get_freight_model(algorithm)
+            loaded_model_freight = get_freight_model(algorithm)
+            loaded_model_freight.load(ml_model.model_file_path)
+            # Type narrowing: we know it's XGB if algorithm == "xgboost"
+            if isinstance(loaded_model_freight, FreightCostModelXGB):
+                feature_importance = loaded_model_freight.get_feature_importance()
+            else:
+                raise HTTPException(status_code=500, detail="Model does not support feature importance")
         else:
             raise HTTPException(status_code=400, detail="Unknown model type")
-
-        model.load(ml_model.model_file_path)
-        feature_importance = model.get_feature_importance()
 
         return FeatureImportanceOut(
             model_id=model_id,
