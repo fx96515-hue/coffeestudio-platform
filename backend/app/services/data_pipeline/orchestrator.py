@@ -258,7 +258,9 @@ class DataPipelineOrchestrator:
         status = (
             "success"
             if results["fx_rates"] and results["coffee_prices"]
-            else "partial" if any(results.values()) else "failed"
+            else "partial"
+            if any(results.values())
+            else "failed"
         )
 
         log.info(
@@ -322,7 +324,9 @@ class DataPipelineOrchestrator:
         status = (
             "success"
             if results["peru_weather"] and results["news"]
-            else "partial" if any(results.values()) else "failed"
+            else "partial"
+            if any(results.values())
+            else "failed"
         )
 
         log.info(

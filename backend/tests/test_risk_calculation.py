@@ -86,7 +86,7 @@ def test_moderate_risk_cooperative(db):
     result = analyzer.calculate_sourcing_risk(coop)
 
     # Financial: 10, Quality: 10, Delivery: 17, Geographic: 5, Communication: 1 = 43
-    assert (
-        30 <= result["total_risk_score"] < 50
-    ), f"Moderate risk coop should have risk between 30-50, got {result['total_risk_score']}"
+    assert 30 <= result["total_risk_score"] < 50, (
+        f"Moderate risk coop should have risk between 30-50, got {result['total_risk_score']}"
+    )
     assert result["assessment"] == "moderate"

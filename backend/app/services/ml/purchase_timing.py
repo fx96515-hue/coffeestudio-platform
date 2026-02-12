@@ -70,7 +70,9 @@ def analyze_price_trends(
         trend = (
             "increasing"
             if slope > 0.01
-            else "decreasing" if slope < -0.01 else "stable"
+            else "decreasing"
+            if slope < -0.01
+            else "stable"
         )
     else:
         trend = "unknown"

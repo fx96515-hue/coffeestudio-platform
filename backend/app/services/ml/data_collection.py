@@ -125,7 +125,9 @@ class DataCollectionService:
                     "high"
                     if shipment.departure_date
                     and shipment.departure_date.month in HIGH_SEASON_MONTHS
-                    else "low" if shipment.departure_date else None
+                    else "low"
+                    if shipment.departure_date
+                    else None
                 ),
             )
             self.db.add(freight)

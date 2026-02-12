@@ -15,9 +15,9 @@ def test_global_rate_limit_exists(client: TestClient, auth_headers):
 
     # All requests should succeed in test environment
     # Rate limiting is configured but may not trigger due to test client behavior
-    assert all(
-        r.status_code in [200, 429] for r in responses
-    ), "Unexpected status codes"
+    assert all(r.status_code in [200, 429] for r in responses), (
+        "Unexpected status codes"
+    )
 
 
 def test_login_rate_limit(client: TestClient):
@@ -104,12 +104,12 @@ def test_authenticated_vs_unauthenticated_rate_limits(client: TestClient, auth_h
         responses_auth.append(response.status_code)
 
     # Both should process successfully (200) or hit rate limit (429)
-    assert all(
-        status in [200, 429] for status in responses_unauth
-    ), "Unexpected unauth status"
-    assert all(
-        status in [200, 429] for status in responses_auth
-    ), "Unexpected auth status"
+    assert all(status in [200, 429] for status in responses_unauth), (
+        "Unexpected unauth status"
+    )
+    assert all(status in [200, 429] for status in responses_auth), (
+        "Unexpected auth status"
+    )
 
 
 def test_rate_limit_does_not_block_legitimate_use(client: TestClient, auth_headers):
@@ -121,9 +121,9 @@ def test_rate_limit_does_not_block_legitimate_use(client: TestClient, auth_heade
         responses.append(response.status_code)
 
     # All should succeed
-    assert all(
-        status == 200 for status in responses
-    ), "Rate limit too strict for normal use"
+    assert all(status == 200 for status in responses), (
+        "Rate limit too strict for normal use"
+    )
 
 
 def test_rate_limit_per_endpoint():

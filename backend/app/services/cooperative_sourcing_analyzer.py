@@ -288,7 +288,9 @@ class CooperativeSourcingAnalyzer:
             "assessment": (
                 "ready"
                 if score >= 75
-                else "partially_ready" if score >= 50 else "not_ready"
+                else "partially_ready"
+                if score >= 50
+                else "not_ready"
             ),
         }
 
@@ -388,7 +390,9 @@ class CooperativeSourcingAnalyzer:
             "assessment": (
                 "excellent"
                 if score >= 80
-                else "good" if score >= 60 else "needs_improvement"
+                else "good"
+                if score >= 60
+                else "needs_improvement"
             ),
         }
 
@@ -449,7 +453,9 @@ class CooperativeSourcingAnalyzer:
             "assessment": (
                 "competitive"
                 if competitiveness_score >= 70
-                else "market_rate" if competitiveness_score >= 50 else "expensive"
+                else "market_rate"
+                if competitiveness_score >= 50
+                else "expensive"
             ),
         }
 
