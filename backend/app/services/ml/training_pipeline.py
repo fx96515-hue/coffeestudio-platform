@@ -67,13 +67,13 @@ def collect_price_training_data(db: Session) -> pd.DataFrame:
 
     data = []
     for record in records:
-        # Parse certifications if stored as JSON/string
+        # Parse certifications - stored as dict in database
         cert_list: list[str] = []
         if hasattr(record, "certifications") and record.certifications:
-            if isinstance(record.certifications, list):
-                cert_list = record.certifications
-            elif isinstance(record.certifications, str):
-                cert_list = [c.strip() for c in record.certifications.split(",")]
+            # certifications is a dict, extract values if it has a list structure
+            if isinstance(record.certifications, dict):
+                # If dict has a 'list' key or similar, extract it
+                cert_list = record.certifications.get("list", []) if "list" in record.certifications else list(record.certifications.keys())
 
         data.append(
             {

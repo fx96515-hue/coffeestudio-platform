@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from typing import Any, Literal
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -29,7 +29,7 @@ def analyze_price_trends(
         Price trend analysis
     """
     # Get historical data
-    cutoff_date = datetime.now() - timedelta(days=days_lookback)
+    cutoff_date = (datetime.now() - timedelta(days=days_lookback)).date()
     stmt = select(CoffeePriceHistory).where(CoffeePriceHistory.date >= cutoff_date)
 
     if origin_region:
@@ -130,7 +130,9 @@ def get_seasonal_patterns(
     # Group by month
     monthly_prices: dict[int, list[float]] = {i: [] for i in range(1, 13)}
     for record in records:
-        month = record.date.month
+        # Convert SQLAlchemy Date to Python date if needed
+        record_date = record.date if isinstance(record.date, date) else date.fromisoformat(str(record.date))
+        month = record_date.month
         monthly_prices[month].append(record.price_usd_per_kg)
 
     # Calculate average by month
