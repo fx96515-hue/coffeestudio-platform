@@ -52,9 +52,6 @@ def get_overview(
                 if len(stale_coops) < 10 and len(stale_roasters) < 10
                 else "needs_attention"
             ),
-            "freshness_status": "good"
-            if len(stale_coops) < 10 and len(stale_roasters) < 10
-            else "needs_attention",
         },
     }
 
@@ -95,9 +92,6 @@ def get_entity_health(
                 "last_scored_at": (
                     c.last_scored_at.isoformat() if c.last_scored_at else None
                 ),
-                "last_scored_at": c.last_scored_at.isoformat()
-                if c.last_scored_at
-                else None,
             }
             for c in coops
         ],
@@ -109,9 +103,6 @@ def get_entity_health(
                 "last_scored_at": (
                     r.last_scored_at.isoformat() if r.last_scored_at else None
                 ),
-                "last_scored_at": r.last_scored_at.isoformat()
-                if r.last_scored_at
-                else None,
             }
             for r in roasters
         ],

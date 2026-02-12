@@ -297,9 +297,6 @@ def get_merge_history(
                 if hasattr(e.created_at, "isoformat")
                 else str(e.created_at)
             ),
-            "created_at": e.created_at.isoformat()
-            if hasattr(e.created_at, "isoformat")
-            else str(e.created_at),
             "payload": e.payload,
         }
         for e in events
