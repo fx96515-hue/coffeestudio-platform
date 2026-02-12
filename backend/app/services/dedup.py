@@ -144,7 +144,6 @@ def merge_entities(
         raise ValueError("entity_type must be cooperative|roaster")
 
     # Get entities with proper typing using Union to avoid type mismatch
-    from typing import Union
     EntityType = Union[Cooperative, Roaster]
     
     if entity_type == "cooperative":
