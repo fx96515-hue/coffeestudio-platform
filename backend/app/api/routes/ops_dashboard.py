@@ -27,8 +27,8 @@ def get_overview(
 
     # Data freshness
     monitor = DataFreshnessMonitor(db)
-    stale_coops = monitor.get_stale_entities("cooperative", days=30)
-    stale_roasters = monitor.get_stale_entities("roaster", days=30)
+    stale_coops = monitor.get_stale_entities("cooperative", 30)
+    stale_roasters = monitor.get_stale_entities("roaster", 30)
 
     # Alerts
     alert_summary = get_alert_summary(db)
@@ -71,7 +71,7 @@ def get_entity_health(
     # Get roasters with scores
     roasters = (
         db.query(Roaster)
-        .filter(Roaster.quality_score.isnot(None))
+        .filter(Roaster.total_score.isnot(None))
         .order_by(Roaster.total_score.desc())
         .limit(50)
         .all()
@@ -94,9 +94,6 @@ def get_entity_health(
             {
                 "id": r.id,
                 "name": r.name,
-                "quality_score": r.quality_score,
-                "reliability_score": r.reliability_score,
-                "economics_score": r.economics_score,
                 "total_score": r.total_score,
                 "last_scored_at": r.last_scored_at.isoformat() if r.last_scored_at else None,
             }

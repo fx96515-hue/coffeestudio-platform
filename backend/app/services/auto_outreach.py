@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import Any, Literal
+from typing import Any, Literal, Union, cast
 from sqlalchemy import select, and_, or_
 from sqlalchemy.orm import Session
 
@@ -45,24 +45,30 @@ def select_top_candidates(
     if entity_type not in {"cooperative", "roaster"}:
         raise ValueError("entity_type must be cooperative|roaster")
 
-    # Build query
-    model = Cooperative if entity_type == "cooperative" else Roaster
-    stmt = select(model).filter(model.status == "active")
-
-    # Apply filters
-    if min_quality_score is not None:
-        stmt = stmt.filter(model.quality_score >= min_quality_score)
-    if min_reliability_score is not None:
-        stmt = stmt.filter(model.reliability_score >= min_reliability_score)
-    if min_economics_score is not None:
-        stmt = stmt.filter(model.economics_score >= min_economics_score)
-    if region:
-        stmt = stmt.filter(model.region == region)
-    if certification:
-        stmt = stmt.filter(model.certifications.ilike(f"%{certification}%"))
-
-    # Order by total score descending, handling None values
-    stmt = stmt.order_by(model.total_score.desc().nullslast()).limit(limit)
+    # Build query - handle different models separately for proper typing
+    if entity_type == "cooperative":
+        stmt = select(Cooperative).filter(Cooperative.status == "active")
+        
+        # Apply filters
+        if min_quality_score is not None:
+            stmt = stmt.filter(Cooperative.quality_score >= min_quality_score)
+        if min_reliability_score is not None:
+            stmt = stmt.filter(Cooperative.reliability_score >= min_reliability_score)
+        if min_economics_score is not None:
+            stmt = stmt.filter(Cooperative.economics_score >= min_economics_score)
+        if region:
+            stmt = stmt.filter(Cooperative.region == region)
+        if certification:
+            stmt = stmt.filter(Cooperative.certifications.ilike(f"%{certification}%"))
+        
+        # Order by total score descending, handling None values
+        stmt = stmt.order_by(Cooperative.total_score.desc().nullslast()).limit(limit)
+    else:
+        # Roaster doesn't have region, certifications, or individual score fields
+        stmt = select(Roaster).filter(Roaster.status == "active")
+        
+        # Order by total score descending, handling None values
+        stmt = stmt.order_by(Roaster.total_score.desc().nullslast()).limit(limit)
 
     result = db.execute(stmt)
     entities = result.scalars().all()
@@ -72,12 +78,12 @@ def select_top_candidates(
             "entity_type": entity_type,
             "entity_id": e.id,
             "name": e.name,
-            "region": e.region,
-            "quality_score": e.quality_score,
-            "reliability_score": e.reliability_score,
-            "economics_score": e.economics_score,
+            "region": getattr(e, "region", None),
+            "quality_score": getattr(e, "quality_score", None),
+            "reliability_score": getattr(e, "reliability_score", None),
+            "economics_score": getattr(e, "economics_score", None),
             "total_score": e.total_score,
-            "certifications": e.certifications,
+            "certifications": getattr(e, "certifications", None),
             "website": e.website,
             "contact_email": e.contact_email,
         }
@@ -235,16 +241,27 @@ def get_outreach_suggestions(
         )
 
         # Only suggest if not contacted in last 30 days (simplified check)
-        if not recent_outreach or (
-            datetime.now(timezone.utc) - recent_outreach.created_at
-        ).days > 30:
+        should_suggest = False
+        if not recent_outreach:
+            should_suggest = True
+        else:
+            # Handle both timezone-aware and naive datetimes
+            created_at = recent_outreach.created_at
+            if hasattr(created_at, 'tzinfo'):
+                if created_at.tzinfo is None:
+                    days_since = (datetime.utcnow() - created_at).days
+                else:
+                    days_since = (datetime.now(timezone.utc) - created_at).days
+                should_suggest = days_since > 30
+        
+        if should_suggest:
             suggestions.append(
                 {
                     **candidate,
                     "reason": "High scores, no recent outreach",
                     "last_contact": (
                         recent_outreach.created_at.isoformat()
-                        if recent_outreach
+                        if recent_outreach and hasattr(recent_outreach.created_at, 'isoformat')
                         else None
                     ),
                 }
