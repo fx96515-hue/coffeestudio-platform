@@ -1,6 +1,7 @@
 from datetime import datetime
 from sqlalchemy import String, Text, Float, JSON, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
+from pgvector.sqlalchemy import Vector
 from app.db.session import Base
 from app.models.common import TimestampMixin
 
@@ -62,3 +63,8 @@ class Cooperative(Base, TimestampMixin):
     communication_metrics: Mapped[dict | None] = mapped_column(
         JSON, nullable=True
     )  # avg_response_hours, languages, missed_meetings
+
+    # Semantic search embedding (v0.5.0)
+    embedding: Mapped[list[float] | None] = mapped_column(
+        Vector(1536), nullable=True
+    )  # OpenAI text-embedding-3-small dimension

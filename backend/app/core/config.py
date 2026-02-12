@@ -49,6 +49,10 @@ class Settings(BaseSettings):
     INTELLIGENCE_REFRESH_TIMES: str = "06:00,12:00,18:00,00:00"
     AUTO_ENRICH_TIME: str = "03:00"
 
+    # --- OpenAI for semantic search embeddings ---
+    OPENAI_API_KEY: str | None = None
+    EMBEDDING_MODEL: str = "text-embedding-3-small"
+
     def cors_origins_list(self) -> List[str]:
         return [s.strip() for s in self.CORS_ORIGINS.split(",") if s.strip()]
 

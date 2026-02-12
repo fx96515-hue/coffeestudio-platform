@@ -318,3 +318,143 @@ def train_ml_model(model_type: str):
         return {"status": "error", "model_type": model_type, "error": str(e)}
     finally:
         db.close()
+
+
+@celery.task(name="app.workers.tasks.generate_embeddings")
+def generate_embeddings(entity_type: str | None = None, batch_size: int = 50):
+    """Generate embeddings for all entities without embeddings.
+
+    Args:
+        entity_type: 'cooperative' or 'roaster' or None for both
+        batch_size: Number of entities to process in one batch
+    """
+    import asyncio
+    from app.services.embedding import EmbeddingService
+
+    db = _db()
+    try:
+        service = EmbeddingService()
+
+        if not service.is_available():
+            log.warning("embeddings_task_skipped", reason="no_openai_api_key")
+            return {
+                "status": "skipped",
+                "reason": "OpenAI API key not configured",
+            }
+
+        async def process_entities(entity_cls, entity_name):
+            # Get entities without embeddings
+            entities = (
+                db.query(entity_cls)
+                .filter(entity_cls.embedding.is_(None))
+                .limit(batch_size)
+                .all()
+            )
+
+            if not entities:
+                log.info(f"no_{entity_name}_without_embeddings")
+                return 0
+
+            # Generate texts for batch processing
+            texts = [service.generate_entity_text(e) for e in entities]
+
+            # Generate embeddings in batch
+            embeddings = await service.generate_embeddings_batch(texts)
+
+            # Update entities
+            updated = 0
+            for entity, embedding in zip(entities, embeddings):
+                if embedding:
+                    entity.embedding = embedding
+                    updated += 1
+
+            db.commit()
+            log.info(
+                f"{entity_name}_embeddings_generated",
+                total=len(entities),
+                updated=updated,
+            )
+            return updated
+
+        # Process based on entity_type
+        results = {}
+        if entity_type in (None, "cooperative"):
+            coop_count = asyncio.run(process_entities(Cooperative, "cooperative"))
+            results["cooperatives"] = coop_count
+
+        if entity_type in (None, "roaster"):
+            roaster_count = asyncio.run(process_entities(Roaster, "roaster"))
+            results["roasters"] = roaster_count
+
+        return {
+            "status": "ok",
+            "updated": results,
+        }
+    except Exception as e:
+        log.error("generate_embeddings_failed", error=str(e))
+        return {"status": "error", "error": str(e)}
+    finally:
+        db.close()
+
+
+@celery.task(name="app.workers.tasks.update_entity_embedding")
+def update_entity_embedding(entity_type: str, entity_id: int):
+    """Update embedding for a single entity.
+
+    Args:
+        entity_type: 'cooperative' or 'roaster'
+        entity_id: Entity ID
+    """
+    import asyncio
+    from app.services.embedding import EmbeddingService
+
+    db = _db()
+    try:
+        service = EmbeddingService()
+
+        if not service.is_available():
+            log.warning("embedding_update_skipped", reason="no_openai_api_key")
+            return {
+                "status": "skipped",
+                "reason": "OpenAI API key not configured",
+            }
+
+        # Get entity
+        if entity_type == "cooperative":
+            entity = db.query(Cooperative).filter(Cooperative.id == entity_id).first()
+        elif entity_type == "roaster":
+            entity = db.query(Roaster).filter(Roaster.id == entity_id).first()
+        else:
+            return {"status": "error", "message": "Invalid entity_type"}
+
+        if not entity:
+            return {"status": "error", "message": "Entity not found"}
+
+        # Generate embedding
+        async def generate():
+            return await service.generate_entity_embedding(entity)
+
+        embedding = asyncio.run(generate())
+
+        if embedding:
+            entity.embedding = embedding
+            db.commit()
+            log.info(
+                "entity_embedding_updated",
+                entity_type=entity_type,
+                entity_id=entity_id,
+            )
+            return {"status": "ok", "entity_type": entity_type, "entity_id": entity_id}
+        else:
+            return {"status": "error", "message": "Embedding generation failed"}
+    except Exception as e:
+        log.error(
+            "update_entity_embedding_failed",
+            entity_type=entity_type,
+            entity_id=entity_id,
+            error=str(e),
+        )
+        return {"status": "error", "error": str(e)}
+    finally:
+        db.close()
+
