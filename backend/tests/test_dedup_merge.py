@@ -5,7 +5,6 @@ from app.services.dedup import merge_entities, get_merge_history
 from app.models.cooperative import Cooperative
 from app.models.roaster import Roaster
 from app.models.entity_alias import EntityAlias
-from app.models.entity_event import EntityEvent
 
 
 def test_merge_cooperatives(db):

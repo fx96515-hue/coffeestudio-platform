@@ -2,12 +2,10 @@
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 
 from app.api.deps import require_role, get_db
 from app.models.cooperative import Cooperative
 from app.models.roaster import Roaster
-from app.models.quality_alert import QualityAlert
 from app.services.data_pipeline.freshness import DataFreshnessMonitor
 from app.services.quality_alerts import get_alert_summary
 
