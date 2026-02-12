@@ -300,8 +300,18 @@ def get_entity_outreach_status(
     status = "pending"
     if latest_event.event_type == "outreach_response":
         status = "responded"
-    elif (datetime.now(timezone.utc) - latest_event.created_at).days > 7:
-        status = "follow_up_needed"
+    else:
+        # Handle both timezone-aware and naive datetimes
+        created_at = latest_event.created_at
+        if created_at.tzinfo is None:
+            # If created_at is naive, use naive datetime for comparison
+            days_since = (datetime.utcnow() - created_at).days
+        else:
+            # If created_at is aware, use aware datetime for comparison
+            days_since = (datetime.now(timezone.utc) - created_at).days
+        
+        if days_since > 7:
+            status = "follow_up_needed"
 
     return {
         "entity_type": entity_type,

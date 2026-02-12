@@ -193,11 +193,12 @@ def merge_entities(
             merged_fields.append(field)
 
     # Merge scores: keep higher scores
-    score_fields = ["quality_score", "reliability_score", "economics_score"]
+    score_fields = ["quality_score", "reliability_score", "economics_score", "total_score"]
     for field in score_fields:
+        # Use getattr with default None to handle fields that don't exist
         keep_val = getattr(keep_entity, field, None) or 0
         merge_val = getattr(merge_entity, field, None) or 0
-        if merge_val > keep_val:
+        if merge_val > keep_val and hasattr(keep_entity, field):
             setattr(keep_entity, field, merge_val)
             merged_fields.append(field)
 
