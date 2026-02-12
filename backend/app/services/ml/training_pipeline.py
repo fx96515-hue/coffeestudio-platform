@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import pandas as pd
 import numpy as np
@@ -70,10 +70,12 @@ def collect_price_training_data(db: Session) -> pd.DataFrame:
         # Parse certifications if stored as JSON/string
         cert_list: list[str] = []
         if hasattr(record, "certifications") and record.certifications:
-            if isinstance(record.certifications, list):
-                cert_list = record.certifications
-            elif isinstance(record.certifications, str):
-                cert_list = [c.strip() for c in record.certifications.split(",")]
+            # Certifications typed as dict | None, but handle legacy list/str data
+            cert_value = cast(Any, record.certifications)
+            if isinstance(cert_value, list):
+                cert_list = cert_value
+            elif isinstance(cert_value, str):
+                cert_list = [c.strip() for c in cert_value.split(",")]
 
         data.append(
             {

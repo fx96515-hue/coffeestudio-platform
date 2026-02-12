@@ -47,33 +47,43 @@ def select_top_candidates(
 
     # Build query - handle different models separately for proper typing
     if entity_type == "cooperative":
-        stmt = select(Cooperative).filter(Cooperative.status == "active")
+        stmt_coop = select(Cooperative).filter(Cooperative.status == "active")
 
         # Apply filters
         if min_quality_score is not None:
-            stmt = stmt.filter(Cooperative.quality_score >= min_quality_score)
+            stmt_coop = stmt_coop.filter(Cooperative.quality_score >= min_quality_score)
         if min_reliability_score is not None:
-            stmt = stmt.filter(Cooperative.reliability_score >= min_reliability_score)
+            stmt_coop = stmt_coop.filter(
+                Cooperative.reliability_score >= min_reliability_score
+            )
         if min_economics_score is not None:
-            stmt = stmt.filter(Cooperative.economics_score >= min_economics_score)
+            stmt_coop = stmt_coop.filter(
+                Cooperative.economics_score >= min_economics_score
+            )
         if region:
-            stmt = stmt.filter(Cooperative.region == region)
+            stmt_coop = stmt_coop.filter(Cooperative.region == region)
         if certification:
-            stmt = stmt.filter(Cooperative.certifications.ilike(f"%{certification}%"))
+            stmt_coop = stmt_coop.filter(
+                Cooperative.certifications.ilike(f"%{certification}%")
+            )
 
         # Order by total score descending, handling None values
-        stmt = stmt.order_by(Cooperative.total_score.desc().nullslast()).limit(limit)
+        stmt_coop = stmt_coop.order_by(
+            Cooperative.total_score.desc().nullslast()
+        ).limit(limit)
 
-        result = db.execute(stmt)
+        result = db.execute(stmt_coop)
         entities = result.scalars().all()
     else:
         # Roaster doesn't have region, certifications, or individual score fields
-        stmt = select(Roaster).filter(Roaster.status == "active")
+        stmt_roaster = select(Roaster).filter(Roaster.status == "active")
 
         # Order by total score descending, handling None values
-        stmt = stmt.order_by(Roaster.total_score.desc().nullslast()).limit(limit)
+        stmt_roaster = stmt_roaster.order_by(
+            Roaster.total_score.desc().nullslast()
+        ).limit(limit)
 
-        result = db.execute(stmt)
+        result = db.execute(stmt_roaster)
         entities = result.scalars().all()
 
     return [
