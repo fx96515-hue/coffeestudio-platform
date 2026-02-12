@@ -69,6 +69,7 @@ def select_top_candidates(
     else:
         # Roaster doesn't have region, certifications, or individual score fields
         stmt_roaster = select(Roaster).filter(Roaster.status == "active")
+        stmt = select(Roaster).filter(Roaster.status == "active")
 
         # Order by total score descending, handling None values
         stmt_roaster = stmt_roaster.order_by(
@@ -257,6 +258,12 @@ def get_outreach_suggestions(
             else:
                 days_since = (datetime.now(timezone.utc) - created_at).days
             should_suggest = days_since > 30
+            if hasattr(created_at, "tzinfo"):
+                if created_at.tzinfo is None:
+                    days_since = (datetime.utcnow() - created_at).days
+                else:
+                    days_since = (datetime.now(timezone.utc) - created_at).days
+                should_suggest = days_since > 30
 
         if should_suggest:
             suggestions.append(
@@ -266,6 +273,7 @@ def get_outreach_suggestions(
                     "last_contact": (
                         recent_outreach.created_at.isoformat()
                         if recent_outreach
+                        and hasattr(recent_outreach.created_at, "isoformat")
                         else None
                     ),
                 }
