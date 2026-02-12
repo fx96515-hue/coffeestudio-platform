@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import Any, Literal
+from typing import Any, Literal, cast
 from sqlalchemy import select, and_, or_
 from sqlalchemy.orm import Session
 
@@ -47,19 +47,25 @@ def select_top_candidates(
     # Build query - handle different models separately for proper typing
     entities: list[Any]
     if entity_type == "cooperative":
-        stmt = select(Cooperative).filter(Cooperative.status == "active")
+        stmt_coop = select(Cooperative).filter(Cooperative.status == "active")
 
         # Apply filters
         if min_quality_score is not None:
-            stmt = stmt.filter(Cooperative.quality_score >= min_quality_score)
+            stmt_coop = stmt_coop.filter(Cooperative.quality_score >= min_quality_score)
         if min_reliability_score is not None:
-            stmt = stmt.filter(Cooperative.reliability_score >= min_reliability_score)
+            stmt_coop = stmt_coop.filter(
+                Cooperative.reliability_score >= min_reliability_score
+            )
         if min_economics_score is not None:
-            stmt = stmt.filter(Cooperative.economics_score >= min_economics_score)
+            stmt_coop = stmt_coop.filter(
+                Cooperative.economics_score >= min_economics_score
+            )
         if region:
-            stmt = stmt.filter(Cooperative.region == region)
+            stmt_coop = stmt_coop.filter(Cooperative.region == region)
         if certification:
-            stmt = stmt.filter(Cooperative.certifications.ilike(f"%{certification}%"))
+            stmt_coop = stmt_coop.filter(
+                Cooperative.certifications.ilike(f"%{certification}%")
+            )
 
         # Order by total score descending, handling None values
         stmt = stmt.order_by(Cooperative.total_score.desc().nullslast()).limit(limit)
@@ -270,9 +276,8 @@ def get_outreach_suggestions(
                     **candidate,
                     "reason": "High scores, no recent outreach",
                     "last_contact": (
-                        recent_outreach.created_at.isoformat()
+                        cast(datetime, recent_outreach.created_at).isoformat()
                         if recent_outreach
-                        and hasattr(recent_outreach.created_at, "isoformat")
                         else None
                     ),
                 }
@@ -330,7 +335,8 @@ def get_entity_outreach_status(
         status = "responded"
     else:
         # Handle both timezone-aware and naive datetimes
-        created_at = latest_event.created_at
+        # Cast created_at to datetime for type checking
+        created_at = cast(datetime, latest_event.created_at)
         if created_at.tzinfo is None:
             # If created_at is naive, use naive datetime for comparison
             days_since = (datetime.utcnow() - created_at).days
@@ -345,11 +351,11 @@ def get_entity_outreach_status(
         "entity_type": entity_type,
         "entity_id": entity_id,
         "status": status,
-        "last_contact": latest_event.created_at.isoformat(),
+        "last_contact": cast(datetime, latest_event.created_at).isoformat(),
         "events": [
             {
                 "event_type": e.event_type,
-                "created_at": e.created_at.isoformat(),
+                "created_at": cast(datetime, e.created_at).isoformat(),
                 "payload": e.payload,
             }
             for e in events
