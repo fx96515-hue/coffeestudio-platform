@@ -7,7 +7,6 @@ import pandas as pd
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.ml.price_model import CoffeePriceModel
 from app.ml import get_coffee_price_model
 from app.core.config import settings
 from app.models.coffee_price_history import CoffeePriceHistory

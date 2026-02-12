@@ -7,7 +7,6 @@ import pandas as pd
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.ml.freight_model import FreightCostModel
 from app.ml import get_freight_model
 from app.core.config import settings
 from app.models.freight_history import FreightHistory

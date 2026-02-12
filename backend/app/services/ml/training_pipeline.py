@@ -12,8 +12,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sqlalchemy.orm import Session
 
-from app.ml.freight_model import FreightCostModel, FreightCostModelXGB
-from app.ml.price_model import CoffeePriceModel, CoffeePriceModelXGB
 from app.ml import get_freight_model, get_coffee_price_model
 from app.core.config import settings
 from app.models.freight_history import FreightHistory
