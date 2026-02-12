@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, cast
+from typing import Any
 
 import pandas as pd
 import numpy as np
@@ -70,17 +70,12 @@ def collect_price_training_data(db: Session) -> pd.DataFrame:
         # Parse certifications if stored as JSON/dict
         cert_list: list[str] = []
         if hasattr(record, "certifications") and record.certifications:
-            # certifications is a dict/JSON field
-            if isinstance(record.certifications, dict):
-                # If it's a dict, it might have various structures
-                # Try to get a list from common keys
-                if "list" in record.certifications:
-                    cert_list = record.certifications["list"]
-                elif "certifications" in record.certifications:
-                    cert_list = record.certifications["certifications"]
-                else:
-                    # Otherwise, use the values
-                    cert_list = list(record.certifications.values())
+            if isinstance(record.certifications, list):
+                cert_list = record.certifications
+            elif isinstance(record.certifications, dict):
+                cert_list = list(record.certifications.keys())
+            elif isinstance(record.certifications, str):
+                cert_list = [c.strip() for c in record.certifications.split(",")]
 
         data.append(
             {
