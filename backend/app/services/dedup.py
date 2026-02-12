@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, cast
+from typing import Any, cast, Union
 from urllib.parse import urlparse
 
 from rapidfuzz import fuzz
@@ -143,10 +143,13 @@ def merge_entities(
     if entity_type not in {"cooperative", "roaster"}:
         raise ValueError("entity_type must be cooperative|roaster")
 
-    # Get entities with proper typing
+    # Get entities with proper typing using Union to avoid type mismatch
+    from typing import Union
+    EntityType = Union[Cooperative, Roaster]
+    
     if entity_type == "cooperative":
-        keep_entity = cast(Cooperative, db.get(Cooperative, keep_id))
-        merge_entity = cast(Cooperative, db.get(Cooperative, merge_id))
+        keep_entity: EntityType = cast(Cooperative, db.get(Cooperative, keep_id))
+        merge_entity: EntityType = cast(Cooperative, db.get(Cooperative, merge_id))
     else:
         keep_entity = cast(Roaster, db.get(Roaster, keep_id))
         merge_entity = cast(Roaster, db.get(Roaster, merge_id))
@@ -285,7 +288,7 @@ def get_merge_history(
     return [
         {
             "entity_id": e.entity_id,
-            "created_at": e.created_at.isoformat(),
+            "created_at": e.created_at.isoformat() if hasattr(e.created_at, 'isoformat') else str(e.created_at),
             "payload": e.payload,
         }
         for e in events
