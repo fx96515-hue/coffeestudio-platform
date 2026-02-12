@@ -49,6 +49,9 @@ class Settings(BaseSettings):
     INTELLIGENCE_REFRESH_TIMES: str = "06:00,12:00,18:00,00:00"
     AUTO_ENRICH_TIME: str = "03:00"
 
+    # Machine Learning model configuration
+    ML_MODEL_TYPE: str = "xgboost"  # Options: "xgboost" or "random_forest"
+
     def cors_origins_list(self) -> List[str]:
         return [s.strip() for s in self.CORS_ORIGINS.split(",") if s.strip()]
 

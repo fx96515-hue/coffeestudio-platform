@@ -8,6 +8,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.ml.freight_model import FreightCostModel
+from app.ml import get_freight_model
+from app.core.config import settings
 from app.models.freight_history import FreightHistory
 from app.models.ml_model import MLModel
 
@@ -17,7 +19,8 @@ class FreightPredictionService:
 
     def __init__(self, db: Session):
         self.db = db
-        self.model = FreightCostModel()
+        # Use configured model type from settings
+        self.model = get_freight_model(settings.ML_MODEL_TYPE)
         self._load_active_model()
 
     def _load_active_model(self) -> None:

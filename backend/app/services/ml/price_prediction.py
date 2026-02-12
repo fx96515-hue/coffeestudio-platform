@@ -8,6 +8,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.ml.price_model import CoffeePriceModel
+from app.ml import get_coffee_price_model
+from app.core.config import settings
 from app.models.coffee_price_history import CoffeePriceHistory
 from app.models.ml_model import MLModel
 
@@ -17,7 +19,8 @@ class CoffeePricePredictionService:
 
     def __init__(self, db: Session):
         self.db = db
-        self.model = CoffeePriceModel()
+        # Use configured model type from settings
+        self.model = get_coffee_price_model(settings.ML_MODEL_TYPE)
         self._load_active_model()
 
     def _load_active_model(self) -> None:

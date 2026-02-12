@@ -14,6 +14,8 @@ from sqlalchemy.orm import Session
 
 from app.ml.freight_model import FreightCostModel
 from app.ml.price_model import CoffeePriceModel
+from app.ml import get_freight_model, get_coffee_price_model
+from app.core.config import settings
 from app.models.freight_history import FreightHistory
 from app.models.coffee_price_history import CoffeePriceHistory
 from app.models.ml_model import MLModel
@@ -95,7 +97,7 @@ def collect_price_training_data(db: Session) -> pd.DataFrame:
 
 
 def train_freight_model(
-    db: Session, *, test_size: float = 0.2, random_state: int = 42
+    db: Session, *, test_size: float = 0.2, random_state: int = 42, model_type: str | None = None
 ) -> dict[str, Any]:
     """Train the freight cost model.
 
@@ -103,15 +105,20 @@ def train_freight_model(
         db: Database session
         test_size: Proportion of data for testing
         random_state: Random seed
+        model_type: Model type override (defaults to settings.ML_MODEL_TYPE)
 
     Returns:
         Training results with metrics
     """
+    # Use configured model type if not specified
+    if model_type is None:
+        model_type = settings.ML_MODEL_TYPE
+    
     # Collect data
     data = collect_freight_training_data(db)
 
-    # Initialize model
-    model = FreightCostModel()
+    # Initialize model using factory
+    model = get_freight_model(model_type)
 
     # Prepare features
     X, y = model.prepare_features(data)
@@ -153,7 +160,12 @@ def train_freight_model(
             "fuel_price_index",
             "port_congestion_score",
         ],
-        performance_metrics={"rmse": float(rmse), "mae": float(mae), "r2": float(r2)},
+        performance_metrics={
+            "rmse": float(rmse),
+            "mae": float(mae),
+            "r2": float(r2),
+            "algorithm": model_type,
+        },
         training_data_count=len(data),
         model_file_path=str(model_path),
         status="active",
@@ -166,6 +178,7 @@ def train_freight_model(
         "status": "success",
         "model_id": ml_model.id,
         "model_type": "freight_cost",
+        "algorithm": model_type,
         "training_samples": len(X_train),
         "test_samples": len(X_test),
         "metrics": {"rmse": float(rmse), "mae": float(mae), "r2": float(r2)},
@@ -174,7 +187,7 @@ def train_freight_model(
 
 
 def train_price_model(
-    db: Session, *, test_size: float = 0.2, random_state: int = 42
+    db: Session, *, test_size: float = 0.2, random_state: int = 42, model_type: str | None = None
 ) -> dict[str, Any]:
     """Train the coffee price model.
 
@@ -182,15 +195,20 @@ def train_price_model(
         db: Database session
         test_size: Proportion of data for testing
         random_state: Random seed
+        model_type: Model type override (defaults to settings.ML_MODEL_TYPE)
 
     Returns:
         Training results with metrics
     """
+    # Use configured model type if not specified
+    if model_type is None:
+        model_type = settings.ML_MODEL_TYPE
+    
     # Collect data
     data = collect_price_training_data(db)
 
-    # Initialize model
-    model = CoffeePriceModel()
+    # Initialize model using factory
+    model = get_coffee_price_model(model_type)
 
     # Prepare features
     X, y = model.prepare_features(data)
@@ -234,7 +252,12 @@ def train_price_model(
             "certifications",
             "ice_c_price",
         ],
-        performance_metrics={"rmse": float(rmse), "mae": float(mae), "r2": float(r2)},
+        performance_metrics={
+            "rmse": float(rmse),
+            "mae": float(mae),
+            "r2": float(r2),
+            "algorithm": model_type,
+        },
         training_data_count=len(data),
         model_file_path=str(model_path),
         status="active",
@@ -247,6 +270,7 @@ def train_price_model(
         "status": "success",
         "model_id": ml_model.id,
         "model_type": "coffee_price",
+        "algorithm": model_type,
         "training_samples": len(X_train),
         "test_samples": len(X_test),
         "metrics": {"rmse": float(rmse), "mae": float(mae), "r2": float(r2)},
@@ -291,3 +315,93 @@ def should_retrain(db: Session, model_type: str, *, min_new_data: int = 100) -> 
         )
 
     return new_count >= min_new_data
+
+
+def compare_models(
+    db: Session, model_type_name: str, *, test_size: float = 0.2, random_state: int = 42
+) -> dict[str, Any]:
+    """Compare Random Forest vs XGBoost models on the same dataset.
+
+    Args:
+        db: Database session
+        model_type_name: Type of model to compare ('freight_cost' or 'coffee_price')
+        test_size: Proportion of data for testing
+        random_state: Random seed
+
+    Returns:
+        Comparison results with metrics for both models
+    """
+    # Collect data based on model type
+    if model_type_name == "freight_cost":
+        data = collect_freight_training_data(db)
+        rf_model = get_freight_model("random_forest")
+        xgb_model = get_freight_model("xgboost")
+    elif model_type_name == "coffee_price":
+        data = collect_price_training_data(db)
+        rf_model = get_coffee_price_model("random_forest")
+        xgb_model = get_coffee_price_model("xgboost")
+    else:
+        raise ValueError(f"Invalid model_type_name: {model_type_name}")
+
+    # Prepare features (using RF model's prepare_features, which is identical)
+    X, y = rf_model.prepare_features(data)
+
+    if X is None or y is None:
+        raise ValueError("Failed to prepare features")
+
+    # Split data
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=test_size, random_state=random_state
+    )
+
+    results: dict[str, Any] = {
+        "model_type": model_type_name,
+        "training_samples": len(X_train),
+        "test_samples": len(X_test),
+        "models": {},
+    }
+
+    # Train and evaluate Random Forest
+    try:
+        rf_model.train(X_train, y_train)
+        y_pred_rf = rf_model.predict(X_test)
+        rf_metrics = {
+            "rmse": float(np.sqrt(mean_squared_error(y_test, y_pred_rf))),
+            "mae": float(mean_absolute_error(y_test, y_pred_rf)),
+            "r2": float(r2_score(y_test, y_pred_rf)),
+        }
+        results["models"]["random_forest"] = rf_metrics
+    except Exception as e:
+        results["models"]["random_forest"] = {"error": str(e)}
+
+    # Train and evaluate XGBoost
+    try:
+        xgb_model.train(X_train, y_train)
+        y_pred_xgb = xgb_model.predict(X_test)
+        xgb_metrics = {
+            "rmse": float(np.sqrt(mean_squared_error(y_test, y_pred_xgb))),
+            "mae": float(mean_absolute_error(y_test, y_pred_xgb)),
+            "r2": float(r2_score(y_test, y_pred_xgb)),
+        }
+        results["models"]["xgboost"] = xgb_metrics
+    except Exception as e:
+        results["models"]["xgboost"] = {"error": str(e)}
+
+    # Determine winner
+    if "error" not in results["models"]["random_forest"] and "error" not in results["models"]["xgboost"]:
+        # Lower RMSE is better
+        if xgb_metrics["rmse"] < rf_metrics["rmse"]:
+            results["winner"] = "xgboost"
+            results["improvement_pct"] = (
+                (rf_metrics["rmse"] - xgb_metrics["rmse"]) / rf_metrics["rmse"] * 100
+            )
+        else:
+            results["winner"] = "random_forest"
+            results["improvement_pct"] = (
+                (xgb_metrics["rmse"] - rf_metrics["rmse"]) / xgb_metrics["rmse"] * 100
+            )
+    else:
+        results["winner"] = "unknown"
+        results["improvement_pct"] = 0.0
+
+    return results
