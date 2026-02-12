@@ -27,8 +27,8 @@ def get_overview(
 
     # Data freshness
     monitor = DataFreshnessMonitor(db)
-    stale_coops = monitor.get_stale_entities("cooperative", 30)
-    stale_roasters = monitor.get_stale_entities("roaster", 30)
+    stale_coops = monitor.get_stale_entities("cooperative", stale_days=30)
+    stale_roasters = monitor.get_stale_entities("roaster", stale_days=30)
 
     # Alerts
     alert_summary = get_alert_summary(db)
@@ -115,8 +115,8 @@ def get_pipeline_status(
     return {
         "status": "operational",
         "freshness": {
-            "cooperative_stale_count": len(monitor.get_stale_entities("cooperative", 30)),
-            "roaster_stale_count": len(monitor.get_stale_entities("roaster", 30)),
+            "cooperative_stale_count": len(monitor.get_stale_entities("cooperative", stale_days=30)),
+            "roaster_stale_count": len(monitor.get_stale_entities("roaster", stale_days=30)),
         },
         "circuit_breakers": {
             "market_data": "closed",

@@ -186,7 +186,6 @@ def get_purchase_timing_recommendation(
 
     # Decision logic
     recommendation: PurchaseRecommendation
-    confidence = 0.5
     reason = ""
 
     # Price below average and stable/decreasing trend
