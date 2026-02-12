@@ -31,8 +31,14 @@ api_router.include_router(cuppings.router, prefix="/cuppings", tags=["cuppings"]
 api_router.include_router(ml_predictions.router, prefix="/ml", tags=["ml"])
 api_router.include_router(peru_sourcing.router, prefix="/peru", tags=["peru-sourcing"])
 api_router.include_router(shipments.router, prefix="/shipments", tags=["shipments"])
-api_router.include_router(data_health.router, prefix="/data-health", tags=["data-health"])
-api_router.include_router(quality_alerts.router, prefix="/alerts", tags=["quality-alerts"])
-api_router.include_router(auto_outreach.router, prefix="/outreach/auto", tags=["auto-outreach"])
+api_router.include_router(
+    data_health.router, prefix="/data-health", tags=["data-health"]
+)
+api_router.include_router(
+    quality_alerts.router, prefix="/alerts", tags=["quality-alerts"]
+)
+api_router.include_router(
+    auto_outreach.router, prefix="/outreach/auto", tags=["auto-outreach"]
+)
 api_router.include_router(ops_dashboard.router, prefix="/ops", tags=["ops-dashboard"])
 api_router.include_router(ml_routes.router, prefix="/ml/train", tags=["ml-training"])

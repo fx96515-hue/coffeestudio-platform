@@ -38,4 +38,6 @@ class QualityAlert(Base, TimestampMixin):
 Index(
     "ix_quality_alerts_entity_type_id", QualityAlert.entity_type, QualityAlert.entity_id
 )
-Index("ix_quality_alerts_severity_ack", QualityAlert.severity, QualityAlert.acknowledged)
+Index(
+    "ix_quality_alerts_severity_ack", QualityAlert.severity, QualityAlert.acknowledged
+)

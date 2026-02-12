@@ -50,7 +50,10 @@ def test_merge_roasters(db):
     """Test merging two roasters."""
     roaster1 = Roaster(name="Berlin Roasters", city="Berlin", total_score=75.0)
     roaster2 = Roaster(
-        name="Berlin Coffee", city="Berlin", total_score=80.0, website="https://berlin.com"
+        name="Berlin Coffee",
+        city="Berlin",
+        total_score=80.0,
+        website="https://berlin.com",
     )
     db.add_all([roaster1, roaster2])
     db.commit()

@@ -29,9 +29,7 @@ def fetch_jnc_data(region_name: str) -> dict[str, Any]:
     Returns:
         Dictionary with JNC data (from web intelligence)
     """
-    intel = fetch_perplexity_production_intel(
-        region_name, settings.PERPLEXITY_API_KEY
-    )
+    intel = fetch_perplexity_production_intel(region_name, settings.PERPLEXITY_API_KEY)
 
     if intel:
         return {
@@ -67,9 +65,7 @@ def fetch_minagri_data(region_name: str) -> dict[str, Any]:
     Returns:
         Dictionary with MINAGRI data (from web intelligence)
     """
-    intel = fetch_perplexity_production_intel(
-        region_name, settings.PERPLEXITY_API_KEY
-    )
+    intel = fetch_perplexity_production_intel(region_name, settings.PERPLEXITY_API_KEY)
 
     if intel:
         return {

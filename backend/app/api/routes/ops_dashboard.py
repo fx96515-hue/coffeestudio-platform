@@ -48,7 +48,9 @@ def get_overview(
         },
         "alerts": alert_summary,
         "data_quality": {
-            "freshness_status": "good" if len(stale_coops) < 10 and len(stale_roasters) < 10 else "needs_attention",
+            "freshness_status": "good"
+            if len(stale_coops) < 10 and len(stale_roasters) < 10
+            else "needs_attention",
         },
     }
 
@@ -86,7 +88,9 @@ def get_entity_health(
                 "reliability_score": c.reliability_score,
                 "economics_score": c.economics_score,
                 "total_score": c.total_score,
-                "last_scored_at": c.last_scored_at.isoformat() if c.last_scored_at else None,
+                "last_scored_at": c.last_scored_at.isoformat()
+                if c.last_scored_at
+                else None,
             }
             for c in coops
         ],
@@ -95,7 +99,9 @@ def get_entity_health(
                 "id": r.id,
                 "name": r.name,
                 "total_score": r.total_score,
-                "last_scored_at": r.last_scored_at.isoformat() if r.last_scored_at else None,
+                "last_scored_at": r.last_scored_at.isoformat()
+                if r.last_scored_at
+                else None,
             }
             for r in roasters
         ],
@@ -115,8 +121,12 @@ def get_pipeline_status(
     return {
         "status": "operational",
         "freshness": {
-            "cooperative_stale_count": len(monitor.get_stale_entities("cooperative", stale_days=30)),
-            "roaster_stale_count": len(monitor.get_stale_entities("roaster", stale_days=30)),
+            "cooperative_stale_count": len(
+                monitor.get_stale_entities("cooperative", stale_days=30)
+            ),
+            "roaster_stale_count": len(
+                monitor.get_stale_entities("roaster", stale_days=30)
+            ),
         },
         "circuit_breakers": {
             "market_data": "closed",

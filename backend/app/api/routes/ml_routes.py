@@ -38,7 +38,8 @@ def train_model(
             result = train_price_model(db)
         else:
             raise HTTPException(
-                status_code=400, detail="model_type must be 'freight_cost' or 'coffee_price'"
+                status_code=400,
+                detail="model_type must be 'freight_cost' or 'coffee_price'",
             )
         return result
     except ValueError as e:

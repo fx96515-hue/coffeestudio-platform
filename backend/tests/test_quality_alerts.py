@@ -17,8 +17,16 @@ def test_detect_score_changes_drop(db):
     db.add(coop)
     db.commit()
 
-    old_scores = {"quality_score": 85.0, "reliability_score": 80.0, "economics_score": 75.0}
-    new_scores = {"quality_score": 75.0, "reliability_score": 70.0, "economics_score": 74.0}
+    old_scores = {
+        "quality_score": 85.0,
+        "reliability_score": 80.0,
+        "economics_score": 75.0,
+    }
+    new_scores = {
+        "quality_score": 75.0,
+        "reliability_score": 70.0,
+        "economics_score": 74.0,
+    }
 
     alerts = detect_score_changes(
         db,
@@ -42,8 +50,16 @@ def test_detect_score_changes_improvement(db):
     db.add(coop)
     db.commit()
 
-    old_scores = {"quality_score": 70.0, "reliability_score": 60.0, "economics_score": 65.0}
-    new_scores = {"quality_score": 82.0, "reliability_score": 60.0, "economics_score": 65.0}
+    old_scores = {
+        "quality_score": 70.0,
+        "reliability_score": 60.0,
+        "economics_score": 65.0,
+    }
+    new_scores = {
+        "quality_score": 82.0,
+        "reliability_score": 60.0,
+        "economics_score": 65.0,
+    }
 
     alerts = detect_score_changes(
         db,
@@ -65,8 +81,16 @@ def test_detect_score_changes_below_threshold(db):
     db.add(coop)
     db.commit()
 
-    old_scores = {"quality_score": 80.0, "reliability_score": 75.0, "economics_score": 70.0}
-    new_scores = {"quality_score": 82.0, "reliability_score": 76.0, "economics_score": 71.0}
+    old_scores = {
+        "quality_score": 80.0,
+        "reliability_score": 75.0,
+        "economics_score": 70.0,
+    }
+    new_scores = {
+        "quality_score": 82.0,
+        "reliability_score": 76.0,
+        "economics_score": 71.0,
+    }
 
     alerts = detect_score_changes(
         db,
@@ -87,8 +111,16 @@ def test_detect_score_changes_severity(db):
     db.commit()
 
     # Critical drop (>15 points)
-    old_scores = {"quality_score": 90.0, "reliability_score": 80.0, "economics_score": 75.0}
-    new_scores = {"quality_score": 70.0, "reliability_score": 80.0, "economics_score": 75.0}
+    old_scores = {
+        "quality_score": 90.0,
+        "reliability_score": 80.0,
+        "economics_score": 75.0,
+    }
+    new_scores = {
+        "quality_score": 70.0,
+        "reliability_score": 80.0,
+        "economics_score": 75.0,
+    }
 
     alerts = detect_score_changes(
         db,
@@ -113,7 +145,11 @@ def test_detect_certification_changes_added(db):
     new_certs = "Organic, Fair Trade"
 
     alerts = detect_certification_changes(
-        db, entity_type="cooperative", entity_id=coop.id, old_certs=old_certs, new_certs=new_certs
+        db,
+        entity_type="cooperative",
+        entity_id=coop.id,
+        old_certs=old_certs,
+        new_certs=new_certs,
     )
 
     assert len(alerts) == 1
@@ -131,7 +167,11 @@ def test_detect_certification_changes_lost(db):
     new_certs = "Organic, Fair Trade"
 
     alerts = detect_certification_changes(
-        db, entity_type="cooperative", entity_id=coop.id, old_certs=old_certs, new_certs=new_certs
+        db,
+        entity_type="cooperative",
+        entity_id=coop.id,
+        old_certs=old_certs,
+        new_certs=new_certs,
     )
 
     assert len(alerts) == 1

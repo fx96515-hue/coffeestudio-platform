@@ -48,7 +48,7 @@ def select_top_candidates(
     # Build query - handle different models separately for proper typing
     if entity_type == "cooperative":
         stmt = select(Cooperative).filter(Cooperative.status == "active")
-        
+
         # Apply filters
         if min_quality_score is not None:
             stmt = stmt.filter(Cooperative.quality_score >= min_quality_score)
@@ -60,13 +60,13 @@ def select_top_candidates(
             stmt = stmt.filter(Cooperative.region == region)
         if certification:
             stmt = stmt.filter(Cooperative.certifications.ilike(f"%{certification}%"))
-        
+
         # Order by total score descending, handling None values
         stmt = stmt.order_by(Cooperative.total_score.desc().nullslast()).limit(limit)
     else:
         # Roaster doesn't have region, certifications, or individual score fields
         stmt = select(Roaster).filter(Roaster.status == "active")
-        
+
         # Order by total score descending, handling None values
         stmt = stmt.order_by(Roaster.total_score.desc().nullslast()).limit(limit)
 
@@ -247,13 +247,13 @@ def get_outreach_suggestions(
         else:
             # Handle both timezone-aware and naive datetimes
             created_at = recent_outreach.created_at
-            if hasattr(created_at, 'tzinfo'):
+            if hasattr(created_at, "tzinfo"):
                 if created_at.tzinfo is None:
                     days_since = (datetime.utcnow() - created_at).days
                 else:
                     days_since = (datetime.now(timezone.utc) - created_at).days
                 should_suggest = days_since > 30
-        
+
         if should_suggest:
             suggestions.append(
                 {
@@ -261,7 +261,8 @@ def get_outreach_suggestions(
                     "reason": "High scores, no recent outreach",
                     "last_contact": (
                         recent_outreach.created_at.isoformat()
-                        if recent_outreach and hasattr(recent_outreach.created_at, 'isoformat')
+                        if recent_outreach
+                        and hasattr(recent_outreach.created_at, "isoformat")
                         else None
                     ),
                 }
@@ -326,7 +327,7 @@ def get_entity_outreach_status(
         else:
             # If created_at is aware, use aware datetime for comparison
             days_since = (datetime.now(timezone.utc) - created_at).days
-        
+
         if days_since > 7:
             status = "follow_up_needed"
 

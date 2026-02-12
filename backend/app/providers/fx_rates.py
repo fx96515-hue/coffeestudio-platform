@@ -236,9 +236,7 @@ def fetch_ecb_fx_wrapped(
     )
 
 
-def fetch_fx_rate(
-    base: str, quote: str, timeout_s: float = 20.0
-) -> Optional[FxRate]:
+def fetch_fx_rate(base: str, quote: str, timeout_s: float = 20.0) -> Optional[FxRate]:
     """Fetch FX rate with automatic fallback chain.
 
     Tries sources in order:
@@ -275,7 +273,9 @@ def fetch_fx_rate(
         return rate
 
     # Fallback to ExchangeRate-API
-    log.info("fx_rate_fetch_fallback", source="exchangerate_api", base=base, quote=quote)
+    log.info(
+        "fx_rate_fetch_fallback", source="exchangerate_api", base=base, quote=quote
+    )
     rate = fetch_exchangerate_api_fx(base, quote, timeout_s)
     if rate:
         log.info(

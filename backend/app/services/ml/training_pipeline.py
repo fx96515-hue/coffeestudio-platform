@@ -136,7 +136,9 @@ def train_freight_model(
     # Save model
     model_dir = Path("models")
     model_dir.mkdir(exist_ok=True)
-    model_path = model_dir / f"freight_model_{datetime.now().strftime('%Y%m%d_%H%M%S')}.joblib"
+    model_path = (
+        model_dir / f"freight_model_{datetime.now().strftime('%Y%m%d_%H%M%S')}.joblib"
+    )
     model.save(str(model_path))
 
     # Save metadata to DB
@@ -215,7 +217,9 @@ def train_price_model(
     # Save model
     model_dir = Path("models")
     model_dir.mkdir(exist_ok=True)
-    model_path = model_dir / f"price_model_{datetime.now().strftime('%Y%m%d_%H%M%S')}.joblib"
+    model_path = (
+        model_dir / f"price_model_{datetime.now().strftime('%Y%m%d_%H%M%S')}.joblib"
+    )
     model.save(str(model_path))
 
     # Save metadata to DB
