@@ -5,10 +5,15 @@ import numpy as np
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import LabelEncoder
 import joblib
-try:
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
     from xgboost import XGBRegressor
-except ImportError:
-    XGBRegressor = None
+else:
+    try:
+        from xgboost import XGBRegressor
+    except ImportError:
+        XGBRegressor = None  # type: ignore[misc,assignment]
 
 
 class CoffeePriceModel:

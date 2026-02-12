@@ -66,7 +66,7 @@ def select_top_candidates(
         stmt = stmt.order_by(Cooperative.total_score.desc().nullslast()).limit(limit)
         
         result = db.execute(stmt)
-        entities = result.scalars().all()
+        entities = list(result.scalars().all())
     else:
         # Roaster doesn't have region, certifications, or individual score fields
         stmt_roaster = select(Roaster).filter(Roaster.status == "active")
@@ -75,7 +75,7 @@ def select_top_candidates(
         stmt_roaster = stmt_roaster.order_by(Roaster.total_score.desc().nullslast()).limit(limit)
         
         result_roaster = db.execute(stmt_roaster)
-        entities = result_roaster.scalars().all()
+        entities = list(result_roaster.scalars().all())
 
     return [
         {
