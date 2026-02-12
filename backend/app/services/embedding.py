@@ -7,7 +7,7 @@ OpenAI's text-embedding-3-small model (1536 dimensions).
 from __future__ import annotations
 
 import structlog
-from typing import Any, Union
+from typing import Union
 
 import httpx
 
@@ -143,9 +143,7 @@ class EmbeddingService:
             log.error("batch_embedding_failed", error=str(e))
             return [None] * len(texts)
 
-    def generate_entity_text(
-        self, entity: Union[Cooperative, Roaster]
-    ) -> str:
+    def generate_entity_text(self, entity: Union[Cooperative, Roaster]) -> str:
         """Generate text representation of an entity for embedding.
 
         Combines relevant fields into a single text that captures the entity's
