@@ -146,7 +146,13 @@ class CircuitBreaker:
 
         # Increment failure count
         failures_result = self.redis.incr(self.failures_key)
-        failures_int: int = int(failures_result) if failures_result is not None else 1
+        # Handle potential Awaitable or None return from redis.incr
+        if failures_result is None:
+            failures_int = 1
+        else:
+            # Cast to Any first to work around mypy's Awaitable detection
+            from typing import Any
+            failures_int = int(failures_result)  # type: ignore[arg-type]
         self.redis.expire(self.failures_key, 3600)  # 1h TTL
 
         # Record timestamp
