@@ -1,5 +1,6 @@
 """Schemas for auto-outreach API."""
 
+from typing import Literal
 from pydantic import BaseModel
 
 
@@ -8,8 +9,8 @@ class CreateCampaignIn(BaseModel):
 
     name: str
     entity_type: str
-    language: str = "de"
-    purpose: str = "sourcing_pitch"
+    language: Literal["de", "en", "es"] = "de"
+    purpose: Literal["sourcing_pitch", "sample_request"] = "sourcing_pitch"
     min_quality_score: float | None = None
     min_reliability_score: float | None = None
     min_economics_score: float | None = None
