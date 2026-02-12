@@ -263,12 +263,6 @@ def get_outreach_suggestions(
             else:
                 days_since = (datetime.now(timezone.utc) - created_at).days
             should_suggest = days_since > 30
-            if hasattr(created_at, "tzinfo"):
-                if created_at.tzinfo is None:
-                    days_since = (datetime.utcnow() - created_at).days
-                else:
-                    days_since = (datetime.now(timezone.utc) - created_at).days
-                should_suggest = days_since > 30
 
         if should_suggest:
             suggestions.append(
