@@ -72,12 +72,11 @@ def collect_price_training_data(db: Session) -> pd.DataFrame:
         if hasattr(record, "certifications") and record.certifications:
             # certifications is a dict, extract values if it has a list structure
             if isinstance(record.certifications, dict):
-                # If dict has a 'list' key or similar, extract it
-                cert_list = (
-                    record.certifications.get("list", [])
-                    if "list" in record.certifications
-                    else list(record.certifications.keys())
-                )
+                # If dict has a 'list' key, use it; otherwise use dict keys
+                if "list" in record.certifications:
+                    cert_list = record.certifications.get("list", [])
+                else:
+                    cert_list = list(record.certifications.keys())
 
         data.append(
             {
