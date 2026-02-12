@@ -194,10 +194,11 @@ def check_all_entities(db: Session, *, threshold: float = 5.0) -> dict[str, Any]
         meta = roaster.meta or {}
         previous_scores = meta.get("previous_scores", {})
 
+        # Roasters don't have individual score fields, use getattr with None defaults
         current_scores = {
-            "quality_score": roaster.quality_score,
-            "reliability_score": roaster.reliability_score,
-            "economics_score": roaster.economics_score,
+            "quality_score": getattr(roaster, "quality_score", None),
+            "reliability_score": getattr(roaster, "reliability_score", None),
+            "economics_score": getattr(roaster, "economics_score", None),
         }
 
         if previous_scores:

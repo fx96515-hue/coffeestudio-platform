@@ -41,6 +41,10 @@ def create_campaign(
         return result
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        import structlog
+        structlog.get_logger().error("create_campaign_failed", error=str(e))
+        raise HTTPException(status_code=500, detail="Campaign creation failed")
 
 
 @router.get("/suggestions", response_model=list[OutreachSuggestionOut])
@@ -51,10 +55,15 @@ def get_suggestions(
     _=Depends(require_role("admin", "analyst")),
 ):
     """Get AI-suggested outreach targets."""
-    suggestions = auto_outreach.get_outreach_suggestions(
-        db, entity_type=entity_type, limit=limit
-    )
-    return suggestions
+    try:
+        suggestions = auto_outreach.get_outreach_suggestions(
+            db, entity_type=entity_type, limit=limit
+        )
+        return suggestions
+    except Exception as e:
+        import structlog
+        structlog.get_logger().error("get_suggestions_failed", error=str(e))
+        raise HTTPException(status_code=500, detail="Failed to get outreach suggestions")
 
 
 @router.get("/status/{entity_type}/{entity_id}", response_model=EntityOutreachStatusOut)
@@ -65,7 +74,12 @@ def get_entity_status(
     _=Depends(require_role("admin", "analyst")),
 ):
     """Get outreach status for a specific entity."""
-    status = auto_outreach.get_entity_outreach_status(
-        db, entity_type=entity_type, entity_id=entity_id
-    )
-    return status
+    try:
+        status = auto_outreach.get_entity_outreach_status(
+            db, entity_type=entity_type, entity_id=entity_id
+        )
+        return status
+    except Exception as e:
+        import structlog
+        structlog.get_logger().error("get_entity_status_failed", error=str(e))
+        raise HTTPException(status_code=500, detail="Failed to get entity outreach status")
