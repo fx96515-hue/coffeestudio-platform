@@ -60,3 +60,23 @@ class PriceForecastOut(BaseModel):
     trend: str | None = None
     note: str | None = None
     message: str | None = None
+
+
+class FeatureImportanceOut(BaseModel):
+    """Feature importance output."""
+
+    model_id: int
+    model_type: str
+    algorithm: str
+    feature_importance: dict[str, float]
+
+
+class ModelComparisonOut(BaseModel):
+    """Model comparison output."""
+
+    model_type: str
+    training_samples: int
+    test_samples: int
+    models: dict[str, dict]
+    winner: str
+    improvement_pct: float
