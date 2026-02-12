@@ -47,20 +47,18 @@ def select_top_candidates(
 
     # Build query - handle different models separately for proper typing
     if entity_type == "cooperative":
-        stmt = select(Cooperative).where(Cooperative.status == "active")
         stmt = select(Cooperative).filter(Cooperative.status == "active")
 
         # Apply filters
         if min_quality_score is not None:
-            stmt = stmt.where(Cooperative.quality_score >= min_quality_score)
+            stmt = stmt.filter(Cooperative.quality_score >= min_quality_score)
         if min_reliability_score is not None:
-            stmt = stmt.where(Cooperative.reliability_score >= min_reliability_score)
+            stmt = stmt.filter(Cooperative.reliability_score >= min_reliability_score)
         if min_economics_score is not None:
-            stmt = stmt.where(Cooperative.economics_score >= min_economics_score)
+            stmt = stmt.filter(Cooperative.economics_score >= min_economics_score)
         if region:
-            stmt = stmt.where(Cooperative.region == region)
+            stmt = stmt.filter(Cooperative.region == region)
         if certification:
-            stmt = stmt.where(Cooperative.certifications.ilike(f"%{certification}%"))
             stmt = stmt.filter(Cooperative.certifications.ilike(f"%{certification}%"))
 
         # Order by total score descending, handling None values
@@ -70,15 +68,12 @@ def select_top_candidates(
         entities = result.scalars().all()
     else:
         # Roaster doesn't have region, certifications, or individual score fields
-        stmt_roaster = select(Roaster).where(Roaster.status == "active")
         stmt = select(Roaster).filter(Roaster.status == "active")
 
         # Order by total score descending, handling None values
-        stmt_roaster = stmt_roaster.order_by(
-            Roaster.total_score.desc().nullslast()
-        ).limit(limit)
+        stmt = stmt.order_by(Roaster.total_score.desc().nullslast()).limit(limit)
 
-        result = db.execute(stmt_roaster)
+        result = db.execute(stmt)
         entities = result.scalars().all()
 
     return [
@@ -261,13 +256,6 @@ def get_outreach_suggestions(
             else:
                 days_since = (datetime.now(timezone.utc) - created_at).days
             should_suggest = days_since > 30
-            created_at = recent_outreach.created_at
-            if hasattr(created_at, "tzinfo"):
-                if created_at.tzinfo is None:
-                    days_since = (datetime.utcnow() - created_at).days
-                else:
-                    days_since = (datetime.now(timezone.utc) - created_at).days
-                should_suggest = days_since > 30
 
         if should_suggest:
             suggestions.append(
@@ -277,9 +265,6 @@ def get_outreach_suggestions(
                     "last_contact": (
                         cast(datetime, recent_outreach.created_at).isoformat()
                         if recent_outreach
-                        recent_outreach.created_at.isoformat()
-                        if recent_outreach
-                        and hasattr(recent_outreach.created_at, "isoformat")
                         else None
                     ),
                 }
