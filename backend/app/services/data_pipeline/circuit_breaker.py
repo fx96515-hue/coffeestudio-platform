@@ -150,8 +150,6 @@ class CircuitBreaker:
         if failures_result is None:
             failures_int = 1
         else:
-            # Cast to Any first to work around mypy's Awaitable detection
-            from typing import Any
             failures_int = int(failures_result)  # type: ignore[arg-type]
         self.redis.expire(self.failures_key, 3600)  # 1h TTL
 
