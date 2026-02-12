@@ -244,7 +244,7 @@ export default function MLPage() {
                             .slice(0, 2)
                             .map(([k, v]) => (
                               <div key={k}>
-                                {k}: {typeof v === "number" ? v.toFixed(3) : v}
+                                {k}: {typeof v === "number" ? v.toFixed(3) : String(v)}
                               </div>
                             ))}
                         </div>

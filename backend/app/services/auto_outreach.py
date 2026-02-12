@@ -82,10 +82,10 @@ def select_top_candidates(
             "quality_score": getattr(e, "quality_score", None),
             "reliability_score": getattr(e, "reliability_score", None),
             "economics_score": getattr(e, "economics_score", None),
-            "total_score": e.total_score,
+            "total_score": getattr(e, "total_score", None),
             "certifications": getattr(e, "certifications", None),
-            "website": e.website,
-            "contact_email": e.contact_email,
+            "website": getattr(e, "website", None),
+            "contact_email": getattr(e, "contact_email", None),
         }
         for e in entities
     ]
