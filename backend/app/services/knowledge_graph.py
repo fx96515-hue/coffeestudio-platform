@@ -143,7 +143,10 @@ def build_graph(db: Session) -> nx.Graph:
                         )
 
     # Add edges: roaster -> region (SOURCES_FROM)
-    # If roaster has peru_focus and cooperative is in that region
+    # NOTE: This creates a SOURCES_FROM edge from every Peru-focused roaster to every region
+    # that has cooperatives. This is an ASSUMPTION that roasters with Peru focus might source
+    # from any Peru region. In a production system, this should be based on actual sourcing
+    # relationships tracked in the database.
     for roaster in roasters:
         if roaster.peru_focus:
             roaster_id = f"roaster_{roaster.id}"
@@ -365,7 +368,9 @@ def get_communities(db: Session) -> list[Community]:
                 )
 
         # Determine dominant node type
-        dominant_type = max(node_types, key=node_types.get) if node_types else "unknown"
+        dominant_type = (
+            max(node_types, key=lambda k: node_types[k]) if node_types else "unknown"
+        )
 
         # Get most common attributes
         common_attributes = sorted(common_attrs.keys(), key=lambda k: common_attrs[k], reverse=True)[:5]
@@ -479,6 +484,7 @@ def get_hidden_connections(
 
             # Generate reason
             target_data = G.nodes[target_node_id]
+            # Note: Using → for visual clarity. Ensure UTF-8 encoding in consuming systems.
             reason = f"Connected via {' → '.join(path_str[1:-1])}"
 
             hidden.append(

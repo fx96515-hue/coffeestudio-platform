@@ -62,7 +62,12 @@ def test_graph_cooperative_certification_edges(db):
 
 
 def test_graph_roaster_region_edges(db):
-    """Test that roasters with Peru focus are connected to regions."""
+    """Test that roasters with Peru focus are connected to regions.
+    
+    Note: This test verifies the ASSUMPTION that Peru-focused roasters
+    are connected to all regions with cooperatives. In production, this
+    should be based on actual sourcing relationships.
+    """
     roaster = Roaster(name="Roaster A", city="Berlin", peru_focus=True)
     region = Region(name="Cajamarca", country="Peru")
     coop = Cooperative(name="Coop A", region="Cajamarca")

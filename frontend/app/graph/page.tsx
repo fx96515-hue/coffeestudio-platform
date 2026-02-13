@@ -72,6 +72,9 @@ const NODE_LABELS: Record<string, string> = {
   certification: "Zertifizierung",
 };
 
+const CANVAS_WIDTH = 800;
+const CANVAS_HEIGHT = 600;
+
 export default function GraphPage() {
   const [networkData, setNetworkData] = useState<NetworkData | null>(null);
   const [communities, setCommunities] = useState<Community[]>([]);
@@ -133,15 +136,13 @@ export default function GraphPage() {
 
   function initializePositions(nodes: GraphNode[]) {
     const positions = new Map<string, NodePosition>();
-    const width = 800;
-    const height = 600;
 
     nodes.forEach((node, idx) => {
       const angle = (idx / nodes.length) * 2 * Math.PI;
-      const radius = Math.min(width, height) * 0.3;
+      const radius = Math.min(CANVAS_WIDTH, CANVAS_HEIGHT) * 0.3;
       positions.set(node.id, {
-        x: width / 2 + Math.cos(angle) * radius,
-        y: height / 2 + Math.sin(angle) * radius,
+        x: CANVAS_WIDTH / 2 + Math.cos(angle) * radius,
+        y: CANVAS_HEIGHT / 2 + Math.sin(angle) * radius,
         vx: 0,
         vy: 0,
       });
@@ -154,7 +155,15 @@ export default function GraphPage() {
   useEffect(() => {
     if (!networkData || nodePositions.size === 0) return;
 
+    let frameCount = 0;
+    const maxFrames = 200; // Limit simulation to prevent infinite loop
+
     const simulate = () => {
+      if (frameCount >= maxFrames) {
+        // Stop animation after max frames
+        return;
+      }
+      
       const newPositions = new Map(nodePositions);
       const alpha = 0.1;
       const repulsionStrength = 5000;
@@ -167,8 +176,8 @@ export default function GraphPage() {
         if (!pos) return;
 
         // Center force
-        pos.vx += (400 - pos.x) * centerStrength;
-        pos.vy += (300 - pos.y) * centerStrength;
+        pos.vx += (CANVAS_WIDTH / 2 - pos.x) * centerStrength;
+        pos.vy += (CANVAS_HEIGHT / 2 - pos.y) * centerStrength;
 
         // Repulsion between all nodes
         networkData.nodes.forEach((other) => {
@@ -214,6 +223,7 @@ export default function GraphPage() {
       });
 
       setNodePositions(newPositions);
+      frameCount++;
       animationRef.current = requestAnimationFrame(simulate);
     };
 
@@ -222,7 +232,7 @@ export default function GraphPage() {
     return () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
-  }, [networkData, nodePositions.size]);
+  }, [networkData]); // Only re-run when network data changes
 
   // Draw canvas
   useEffect(() => {
@@ -412,8 +422,8 @@ export default function GraphPage() {
           <div className="panelBody" style={{ padding: 0 }}>
             <canvas
               ref={canvasRef}
-              width={800}
-              height={600}
+              width={CANVAS_WIDTH}
+              height={CANVAS_HEIGHT}
               onClick={handleCanvasClick}
               onMouseMove={handleCanvasMouseMove}
               style={{ cursor: "pointer", display: "block" }}
