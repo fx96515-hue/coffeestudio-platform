@@ -17,8 +17,17 @@ depends_on = None
 
 
 def upgrade():
-    # Enable pgvector extension
-    op.execute("CREATE EXTENSION IF NOT EXISTS vector")
+    # Try to enable pgvector extension - gracefully skip if not available (e.g., CI)
+    conn = op.get_bind()
+    try:
+        conn.execute(sa.text("CREATE EXTENSION IF NOT EXISTS vector"))
+    except Exception as e:
+        import warnings
+
+        warnings.warn(
+            f"pgvector extension not available - skipping vector columns: {e}"
+        )
+        return
 
     # Add embedding column to cooperatives table
     op.execute(
