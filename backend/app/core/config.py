@@ -53,6 +53,12 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str | None = None
     EMBEDDING_MODEL: str = "text-embedding-3-small"
 
+    # --- RAG AI Analyst ---
+    RAG_LLM_MODEL: str = "gpt-4o-mini"
+    RAG_MAX_CONTEXT_ENTITIES: int = 10
+    RAG_MAX_CONVERSATION_HISTORY: int = 20
+    RAG_TEMPERATURE: float = 0.3
+
     def cors_origins_list(self) -> List[str]:
         return [s.strip() for s in self.CORS_ORIGINS.split(",") if s.strip()]
 
