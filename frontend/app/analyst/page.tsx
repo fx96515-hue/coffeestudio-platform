@@ -19,6 +19,14 @@ interface Source {
   similarity_score: number;
 }
 
+interface ServiceStatus {
+  available: boolean;
+  provider: string;
+  model: string;
+  embedding_provider: string;
+  embedding_model: string;
+}
+
 const EXAMPLE_QUESTIONS = [
   "Welche Kooperativen in Cajamarca haben Fair Trade Zertifizierung?",
   "Vergleiche Röstereien in München nach Bewertung",
@@ -30,7 +38,9 @@ export default function AnalystPage() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [serviceAvailable, setServiceAvailable] = useState(true);
+  const [serviceStatus, setServiceStatus] = useState<ServiceStatus | null>(
+    null
+  );
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -65,19 +75,46 @@ export default function AnalystPage() {
       }
 
       if (!response.ok) {
-        setServiceAvailable(false);
+        setServiceStatus(null);
         setError("Service nicht verfügbar");
         return;
       }
 
-      const data = await response.json();
-      setServiceAvailable(data.available);
+      const data: ServiceStatus = await response.json();
+      setServiceStatus(data);
       if (!data.available) {
-        setError("KI-Analyst ist derzeit nicht verfügbar.");
+        setError(getProviderErrorMessage(data.provider));
       }
     } catch (err) {
-      setServiceAvailable(false);
+      setServiceStatus(null);
       setError("Fehler beim Verbinden mit dem Service");
+    }
+  };
+
+  const getProviderErrorMessage = (provider: string): string => {
+    switch (provider) {
+      case "ollama":
+        return "Ollama ist nicht gestartet. Starte Ollama mit: `ollama serve` und lade ein Modell: `ollama pull llama3.1:8b`";
+      case "openai":
+        return "OPENAI_API_KEY ist nicht konfiguriert";
+      case "groq":
+        return "GROQ_API_KEY ist nicht konfiguriert";
+      default:
+        return "KI-Analyst ist derzeit nicht verfügbar.";
+    }
+  };
+
+  const getProviderBadge = (): string => {
+    if (!serviceStatus) return "";
+    switch (serviceStatus.provider) {
+      case "ollama":
+        return "🦙 Powered by Ollama";
+      case "openai":
+        return "🤖 Powered by OpenAI";
+      case "groq":
+        return "⚡ Powered by Groq";
+      default:
+        return "";
     }
   };
 
@@ -124,7 +161,8 @@ export default function AnalystPage() {
       }
 
       if (response.status === 503) {
-        setError("Service nicht verfügbar.");
+        const errorData = await response.json();
+        setError(errorData.detail || "Service nicht verfügbar.");
         setMessages((prev) => prev.slice(0, -1));
         return;
       }
@@ -174,6 +212,9 @@ export default function AnalystPage() {
         <p className="muted">
           Stellen Sie Fragen über Kooperativen, Röstereien und Sourcing
         </p>
+        {serviceStatus && serviceStatus.available && (
+          <div className="provider-badge">{getProviderBadge()}</div>
+        )}
       </div>
 
       {error && (
@@ -194,7 +235,7 @@ export default function AnalystPage() {
                   key={i}
                   className="example-button"
                   onClick={() => handleExampleClick(q)}
-                  disabled={loading || !serviceAvailable}
+                  disabled={loading || !serviceStatus?.available}
                 >
                   {q}
                 </button>
@@ -253,13 +294,13 @@ export default function AnalystPage() {
           placeholder="Stellen Sie eine Frage..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          disabled={loading || !serviceAvailable}
+          disabled={loading || !serviceStatus?.available}
           maxLength={MAX_QUESTION_LENGTH}
         />
         <button
           type="submit"
           className="analyst-send-button"
-          disabled={!input.trim() || loading || !serviceAvailable}
+          disabled={!input.trim() || loading || !serviceStatus?.available}
         >
           {loading ? "..." : "Senden"}
         </button>
@@ -282,6 +323,17 @@ export default function AnalystPage() {
         .analyst-header h1 {
           margin: 0 0 0.5rem 0;
           color: var(--coffee-dark, #3e2723);
+        }
+
+        .provider-badge {
+          display: inline-block;
+          padding: 0.4rem 0.8rem;
+          background: var(--coffee-light, #efebe9);
+          border: 1px solid var(--coffee-medium, #8d6e63);
+          border-radius: 16px;
+          font-size: 0.85rem;
+          color: var(--coffee-dark, #5d4037);
+          margin-top: 0.5rem;
         }
 
         .alert {

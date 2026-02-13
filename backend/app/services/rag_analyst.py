@@ -11,11 +11,10 @@ import structlog
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-import httpx
-
 from app.core.config import settings
 from app.schemas.rag_analyst import RAGResponse, RAGSource, ConversationMessage
 from app.services.embedding import EmbeddingService
+from app.services.llm_providers import get_llm_provider, BaseLLMProvider
 
 log = structlog.get_logger()
 
@@ -24,18 +23,27 @@ class RAGAnalystService:
     """RAG-based AI analyst for coffee sourcing intelligence."""
 
     def __init__(self) -> None:
-        self.api_key = settings.OPENAI_API_KEY
+        self.llm_provider: BaseLLMProvider = get_llm_provider()
         self.model = settings.RAG_LLM_MODEL
         self.temperature = settings.RAG_TEMPERATURE
         self.max_context_entities = settings.RAG_MAX_CONTEXT_ENTITIES
         self.max_history = settings.RAG_MAX_CONVERSATION_HISTORY
-        self.base_url = "https://api.openai.com/v1/chat/completions"
-        self.timeout = 60.0
         self.embedding_service = EmbeddingService()
 
     def is_available(self) -> bool:
-        """Check if RAG service is available (API key configured)."""
-        return self.api_key is not None and len(self.api_key.strip()) > 0
+        """Check if RAG service is available (provider configured and reachable)."""
+        return self.llm_provider.is_available()
+
+    def get_provider_info(self) -> dict:
+        """Get information about the configured provider.
+
+        Returns:
+            Dict with provider name and model
+        """
+        return {
+            "provider": self.llm_provider.provider_name(),
+            "model": self.model,
+        }
 
     async def ask(
         self,
@@ -57,8 +65,15 @@ class RAGAnalystService:
             Exception: If service unavailable or API call fails
         """
         if not self.is_available():
-            log.warning("rag_service_unavailable", reason="no_api_key")
-            raise Exception("RAG service not available: API key not configured")
+            provider_name = self.llm_provider.provider_name()
+            log.warning(
+                "rag_service_unavailable",
+                provider=provider_name,
+                reason="provider_not_available",
+            )
+            raise Exception(
+                f"RAG service not available: {provider_name} provider is not configured or unreachable"
+            )
 
         # Retrieve relevant context
         context = await self._retrieve_context(question, db)
@@ -81,60 +96,43 @@ class RAGAnalystService:
         # Add current question
         messages.append({"role": "user", "content": question})
 
-        # Call OpenAI Chat Completion API
+        # Call LLM provider
         try:
-            async with httpx.AsyncClient() as client:
-                response = await client.post(
-                    self.base_url,
-                    headers={
-                        "Authorization": f"Bearer {self.api_key}",
-                        "Content-Type": "application/json",
-                    },
-                    json={
-                        "model": self.model,
-                        "messages": messages,
-                        "temperature": self.temperature,
-                    },
-                    timeout=self.timeout,
-                )
-                response.raise_for_status()
-                data = response.json()
-
-                answer = data["choices"][0]["message"]["content"]
-                tokens_used = data.get("usage", {}).get("total_tokens")
-
-                log.info(
-                    "rag_answer_generated",
-                    question_length=len(question),
-                    answer_length=len(answer),
-                    tokens_used=tokens_used,
-                )
-
-                # Build sources from context
-                sources = [
-                    RAGSource(
-                        entity_type=ctx["entity_type"],
-                        entity_id=ctx["entity_id"],
-                        name=ctx["name"],
-                        similarity_score=ctx["similarity_score"],
-                    )
-                    for ctx in context
-                ]
-
-                return RAGResponse(
-                    answer=answer,
-                    sources=sources,
-                    model=self.model,
-                    tokens_used=tokens_used,
-                )
-
-        except httpx.HTTPStatusError as e:
-            log.error(
-                "openai_api_error",
-                status_code=e.response.status_code,
-                error=str(e),
+            result = await self.llm_provider.chat_completion(
+                messages=messages,
+                temperature=self.temperature,
+                model=self.model,
             )
-            raise Exception(f"OpenAI API error: {e.response.status_code}")
+
+            answer = result["content"]
+            tokens_used = result["tokens_used"]
+
+            log.info(
+                "rag_answer_generated",
+                provider=self.llm_provider.provider_name(),
+                question_length=len(question),
+                answer_length=len(answer),
+                tokens_used=tokens_used,
+            )
+
+            # Build sources from context
+            sources = [
+                RAGSource(
+                    entity_type=ctx["entity_type"],
+                    entity_id=ctx["entity_id"],
+                    name=ctx["name"],
+                    similarity_score=ctx["similarity_score"],
+                )
+                for ctx in context
+            ]
+
+            return RAGResponse(
+                answer=answer,
+                sources=sources,
+                model=self.model,
+                tokens_used=tokens_used,
+            )
+
         except Exception as e:
             log.error("rag_answer_generation_failed", error=str(e))
             raise
