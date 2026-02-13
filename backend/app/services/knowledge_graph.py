@@ -261,11 +261,16 @@ def get_network_data(db: Session, node_types: str = "all") -> NetworkData:
     return NetworkData(nodes=nodes, edges=edges, stats=stats)
 
 
-def get_entity_analysis(db: Session, entity_type: str, entity_id: int) -> EntityAnalysis:
+def get_entity_analysis(db: Session, entity_type: str, entity_id: int | str) -> EntityAnalysis:
     """Get graph analysis for a specific entity."""
     G = _get_or_build_graph(db)
 
-    node_id = f"{entity_type}_{entity_id}"
+    # Handle different ID formats (numeric for most, string for regions/certifications)
+    if isinstance(entity_id, int):
+        node_id = f"{entity_type}_{entity_id}"
+    else:
+        node_id = f"{entity_type}_{str(entity_id).lower().replace(' ', '_')}"
+    
     if not G.has_node(node_id):
         raise ValueError(f"Node {node_id} not found in graph")
 
@@ -381,15 +386,23 @@ def get_communities(db: Session) -> list[Community]:
 def get_shortest_path(
     db: Session,
     source_type: str,
-    source_id: int,
+    source_id: int | str,
     target_type: str,
-    target_id: int,
+    target_id: int | str,
 ) -> PathResult:
     """Find shortest path between two entities."""
     G = _get_or_build_graph(db)
 
-    source_node_id = f"{source_type}_{source_id}"
-    target_node_id = f"{target_type}_{target_id}"
+    # Handle different ID formats (numeric for most, string for regions/certifications)
+    if isinstance(source_id, int):
+        source_node_id = f"{source_type}_{source_id}"
+    else:
+        source_node_id = f"{source_type}_{str(source_id).lower().replace(' ', '_')}"
+    
+    if isinstance(target_id, int):
+        target_node_id = f"{target_type}_{target_id}"
+    else:
+        target_node_id = f"{target_type}_{str(target_id).lower().replace(' ', '_')}"
 
     if not G.has_node(source_node_id):
         raise ValueError(f"Source node {source_node_id} not found")
@@ -437,12 +450,17 @@ def get_shortest_path(
 
 
 def get_hidden_connections(
-    db: Session, entity_type: str, entity_id: int, max_hops: int = 3
+    db: Session, entity_type: str, entity_id: int | str, max_hops: int = 3
 ) -> list[HiddenConnection]:
     """Find hidden connections to entities 2-3 hops away."""
     G = _get_or_build_graph(db)
 
-    node_id = f"{entity_type}_{entity_id}"
+    # Handle different ID formats (numeric for most, string for regions/certifications)
+    if isinstance(entity_id, int):
+        node_id = f"{entity_type}_{entity_id}"
+    else:
+        node_id = f"{entity_type}_{str(entity_id).lower().replace(' ', '_')}"
+    
     if not G.has_node(node_id):
         raise ValueError(f"Node {node_id} not found in graph")
 
