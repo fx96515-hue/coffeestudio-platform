@@ -87,8 +87,8 @@ export default function GraphPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const nodePositionsRef = useRef<Map<string, NodePosition>>(new Map());
   const [zoom, setZoom] = useState(1);
-  const [panX, setPanX] = useState(0);
-  const [panY, setPanY] = useState(0);
+  const [panX] = useState(0);
+  const [panY] = useState(0);
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
   const animationRef = useRef<number | null>(null);
   const [, forceUpdate] = useState({});  // Trigger re-renders for canvas updates
