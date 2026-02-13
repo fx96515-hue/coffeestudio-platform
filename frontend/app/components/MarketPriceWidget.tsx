@@ -28,9 +28,9 @@ export default function MarketPriceWidget() {
         const data = await apiFetch<MarketSnapshot>("/market/latest");
         if (!alive) return;
         setMarket(data);
-      } catch (e: any) {
+      } catch (e: unknown) {
         if (!alive) return;
-        setError(e?.message ?? String(e));
+        setError(e instanceof Error ? e.message : String(e));
       } finally {
         if (!alive) return;
         setLoading(false);
@@ -47,7 +47,6 @@ export default function MarketPriceWidget() {
 
   // Fallback reference prices
   const fallbackCoffeePrice = 3.50; // USD/lb
-  const fallbackEurUsd = 1.08;
 
   const formatDate = (dateStr?: string | null) => {
     if (!dateStr) return "–";
