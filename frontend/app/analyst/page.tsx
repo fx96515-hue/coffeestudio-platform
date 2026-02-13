@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 // Constants
 const MAX_QUESTION_LENGTH = 1000; // Must match backend RAGQuestion.question max_length
@@ -257,9 +258,9 @@ export default function AnalystPage() {
                   <ul>
                     {msg.sources.map((source, i) => (
                       <li key={i}>
-                        <a href={getEntityLink(source)}>
+                        <Link href={getEntityLink(source)}>
                           {source.name} (ID: {source.entity_id})
-                        </a>{" "}
+                        </Link>{" "}
                         <span className="similarity-score">
                           {(source.similarity_score * 100).toFixed(0)}%
                         </span>

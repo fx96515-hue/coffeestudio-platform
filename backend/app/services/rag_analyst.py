@@ -175,7 +175,7 @@ class RAGAnalystService:
                 certifications,
                 altitude_m,
                 varieties,
-                1 - (embedding <=> :query_embedding) AS similarity
+                1 - ((embedding <=> :query_embedding) / 2) AS similarity
             FROM cooperatives
             WHERE embedding IS NOT NULL
             ORDER BY embedding <=> :query_embedding
@@ -202,7 +202,7 @@ class RAGAnalystService:
                 peru_focus,
                 specialty_focus,
                 price_position,
-                1 - (embedding <=> :query_embedding) AS similarity
+                1 - ((embedding <=> :query_embedding) / 2) AS similarity
             FROM roasters
             WHERE embedding IS NOT NULL
             ORDER BY embedding <=> :query_embedding
@@ -269,14 +269,21 @@ Du sprichst primär Deutsch, kannst aber auch auf Englisch antworten wenn gewün
 
 WICHTIGE RICHTLINIEN:
 - Beantworte Fragen präzise und auf Basis der bereitgestellten Daten
-- Nenne IMMER die Quellen (Namen und IDs der Entities) in deiner Antwort
+- Nenne, falls vorhanden, die Quellen (Namen und IDs der Entities) in deiner Antwort
 - Wenn Daten fehlen oder unvollständig sind, sage das klar
-- Gib keine Informationen an, die nicht in den Quelldaten vorhanden sind
+- Erfinde keine spezifischen Details zu Entities und gib nichts als aus den Quelldaten stammend aus, wenn es dort nicht vorkommt
 - Sei hilfsbereit und professionell
 """
 
         if not context:
-            base_prompt += "\nAktuell sind keine spezifischen Daten verfügbar. Antworte allgemein basierend auf Kaffee-Sourcing-Wissen."
+            base_prompt += (
+                "\nAktuell sind keine spezifischen Quelldaten verfügbar.\n"
+                "\n"
+                "Zusätzliche Richtlinien für diese Situation:\n"
+                "- Erkläre ausdrücklich, dass du für diese Antwort keine konkreten Quellen/Entities zur Verfügung hast.\n"
+                "- Nenne keine Entity-Namen oder -IDs und erfinde keine Quellen.\n"
+                "- Du darfst nur allgemeines Wissen über Kaffee-Sourcing nutzen und musst klar machen, dass es sich um allgemeine Informationen ohne konkrete Quellenangabe handelt.\n"
+            )
             return base_prompt
 
         base_prompt += "\n\n=== VERFÜGBARE DATEN ===\n"

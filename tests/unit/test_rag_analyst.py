@@ -3,11 +3,10 @@
 from __future__ import annotations
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 from app.services.rag_analyst import RAGAnalystService
 from app.schemas.rag_analyst import ConversationMessage, RAGResponse
-from app.services.llm_providers import OllamaProvider
 
 # Test constants
 MOCK_COOPERATIVE_SIMILARITY = 0.85
