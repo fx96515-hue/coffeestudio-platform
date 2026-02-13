@@ -169,7 +169,7 @@ export default function SearchPage() {
             Ergebnisse: {results.length}
             {results.length > 0 && (
               <span className="muted" style={{ marginLeft: "0.5rem", fontWeight: "normal" }}>
-                für "{query}"
+                für &quot;{query}&quot;
               </span>
             )}
           </div>
@@ -243,7 +243,7 @@ export default function SearchPage() {
                           <tr key={`${key}-similar`}>
                             <td colSpan={7} style={{ backgroundColor: "var(--color-bg-secondary)", padding: "1rem" }}>
                               <div style={{ marginBottom: "0.5rem", fontWeight: "600" }}>
-                                Ähnliche Entitäten zu "{result.name}":
+                                Ähnliche Entitäten zu &quot;{result.name}&quot;:
                               </div>
                               <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
                                 {similar.map((sim) => (

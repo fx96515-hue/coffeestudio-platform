@@ -95,23 +95,23 @@ export default function GraphPage() {
 
   // Load network data
   useEffect(() => {
-    loadNetworkData();
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await apiFetch<NetworkData>(`/graph/network?node_types=${nodeFilter}`);
+        setNetworkData(data);
+        initializePositions(data.nodes);
+      } catch (e: any) {
+        setError(e?.message ?? String(e));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
     loadCommunities();
   }, [nodeFilter]);
-
-  async function loadNetworkData() {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await apiFetch<NetworkData>(`/graph/network?node_types=${nodeFilter}`);
-      setNetworkData(data);
-      initializePositions(data.nodes);
-    } catch (e: any) {
-      setError(e?.message ?? String(e));
-    } finally {
-      setLoading(false);
-    }
-  }
 
   async function loadCommunities() {
     try {

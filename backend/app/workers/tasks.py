@@ -420,6 +420,7 @@ def update_entity_embedding(entity_type: str, entity_id: int):
             }
 
         # Get entity
+        entity: Cooperative | Roaster | None
         if entity_type == "cooperative":
             entity = db.query(Cooperative).filter(Cooperative.id == entity_id).first()
         elif entity_type == "roaster":

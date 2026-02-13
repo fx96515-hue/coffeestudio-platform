@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, require_auth
+from app.api.deps import get_db, require_role
 from app.models.cooperative import Cooperative
 from app.models.roaster import Roaster
 from app.schemas.semantic_search import (
@@ -30,7 +30,7 @@ async def semantic_search(
     entity_type: Annotated[str, Query()] = "all",
     limit: Annotated[int, Query(ge=1, le=50)] = 10,
     db: Session = Depends(get_db),
-    _: dict = Depends(require_auth),
+    _=Depends(require_role("admin", "analyst", "viewer")),
 ):
     """Search for entities using semantic similarity.
 
@@ -99,7 +99,7 @@ async def find_similar_entities(
     entity_id: int,
     limit: Annotated[int, Query(ge=1, le=50)] = 5,
     db: Session = Depends(get_db),
-    _: dict = Depends(require_auth),
+    _=Depends(require_role("admin", "analyst", "viewer")),
 ):
     """Find similar entities based on embedding similarity.
 
@@ -117,6 +117,7 @@ async def find_similar_entities(
         raise HTTPException(status_code=400, detail="Invalid entity_type")
 
     # Get entity and check if it has embedding
+    entity: Cooperative | Roaster | None
     if entity_type == "cooperative":
         entity = db.query(Cooperative).filter(Cooperative.id == entity_id).first()
     else:
