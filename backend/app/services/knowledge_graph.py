@@ -147,16 +147,20 @@ def build_graph(db: Session) -> nx.Graph:
     # that has cooperatives. This is an ASSUMPTION that roasters with Peru focus might source
     # from any Peru region. In a production system, this should be based on actual sourcing
     # relationships tracked in the database.
+    # Optimization: Collect unique regions first to avoid redundant iteration
+    unique_region_ids = {
+        f"region_{coop.region.lower().replace(' ', '_')}"
+        for coop in cooperatives
+        if coop.region
+    }
     for roaster in roasters:
         if roaster.peru_focus:
             roaster_id = f"roaster_{roaster.id}"
-            for coop in cooperatives:
-                if coop.region:
-                    region_id = f"region_{coop.region.lower().replace(' ', '_')}"
-                    if G.has_node(region_id):
-                        G.add_edge(
-                            roaster_id, region_id, edge_type="SOURCES_FROM", weight=1.0
-                        )
+            for region_id in unique_region_ids:
+                if G.has_node(region_id):
+                    G.add_edge(
+                        roaster_id, region_id, edge_type="SOURCES_FROM", weight=1.0
+                    )
 
     # Add edges: cooperative -> cooperative (SIMILAR_PROFILE)
     # Similar if they share region and at least one certification
@@ -372,8 +376,10 @@ def get_communities(db: Session) -> list[Community]:
             max(node_types, key=lambda k: node_types[k]) if node_types else "unknown"
         )
 
-        # Get most common attributes
-        common_attributes = sorted(common_attrs.keys(), key=lambda k: common_attrs[k], reverse=True)[:5]
+        # Get most common attributes (sorted by frequency, descending)
+        common_attributes = sorted(
+            common_attrs.keys(), key=lambda k: common_attrs[k], reverse=True
+        )[:5]
 
         result.append(
             Community(

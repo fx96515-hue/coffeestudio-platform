@@ -85,12 +85,13 @@ export default function GraphPage() {
   const [error, setError] = useState<string | null>(null);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [nodePositions, setNodePositions] = useState<Map<string, NodePosition>>(new Map());
+  const nodePositionsRef = useRef<Map<string, NodePosition>>(new Map());
   const [zoom, setZoom] = useState(1);
   const [panX, setPanX] = useState(0);
   const [panY, setPanY] = useState(0);
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
   const animationRef = useRef<number | null>(null);
+  const [, forceUpdate] = useState({});  // Trigger re-renders for canvas updates
 
   // Load network data
   useEffect(() => {
@@ -148,12 +149,13 @@ export default function GraphPage() {
       });
     });
 
-    setNodePositions(positions);
+    nodePositionsRef.current = positions;
+    forceUpdate({});  // Trigger re-render
   }
 
   // Simple force-directed layout simulation
   useEffect(() => {
-    if (!networkData || nodePositions.size === 0) return;
+    if (!networkData || nodePositionsRef.current.size === 0) return;
 
     let frameCount = 0;
     const maxFrames = 200; // Limit simulation to prevent infinite loop
@@ -164,7 +166,7 @@ export default function GraphPage() {
         return;
       }
       
-      const newPositions = new Map(nodePositions);
+      const positions = nodePositionsRef.current;
       const alpha = 0.1;
       const repulsionStrength = 5000;
       const attractionStrength = 0.01;
@@ -172,7 +174,7 @@ export default function GraphPage() {
 
       // Apply forces
       networkData.nodes.forEach((node) => {
-        const pos = newPositions.get(node.id);
+        const pos = positions.get(node.id);
         if (!pos) return;
 
         // Center force
@@ -182,7 +184,7 @@ export default function GraphPage() {
         // Repulsion between all nodes
         networkData.nodes.forEach((other) => {
           if (node.id === other.id) return;
-          const otherPos = newPositions.get(other.id);
+          const otherPos = positions.get(other.id);
           if (!otherPos) return;
 
           const dx = pos.x - otherPos.x;
@@ -197,8 +199,8 @@ export default function GraphPage() {
 
       // Attraction along edges
       networkData.edges.forEach((edge) => {
-        const sourcePos = newPositions.get(edge.source);
-        const targetPos = newPositions.get(edge.target);
+        const sourcePos = positions.get(edge.source);
+        const targetPos = positions.get(edge.target);
         if (!sourcePos || !targetPos) return;
 
         const dx = targetPos.x - sourcePos.x;
@@ -213,7 +215,7 @@ export default function GraphPage() {
 
       // Update positions
       networkData.nodes.forEach((node) => {
-        const pos = newPositions.get(node.id);
+        const pos = positions.get(node.id);
         if (!pos) return;
 
         pos.x += pos.vx * alpha;
@@ -222,7 +224,7 @@ export default function GraphPage() {
         pos.vy *= 0.8;
       });
 
-      setNodePositions(newPositions);
+      forceUpdate({});  // Trigger re-render
       frameCount++;
       animationRef.current = requestAnimationFrame(simulate);
     };
@@ -242,6 +244,8 @@ export default function GraphPage() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    const positions = nodePositionsRef.current;
+
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save();
@@ -254,8 +258,8 @@ export default function GraphPage() {
     ctx.strokeStyle = "#d1d5db";
     ctx.lineWidth = 1;
     networkData.edges.forEach((edge) => {
-      const sourcePos = nodePositions.get(edge.source);
-      const targetPos = nodePositions.get(edge.target);
+      const sourcePos = positions.get(edge.source);
+      const targetPos = positions.get(edge.target);
       if (!sourcePos || !targetPos) return;
 
       ctx.beginPath();
@@ -266,7 +270,7 @@ export default function GraphPage() {
 
     // Draw nodes
     networkData.nodes.forEach((node) => {
-      const pos = nodePositions.get(node.id);
+      const pos = positions.get(node.id);
       if (!pos) return;
 
       const isHovered = hoveredNode === node.id;
@@ -293,7 +297,7 @@ export default function GraphPage() {
     });
 
     ctx.restore();
-  }, [networkData, nodePositions, zoom, panX, panY, hoveredNode, selectedNode]);
+  }, [networkData, zoom, panX, panY, hoveredNode, selectedNode]);
 
   // Handle canvas click
   function handleCanvasClick(e: React.MouseEvent<HTMLCanvasElement>) {
@@ -306,9 +310,11 @@ export default function GraphPage() {
     const x = (e.clientX - rect.left - panX) / zoom;
     const y = (e.clientY - rect.top - panY) / zoom;
 
+    const positions = nodePositionsRef.current;
+
     // Find clicked node
     for (const node of networkData.nodes) {
-      const pos = nodePositions.get(node.id);
+      const pos = positions.get(node.id);
       if (!pos) continue;
 
       const dx = x - pos.x;
@@ -338,9 +344,11 @@ export default function GraphPage() {
     const x = (e.clientX - rect.left - panX) / zoom;
     const y = (e.clientY - rect.top - panY) / zoom;
 
+    const positions = nodePositionsRef.current;
+
     // Find hovered node
     for (const node of networkData.nodes) {
-      const pos = nodePositions.get(node.id);
+      const pos = positions.get(node.id);
       if (!pos) continue;
 
       const dx = x - pos.x;
