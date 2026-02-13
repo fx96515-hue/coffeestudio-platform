@@ -139,10 +139,10 @@ class RAGAnalystService:
 
     def _clamp_similarity(self, score: float) -> float:
         """Clamp similarity score to valid range [0.0, 1.0].
-        
+
         Args:
             score: Raw similarity score
-            
+
         Returns:
             Clamped score between 0.0 and 1.0
         """
