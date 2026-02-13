@@ -6,6 +6,8 @@ Create Date: 2026-02-12
 
 """
 
+import warnings
+
 from alembic import op
 
 
@@ -20,8 +22,6 @@ def upgrade():
     try:
         op.execute("CREATE EXTENSION IF NOT EXISTS vector")
     except Exception:
-        import warnings
-
         warnings.warn(
             "pgvector extension not available - skipping vector columns and indexes"
         )
