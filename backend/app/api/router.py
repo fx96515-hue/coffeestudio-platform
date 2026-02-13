@@ -43,4 +43,6 @@ api_router.include_router(
 api_router.include_router(ops_dashboard.router, prefix="/ops", tags=["ops-dashboard"])
 api_router.include_router(ml_routes.router, prefix="/ml/train", tags=["ml-training"])
 api_router.include_router(semantic_search.router, tags=["semantic-search"])
-api_router.include_router(knowledge_graph.router, prefix="/graph", tags=["knowledge-graph"])
+api_router.include_router(
+    knowledge_graph.router, prefix="/graph", tags=["knowledge-graph"]
+)
