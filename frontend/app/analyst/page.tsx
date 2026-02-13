@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
 // Constants
@@ -44,15 +44,7 @@ export default function AnalystPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    checkServiceStatus();
-  }, []);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  const checkServiceStatus = async () => {
+  const checkServiceStatus = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -85,11 +77,19 @@ export default function AnalystPage() {
       if (!data.available) {
         setError(getProviderErrorMessage(data.provider));
       }
-    } catch (err) {
+    } catch {
       setServiceStatus(null);
       setError("Fehler beim Verbinden mit dem Service");
     }
-  };
+  }, [router]);
+
+  useEffect(() => {
+    checkServiceStatus();
+  }, [checkServiceStatus]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const getProviderErrorMessage = (provider: string): string => {
     switch (provider) {
@@ -179,7 +179,7 @@ export default function AnalystPage() {
         sources: data.sources || [],
       };
       setMessages((prev) => [...prev, assistantMessage]);
-    } catch (err) {
+    } catch {
       setError("Fehler beim Senden der Nachricht.");
       setMessages((prev) => prev.slice(0, -1));
     } finally {
