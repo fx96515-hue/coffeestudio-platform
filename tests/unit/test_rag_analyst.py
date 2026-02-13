@@ -7,6 +7,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 from app.services.rag_analyst import RAGAnalystService
 from app.schemas.rag_analyst import ConversationMessage, RAGResponse
+from app.services.llm_providers import OllamaProvider
 
 # Test constants
 MOCK_COOPERATIVE_SIMILARITY = 0.85
@@ -15,39 +16,51 @@ MOCK_ROASTER_SIMILARITY = 0.80
 
 @pytest.fixture
 def mock_settings():
-    """Mock settings with API key configured."""
+    """Mock settings with multi-provider config."""
     with patch("app.services.rag_analyst.settings") as mock:
-        mock.OPENAI_API_KEY = "test-api-key"
-        mock.RAG_LLM_MODEL = "gpt-4o-mini"
+        mock.RAG_PROVIDER = "ollama"
+        mock.RAG_LLM_MODEL = "llama3.1:8b"
         mock.RAG_TEMPERATURE = 0.3
         mock.RAG_MAX_CONTEXT_ENTITIES = 10
         mock.RAG_MAX_CONVERSATION_HISTORY = 20
+        mock.RAG_EMBEDDING_PROVIDER = "openai"
+        mock.RAG_EMBEDDING_MODEL = "text-embedding-3-small"
+        mock.OLLAMA_BASE_URL = "http://localhost:11434"
+        mock.OPENAI_API_KEY = "test-key"
         mock.EMBEDDING_MODEL = "text-embedding-3-small"
         yield mock
 
 
 @pytest.fixture
 def mock_settings_no_key():
-    """Mock settings without API key."""
+    """Mock settings without provider availability."""
     with patch("app.services.rag_analyst.settings") as mock:
-        mock.OPENAI_API_KEY = None
+        mock.RAG_PROVIDER = "openai"
         mock.RAG_LLM_MODEL = "gpt-4o-mini"
         mock.RAG_TEMPERATURE = 0.3
         mock.RAG_MAX_CONTEXT_ENTITIES = 10
         mock.RAG_MAX_CONVERSATION_HISTORY = 20
+        mock.OPENAI_API_KEY = None  # No key
         yield mock
 
 
 @pytest.fixture
 def service(mock_settings):
     """Create RAGAnalystService with mocked settings."""
-    return RAGAnalystService()
+    with patch("app.services.llm_providers.settings", mock_settings):
+        with patch("httpx.get") as mock_get:
+            # Mock Ollama availability check
+            mock_response = MagicMock()
+            mock_response.status_code = 200
+            mock_get.return_value = mock_response
+            return RAGAnalystService()
 
 
 @pytest.fixture
 def service_no_key(mock_settings_no_key):
     """Create RAGAnalystService without API key."""
-    return RAGAnalystService()
+    with patch("app.services.llm_providers.settings", mock_settings_no_key):
+        return RAGAnalystService()
 
 
 @pytest.fixture
@@ -68,16 +81,18 @@ def mock_db():
         )
     ]
     # Mock roaster results
-    roaster_rows = [(
-        "roaster",
-        2,
-        "Test Roaster",
-        "Hamburg",
-        True,
-        True,
-        "premium",
-        MOCK_ROASTER_SIMILARITY,
-    )]
+    roaster_rows = [
+        (
+            "roaster",
+            2,
+            "Test Roaster",
+            "Hamburg",
+            True,
+            True,
+            "premium",
+            MOCK_ROASTER_SIMILARITY,
+        )
+    ]
 
     # Mock execute to return different results based on query
     def mock_execute(query, params):
@@ -105,10 +120,11 @@ class TestRAGAnalystService:
 
     def test_initialization(self, service, mock_settings):
         """Test service initializes with correct settings."""
-        assert service.model == "gpt-4o-mini"
+        assert service.model == "llama3.1:8b"
         assert service.temperature == 0.3
         assert service.max_context_entities == 10
         assert service.max_history == 20
+        assert service.llm_provider.provider_name() == "ollama"
 
     @pytest.mark.asyncio
     async def test_ask_success(self, service, mock_db):
@@ -121,18 +137,12 @@ class TestRAGAnalystService:
         ) as mock_embed:
             mock_embed.return_value = [0.1] * 1536
 
-            # Mock OpenAI API
-            with patch("httpx.AsyncClient") as mock_client:
-                mock_response = AsyncMock()
-                mock_response.json.return_value = {
-                    "choices": [{"message": {"content": mock_answer}}],
-                    "usage": {"total_tokens": 500},
+            # Mock LLM provider
+            with patch.object(service.llm_provider, "chat_completion") as mock_chat:
+                mock_chat.return_value = {
+                    "content": mock_answer,
+                    "tokens_used": 500,
                 }
-                mock_response.raise_for_status = MagicMock()
-
-                mock_client.return_value.__aenter__.return_value.post = AsyncMock(
-                    return_value=mock_response
-                )
 
                 result = await service.ask(
                     question="Welche Kooperativen in Cajamarca haben Fair Trade?",
@@ -142,7 +152,7 @@ class TestRAGAnalystService:
 
                 assert isinstance(result, RAGResponse)
                 assert result.answer == mock_answer
-                assert result.model == "gpt-4o-mini"
+                assert result.model == "llama3.1:8b"
                 assert result.tokens_used == 500
                 assert len(result.sources) > 0
 
@@ -215,6 +225,13 @@ class TestRAGAnalystService:
         assert "KI-Assistent" in prompt
         assert "keine spezifischen Daten verfügbar" in prompt
 
+    def test_get_provider_info(self, service):
+        """Test get_provider_info returns correct information."""
+        info = service.get_provider_info()
+
+        assert info["provider"] == "ollama"
+        assert info["model"] == "llama3.1:8b"
+
     @pytest.mark.asyncio
     async def test_conversation_history_handling(self, service, mock_db):
         """Test conversation history is included in API call."""
@@ -228,16 +245,11 @@ class TestRAGAnalystService:
         ) as mock_embed:
             mock_embed.return_value = [0.1] * 1536
 
-            with patch("httpx.AsyncClient") as mock_client:
-                mock_response = AsyncMock()
-                mock_response.json.return_value = {
-                    "choices": [{"message": {"content": "Antwort"}}],
-                    "usage": {"total_tokens": 100},
+            with patch.object(service.llm_provider, "chat_completion") as mock_chat:
+                mock_chat.return_value = {
+                    "content": "Antwort",
+                    "tokens_used": 100,
                 }
-                mock_response.raise_for_status = MagicMock()
-
-                post_mock = AsyncMock(return_value=mock_response)
-                mock_client.return_value.__aenter__.return_value.post = post_mock
 
                 await service.ask(
                     question="Zweite Frage",
@@ -246,26 +258,21 @@ class TestRAGAnalystService:
                 )
 
                 # Verify history was included in API call
-                call_args = post_mock.call_args
-                messages = call_args[1]["json"]["messages"]
+                call_args = mock_chat.call_args
+                messages = call_args[1]["messages"]
                 # Should have: system + 2 history + current question
                 assert len(messages) >= 4
 
     @pytest.mark.asyncio
     async def test_api_error_handling(self, service, mock_db):
-        """Test handling of OpenAI API errors."""
+        """Test handling of provider API errors."""
         with patch.object(
             service.embedding_service, "generate_embedding"
         ) as mock_embed:
             mock_embed.return_value = [0.1] * 1536
 
-            with patch("httpx.AsyncClient") as mock_client:
-                mock_response = AsyncMock()
-                mock_response.raise_for_status.side_effect = Exception("API Error")
-
-                mock_client.return_value.__aenter__.return_value.post = AsyncMock(
-                    return_value=mock_response
-                )
+            with patch.object(service.llm_provider, "chat_completion") as mock_chat:
+                mock_chat.side_effect = Exception("API Error")
 
                 with pytest.raises(Exception):
                     await service.ask(

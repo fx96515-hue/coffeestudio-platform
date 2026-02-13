@@ -57,7 +57,9 @@ class Settings(BaseSettings):
     RAG_PROVIDER: str = "ollama"  # ollama | openai | groq
     RAG_LLM_MODEL: str = "llama3.1:8b"  # Provider-specific model
     RAG_EMBEDDING_PROVIDER: str = "openai"  # Separate from LLM provider
-    RAG_EMBEDDING_MODEL: str = "text-embedding-3-small"  # Or "nomic-embed-text" for Ollama
+    RAG_EMBEDDING_MODEL: str = (
+        "text-embedding-3-small"  # Or "nomic-embed-text" for Ollama
+    )
     RAG_MAX_CONTEXT_ENTITIES: int = 10
     RAG_MAX_CONVERSATION_HISTORY: int = 20
     RAG_TEMPERATURE: float = 0.3

@@ -108,8 +108,7 @@ class OllamaProvider(BaseLLMProvider):
         except httpx.ConnectError as e:
             log.error("ollama_connection_error", error=str(e))
             raise Exception(
-                "Ollama nicht erreichbar. "
-                "Starten Sie Ollama mit: ollama serve"
+                "Ollama nicht erreichbar. " "Starten Sie Ollama mit: ollama serve"
             )
         except Exception as e:
             log.error("ollama_chat_completion_failed", error=str(e))
