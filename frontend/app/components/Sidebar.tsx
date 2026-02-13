@@ -7,6 +7,7 @@ import React from "react";
 const items: { href: string; label: string; badge?: string }[] = [
   { href: "/dashboard", label: "Übersicht" },
   { href: "/search", label: "🔍 Suche" },
+  { href: "/analyst", label: "🤖 KI-Analyst" },
   { href: "/peru-sourcing", label: "Peru Einkauf" },
   { href: "/german-sales", label: "Vertrieb Deutschland" },
   { href: "/shipments", label: "Sendungen" },
