@@ -5,7 +5,7 @@ from app.api.routes import sources, market, reports, lots, margins
 from app.api.routes import enrich, dedup, news, logistics, outreach, regions
 from app.api.routes import kb, cuppings, ml_predictions, peru_sourcing, shipments
 from app.api.routes import data_health, quality_alerts, auto_outreach, ops_dashboard
-from app.api.routes import ml_routes, semantic_search
+from app.api.routes import ml_routes, semantic_search, knowledge_graph
 
 api_router = APIRouter()
 api_router.include_router(health.router, tags=["health"])
@@ -43,3 +43,4 @@ api_router.include_router(
 api_router.include_router(ops_dashboard.router, prefix="/ops", tags=["ops-dashboard"])
 api_router.include_router(ml_routes.router, prefix="/ml/train", tags=["ml-training"])
 api_router.include_router(semantic_search.router, tags=["semantic-search"])
+api_router.include_router(knowledge_graph.router, prefix="/graph", tags=["knowledge-graph"])
