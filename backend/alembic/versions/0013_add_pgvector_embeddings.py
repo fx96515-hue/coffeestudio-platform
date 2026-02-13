@@ -17,53 +17,29 @@ depends_on = None
 
 
 def upgrade():
-    conn = op.get_bind()
-    
-    # Check if vector extension is available before trying to create it
-    result = conn.execute(sa.text(
-        "SELECT 1 FROM pg_available_extensions WHERE name = 'vector'"
-    ))
-    if result.fetchone() is None:
-        # pgvector not installed - skip this migration gracefully
-        print("INFO: pgvector extension not available, skipping embedding columns")
+    # Try to enable pgvector - skip gracefully if not available (CI environment)
+    try:
+        op.execute("CREATE EXTENSION IF NOT EXISTS vector")
+    except Exception:
+        import warnings
+
+        warnings.warn(
+            "pgvector extension not available - skipping vector columns and indexes"
+        )
         return
-    
-    # pgvector is available, proceed normally
-    op.execute("CREATE EXTENSION IF NOT EXISTS vector")
 
-    # Add embedding column to cooperatives table
+    # Add embedding columns and indexes only if extension is available
     op.execute(
-        """
-        ALTER TABLE cooperatives 
-        ADD COLUMN IF NOT EXISTS embedding vector(1536)
-        """
+        """ALTER TABLE cooperatives ADD COLUMN IF NOT EXISTS embedding vector(1536)"""
     )
-
-    # Add embedding column to roasters table
     op.execute(
-        """
-        ALTER TABLE roasters 
-        ADD COLUMN IF NOT EXISTS embedding vector(1536)
-        """
+        """ALTER TABLE roasters ADD COLUMN IF NOT EXISTS embedding vector(1536)"""
     )
-
-    # Create HNSW index for cooperatives embeddings (cosine distance)
-    # HNSW is better for high-dimensional vectors than IVFFlat
     op.execute(
-        """
-        CREATE INDEX IF NOT EXISTS ix_cooperatives_embedding_cosine 
-        ON cooperatives 
-        USING hnsw (embedding vector_cosine_ops)
-        """
+        """CREATE INDEX IF NOT EXISTS ix_cooperatives_embedding_cosine ON cooperatives USING hnsw (embedding vector_cosine_ops)"""
     )
-
-    # Create HNSW index for roasters embeddings (cosine distance)
     op.execute(
-        """
-        CREATE INDEX IF NOT EXISTS ix_roasters_embedding_cosine 
-        ON roasters 
-        USING hnsw (embedding vector_cosine_ops)
-        """
+        """CREATE INDEX IF NOT EXISTS ix_roasters_embedding_cosine ON roasters USING hnsw (embedding vector_cosine_ops)"""
     )
 
 

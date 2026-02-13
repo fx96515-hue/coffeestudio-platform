@@ -65,11 +65,12 @@ export default function SearchPage() {
         `/search/semantic?q=${encodeURIComponent(query)}&entity_type=${entityType}&limit=20`
       );
       setResults(response.results);
-    } catch (e: any) {
-      if (e?.message?.includes("503")) {
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      if (errorMessage.includes("503")) {
         setError("Semantische Suche ist nicht verfügbar. OpenAI API-Schlüssel nicht konfiguriert.");
       } else {
-        setError(e?.message ?? String(e));
+        setError(errorMessage);
       }
     } finally {
       setLoading(false);
@@ -87,8 +88,9 @@ export default function SearchPage() {
         ...prev,
         [key]: response.similar_entities,
       }));
-    } catch (e: any) {
-      setError(e?.message ?? String(e));
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      setError(errorMessage);
     }
   };
 
@@ -140,7 +142,7 @@ export default function SearchPage() {
             <select
               className="input"
               value={entityType}
-              onChange={(e) => setEntityType(e.target.value as any)}
+              onChange={(e) => setEntityType(e.target.value as "all" | "cooperative" | "roaster")}
             >
               <option value="all">Alle</option>
               <option value="cooperative">Kooperativen</option>

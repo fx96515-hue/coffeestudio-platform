@@ -7,7 +7,7 @@ type GraphNode = {
   id: string;
   label: string;
   node_type: string;
-  properties: Record<string, any>;
+  properties: Record<string, unknown>;
 };
 
 type GraphEdge = {
@@ -102,8 +102,9 @@ export default function GraphPage() {
         const data = await apiFetch<NetworkData>(`/graph/network?node_types=${nodeFilter}`);
         setNetworkData(data);
         initializePositions(data.nodes);
-      } catch (e: any) {
-        setError(e?.message ?? String(e));
+      } catch (e: unknown) {
+        const errorMessage = e instanceof Error ? e.message : String(e);
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }
