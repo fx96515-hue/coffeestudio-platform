@@ -33,7 +33,8 @@ def upgrade():
 
         warnings.warn(
             f"pgvector extension not available - skipping vector columns. "
-            f"Semantic search features will be unavailable. Error: {e}"
+            f"Semantic search features will be unavailable. "
+            f"Error: {type(e).__name__}: {str(e)}"
         )
         return
 
