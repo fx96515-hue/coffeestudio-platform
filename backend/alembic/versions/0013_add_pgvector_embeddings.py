@@ -28,7 +28,7 @@ def upgrade():
     conn = op.get_bind()
     try:
         conn.execute(sa.text("CREATE EXTENSION IF NOT EXISTS vector"))
-    except (ProgrammingError, Exception) as e:
+    except ProgrammingError as e:
         import warnings
 
         warnings.warn(
