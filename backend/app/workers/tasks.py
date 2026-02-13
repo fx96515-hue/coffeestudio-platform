@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import structlog
 from datetime import datetime, timezone
 
