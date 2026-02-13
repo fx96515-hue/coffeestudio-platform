@@ -19,7 +19,10 @@ router = APIRouter()
 
 @router.get("/network", response_model=NetworkData)
 def get_network(
-    node_types: str = Query("all", description="Filter by node types: cooperative, roaster, region, certification"),
+    node_types: str = Query(
+        "all",
+        description="Filter by node types: cooperative, roaster, region, certification",
+    ),
     db: Session = Depends(get_db),
     _=Depends(require_role("admin", "analyst", "viewer")),
 ) -> NetworkData:
@@ -56,7 +59,10 @@ def get_communities(
     return knowledge_graph.get_communities(db)
 
 
-@router.get("/path/{source_type}/{source_id}/{target_type}/{target_id}", response_model=PathResult)
+@router.get(
+    "/path/{source_type}/{source_id}/{target_type}/{target_id}",
+    response_model=PathResult,
+)
 def get_shortest_path(
     source_type: str,
     source_id: str,  # Accept str to handle both numeric IDs and string-based IDs
@@ -78,7 +84,7 @@ def get_shortest_path(
             parsed_target_id = int(target_id)
         except ValueError:
             parsed_target_id = target_id
-        
+
         return knowledge_graph.get_shortest_path(
             db, source_type, parsed_source_id, target_type, parsed_target_id
         )
@@ -86,7 +92,10 @@ def get_shortest_path(
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@router.get("/hidden-connections/{entity_type}/{entity_id}", response_model=list[HiddenConnection])
+@router.get(
+    "/hidden-connections/{entity_type}/{entity_id}",
+    response_model=list[HiddenConnection],
+)
 def get_hidden_connections(
     entity_type: str,
     entity_id: str,  # Accept str to handle both numeric IDs and string-based IDs
@@ -102,6 +111,8 @@ def get_hidden_connections(
             parsed_id = int(entity_id)
         except ValueError:
             parsed_id = entity_id
-        return knowledge_graph.get_hidden_connections(db, entity_type, parsed_id, max_hops)
+        return knowledge_graph.get_hidden_connections(
+            db, entity_type, parsed_id, max_hops
+        )
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))

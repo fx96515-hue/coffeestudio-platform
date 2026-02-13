@@ -267,7 +267,9 @@ def get_network_data(db: Session, node_types: str = "all") -> NetworkData:
     return NetworkData(nodes=nodes, edges=edges, stats=stats)
 
 
-def get_entity_analysis(db: Session, entity_type: str, entity_id: int | str) -> EntityAnalysis:
+def get_entity_analysis(
+    db: Session, entity_type: str, entity_id: int | str
+) -> EntityAnalysis:
     """Get graph analysis for a specific entity."""
     G = _get_or_build_graph(db)
 
@@ -276,7 +278,7 @@ def get_entity_analysis(db: Session, entity_type: str, entity_id: int | str) -> 
         node_id = f"{entity_type}_{entity_id}"
     else:
         node_id = f"{entity_type}_{str(entity_id).lower().replace(' ', '_')}"
-    
+
     if not G.has_node(node_id):
         raise ValueError(f"Node {node_id} not found in graph")
 
@@ -408,7 +410,7 @@ def get_shortest_path(
         source_node_id = f"{source_type}_{source_id}"
     else:
         source_node_id = f"{source_type}_{str(source_id).lower().replace(' ', '_')}"
-    
+
     if isinstance(target_id, int):
         target_node_id = f"{target_type}_{target_id}"
     else:
@@ -470,7 +472,7 @@ def get_hidden_connections(
         node_id = f"{entity_type}_{entity_id}"
     else:
         node_id = f"{entity_type}_{str(entity_id).lower().replace(' ', '_')}"
-    
+
     if not G.has_node(node_id):
         raise ValueError(f"Node {node_id} not found in graph")
 
@@ -482,7 +484,11 @@ def get_hidden_connections(
     path_lengths = nx.single_source_shortest_path_length(G, node_id, cutoff=max_hops)
 
     for target_node_id, distance in path_lengths.items():
-        if distance >= 2 and distance <= max_hops and target_node_id not in direct_neighbors:
+        if (
+            distance >= 2
+            and distance <= max_hops
+            and target_node_id not in direct_neighbors
+        ):
             # Get the path
             path = nx.shortest_path(G, node_id, target_node_id)
             path_str = [G.nodes[n]["label"] for n in path]

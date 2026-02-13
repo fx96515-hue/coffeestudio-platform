@@ -16,13 +16,15 @@ def test_build_empty_graph(db):
 
 def test_build_graph_with_cooperatives(db):
     """Test building graph with cooperatives."""
-    coop1 = Cooperative(name="Coop A", region="Cajamarca", certifications="Organic, Fair Trade")
+    coop1 = Cooperative(
+        name="Coop A", region="Cajamarca", certifications="Organic, Fair Trade"
+    )
     coop2 = Cooperative(name="Coop B", region="Cajamarca", certifications="Organic")
     db.add_all([coop1, coop2])
     db.commit()
 
     G = knowledge_graph.build_graph(db)
-    
+
     # Should have 2 cooperatives + 1 region + 2 certifications = 5 nodes
     assert G.number_of_nodes() >= 5
     assert G.has_node("cooperative_1")
@@ -40,7 +42,7 @@ def test_graph_cooperative_region_edges(db):
     db.commit()
 
     G = knowledge_graph.build_graph(db)
-    
+
     assert G.has_edge("cooperative_1", "region_cusco")
     edge_data = G.get_edge_data("cooperative_1", "region_cusco")
     assert edge_data["edge_type"] == "LOCATED_IN"
@@ -53,17 +55,17 @@ def test_graph_cooperative_certification_edges(db):
     db.commit()
 
     G = knowledge_graph.build_graph(db)
-    
+
     assert G.has_edge("cooperative_1", "certification_organic")
     assert G.has_edge("cooperative_1", "certification_fair_trade")
-    
+
     edge_data = G.get_edge_data("cooperative_1", "certification_organic")
     assert edge_data["edge_type"] == "HAS_CERTIFICATION"
 
 
 def test_graph_roaster_region_edges(db):
     """Test that roasters with Peru focus are connected to regions.
-    
+
     Note: This test verifies the ASSUMPTION that Peru-focused roasters
     are connected to all regions with cooperatives. In production, this
     should be based on actual sourcing relationships.
@@ -75,7 +77,7 @@ def test_graph_roaster_region_edges(db):
     db.commit()
 
     G = knowledge_graph.build_graph(db)
-    
+
     assert G.has_edge("roaster_1", "region_cajamarca")
     edge_data = G.get_edge_data("roaster_1", "region_cajamarca")
     assert edge_data["edge_type"] == "SOURCES_FROM"
@@ -84,12 +86,14 @@ def test_graph_roaster_region_edges(db):
 def test_graph_similar_cooperatives(db):
     """Test that similar cooperatives are connected."""
     coop1 = Cooperative(name="Coop A", region="Cusco", certifications="Organic")
-    coop2 = Cooperative(name="Coop B", region="Cusco", certifications="Organic, Fair Trade")
+    coop2 = Cooperative(
+        name="Coop B", region="Cusco", certifications="Organic, Fair Trade"
+    )
     db.add_all([coop1, coop2])
     db.commit()
 
     G = knowledge_graph.build_graph(db)
-    
+
     # Cooperatives in same region with shared certification should be connected
     assert G.has_edge("cooperative_1", "cooperative_2")
     edge_data = G.get_edge_data("cooperative_1", "cooperative_2")
@@ -104,7 +108,7 @@ def test_graph_similar_roasters(db):
     db.commit()
 
     G = knowledge_graph.build_graph(db)
-    
+
     # Roasters in same city with same price position should be connected
     assert G.has_edge("roaster_1", "roaster_2")
     edge_data = G.get_edge_data("roaster_1", "roaster_2")
@@ -119,7 +123,7 @@ def test_get_network_data(db):
     db.commit()
 
     network_data = knowledge_graph.get_network_data(db)
-    
+
     assert network_data.stats.total_nodes >= 3  # coop + region + cert
     assert network_data.stats.total_edges >= 2  # coop->region, coop->cert
     assert len(network_data.nodes) >= 3
@@ -136,7 +140,7 @@ def test_get_network_data_filtered(db):
     db.commit()
 
     network_data = knowledge_graph.get_network_data(db, node_types="cooperative,region")
-    
+
     # Should only include cooperatives and regions
     for node in network_data.nodes:
         assert node.node_type in ["cooperative", "region"]
@@ -150,7 +154,7 @@ def test_get_entity_analysis(db):
     db.commit()
 
     analysis = knowledge_graph.get_entity_analysis(db, "cooperative", 1)
-    
+
     assert analysis.entity_id == "cooperative_1"
     assert analysis.entity_name == "Coop A"
     assert analysis.entity_type == "cooperative"
@@ -176,7 +180,7 @@ def test_get_communities(db):
     db.commit()
 
     communities = knowledge_graph.get_communities(db)
-    
+
     assert len(communities) > 0
     for community in communities:
         assert community.size > 0
@@ -191,8 +195,10 @@ def test_get_shortest_path(db):
     db.add_all([coop, region])
     db.commit()
 
-    path_result = knowledge_graph.get_shortest_path(db, "cooperative", 1, "region", "cusco")
-    
+    path_result = knowledge_graph.get_shortest_path(
+        db, "cooperative", 1, "region", "cusco"
+    )
+
     assert path_result.source.id == "cooperative_1"
     assert path_result.target.node_type == "region"
     assert path_result.total_hops >= 1
@@ -221,7 +227,7 @@ def test_get_hidden_connections(db):
     db.commit()
 
     hidden = knowledge_graph.get_hidden_connections(db, "cooperative", 1, max_hops=3)
-    
+
     # Should find coop2 as a hidden connection (2 hops away via region)
     assert len(hidden) >= 1
     for connection in hidden:
@@ -239,16 +245,16 @@ def test_cache_functionality(db):
     # First call should build graph
     knowledge_graph.invalidate_cache()
     network_data1 = knowledge_graph.get_network_data(db)
-    
+
     # Second call should use cache
     network_data2 = knowledge_graph.get_network_data(db)
-    
+
     assert network_data1.stats.total_nodes == network_data2.stats.total_nodes
-    
+
     # Invalidate and rebuild
     knowledge_graph.invalidate_cache()
     network_data3 = knowledge_graph.get_network_data(db)
-    
+
     assert network_data3.stats.total_nodes == network_data1.stats.total_nodes
 
 
@@ -259,13 +265,13 @@ def test_graph_node_properties(db):
         region="Cusco",
         altitude_m=1800.0,
         total_score=8.5,
-        certifications="Organic"
+        certifications="Organic",
     )
     db.add(coop)
     db.commit()
 
     G = knowledge_graph.build_graph(db)
-    
+
     node_data = G.nodes["cooperative_1"]
     assert node_data["label"] == "Coop A"
     assert node_data["node_type"] == "cooperative"
@@ -287,7 +293,7 @@ def test_api_get_network(client, auth_headers, db):
 
     response = client.get("/graph/network", headers=auth_headers)
     assert response.status_code == 200
-    
+
     data = response.json()
     assert "nodes" in data
     assert "edges" in data
@@ -307,7 +313,7 @@ def test_api_get_network_filtered(client, auth_headers, db):
         "/graph/network?node_types=cooperative,region", headers=auth_headers
     )
     assert response.status_code == 200
-    
+
     data = response.json()
     # Should only include cooperatives and regions
     for node in data["nodes"]:
@@ -323,7 +329,7 @@ def test_api_get_entity_analysis(client, auth_headers, db):
 
     response = client.get("/graph/analysis/cooperative/1", headers=auth_headers)
     assert response.status_code == 200
-    
+
     data = response.json()
     assert data["entity_id"] == "cooperative_1"
     assert data["entity_name"] == "Coop A"
@@ -350,7 +356,7 @@ def test_api_get_communities(client, auth_headers, db):
 
     response = client.get("/graph/communities", headers=auth_headers)
     assert response.status_code == 200
-    
+
     data = response.json()
     assert isinstance(data, list)
     if len(data) > 0:
@@ -364,7 +370,7 @@ def test_api_get_communities(client, auth_headers, db):
 def test_api_get_communities_requires_analyst_role(client, test_viewer_user, db):
     """Test GET /graph/communities requires analyst role."""
     from app.core.security import create_access_token
-    
+
     # Create viewer auth headers
     token = create_access_token(sub=test_viewer_user.email, role=test_viewer_user.role)
     viewer_headers = {"Authorization": f"Bearer {token}"}
@@ -384,7 +390,7 @@ def test_api_get_shortest_path(client, auth_headers, db):
         "/graph/path/cooperative/1/region/cusco", headers=auth_headers
     )
     assert response.status_code == 200
-    
+
     data = response.json()
     assert "source" in data
     assert "target" in data
@@ -420,7 +426,7 @@ def test_api_get_hidden_connections(client, auth_headers, db):
         "/graph/hidden-connections/cooperative/1?max_hops=3", headers=auth_headers
     )
     assert response.status_code == 200
-    
+
     data = response.json()
     assert isinstance(data, list)
     for connection in data:
@@ -453,7 +459,7 @@ def test_api_requires_authentication(client, db):
         "/graph/path/cooperative/1/region/cusco",
         "/graph/hidden-connections/cooperative/1",
     ]
-    
+
     for endpoint in endpoints:
         response = client.get(endpoint)
         assert response.status_code in [401, 403]  # Unauthorized or Forbidden
