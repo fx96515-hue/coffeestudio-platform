@@ -52,14 +52,38 @@ async def ask_analyst(
 
     # Check if service is available
     if not service.is_available():
+        provider_info = service.get_provider_info()
+        provider = provider_info["provider"]
+
         log.warning(
             "rag_analyst_unavailable",
-            reason="no_api_key",
+            provider=provider,
             user=auth_info.get("email"),
         )
+
+        # Provider-specific error messages
+        if provider == "ollama":
+            error_msg = (
+                "RAG AI Analyst ist nicht verfügbar. "
+                "Ollama ist nicht gestartet. "
+                "Starte Ollama mit: `ollama serve` und lade ein Modell: `ollama pull llama3.1:8b`"
+            )
+        elif provider == "openai":
+            error_msg = (
+                "RAG AI Analyst ist nicht verfügbar. "
+                "OPENAI_API_KEY ist nicht konfiguriert."
+            )
+        elif provider == "groq":
+            error_msg = (
+                "RAG AI Analyst ist nicht verfügbar. "
+                "GROQ_API_KEY ist nicht konfiguriert."
+            )
+        else:
+            error_msg = "RAG AI Analyst ist nicht verfügbar."
+
         raise HTTPException(
             status_code=503,
-            detail="RAG AI Analyst ist nicht verfügbar. OpenAI API-Schlüssel nicht konfiguriert.",
+            detail=error_msg,
         )
 
     # Validate conversation history length
@@ -108,12 +132,15 @@ async def get_status(
         _: Authenticated user info
 
     Returns:
-        Service status information
+        Service status information with provider details
     """
     service = RAGAnalystService()
+    provider_info = service.get_provider_info()
 
     return RAGStatusResponse(
         available=service.is_available(),
-        model=settings.RAG_LLM_MODEL,
-        embedding_model=settings.EMBEDDING_MODEL,
+        provider=provider_info["provider"],
+        model=provider_info["model"],
+        embedding_provider=settings.RAG_EMBEDDING_PROVIDER,
+        embedding_model=settings.RAG_EMBEDDING_MODEL,
     )

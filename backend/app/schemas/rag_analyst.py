@@ -50,5 +50,7 @@ class RAGStatusResponse(BaseModel):
     """Status of RAG service."""
 
     available: bool = Field(description="Whether RAG service is available")
+    provider: str = Field(description="LLM provider name")
     model: str = Field(description="LLM model configured")
+    embedding_provider: str = Field(description="Embedding provider name")
     embedding_model: str = Field(description="Embedding model configured")
