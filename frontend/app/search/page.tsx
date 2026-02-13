@@ -209,7 +209,7 @@ export default function SearchPage() {
                             </Link>
                           </td>
                           <td>
-                            <Badge color={result.entity_type === "cooperative" ? "green" : "blue"}>
+                            <Badge tone={result.entity_type === "cooperative" ? "good" : "neutral"}>
                               {result.entity_type === "cooperative" ? "Kooperative" : "Rösterei"}
                             </Badge>
                           </td>
@@ -221,13 +221,13 @@ export default function SearchPage() {
                           </td>
                           <td>
                             {result.total_score ? (
-                              <Badge color="purple">{result.total_score.toFixed(1)}</Badge>
+                              <Badge tone="neutral">{result.total_score.toFixed(1)}</Badge>
                             ) : (
                               "–"
                             )}
                           </td>
                           <td>
-                            <Badge color="orange">{formatSimilarity(result.similarity_score)}</Badge>
+                            <Badge tone="warn">{formatSimilarity(result.similarity_score)}</Badge>
                           </td>
                           <td>
                             <button
@@ -262,7 +262,7 @@ export default function SearchPage() {
                                     }}
                                   >
                                     <span>{sim.name}</span>
-                                    <Badge color="orange" style={{ fontSize: "0.75rem" }}>
+                                    <Badge tone="warn">
                                       {formatSimilarity(sim.similarity_score)}
                                     </Badge>
                                   </Link>
