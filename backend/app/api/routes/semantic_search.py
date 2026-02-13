@@ -117,6 +117,7 @@ async def find_similar_entities(
         raise HTTPException(status_code=400, detail="Invalid entity_type")
 
     # Get entity and check if it has embedding
+    entity: Cooperative | Roaster | None
     if entity_type == "cooperative":
         entity = db.query(Cooperative).filter(Cooperative.id == entity_id).first()
     else:
