@@ -7,7 +7,6 @@ Create Date: 2026-02-12
 """
 
 from alembic import op
-import sqlalchemy as sa
 
 
 revision = "0013_add_pgvector_embeddings"
