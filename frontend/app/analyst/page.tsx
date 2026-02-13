@@ -3,6 +3,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
+// Constants
+const MAX_QUESTION_LENGTH = 1000; // Must match backend RAGQuestion.question max_length
+
 interface Message {
   role: "user" | "assistant";
   content: string;
@@ -251,7 +254,7 @@ export default function AnalystPage() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           disabled={loading || !serviceAvailable}
-          maxLength={1000}
+          maxLength={MAX_QUESTION_LENGTH}
         />
         <button
           type="submit"

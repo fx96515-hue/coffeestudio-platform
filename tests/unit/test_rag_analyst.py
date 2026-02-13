@@ -8,6 +8,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from app.services.rag_analyst import RAGAnalystService
 from app.schemas.rag_analyst import ConversationMessage, RAGResponse
 
+# Test constants
+MOCK_COOPERATIVE_SIMILARITY = 0.85
+MOCK_ROASTER_SIMILARITY = 0.80
+
 
 @pytest.fixture
 def mock_settings():
@@ -60,11 +64,20 @@ def mock_db():
             "Organic, Fair Trade",
             1500,
             "Arabica",
-            0.85,
+            MOCK_COOPERATIVE_SIMILARITY,
         )
     ]
     # Mock roaster results
-    roaster_rows = [("roaster", 2, "Test Roaster", "Hamburg", True, True, "premium", 0.80)]
+    roaster_rows = [(
+        "roaster",
+        2,
+        "Test Roaster",
+        "Hamburg",
+        True,
+        True,
+        "premium",
+        MOCK_ROASTER_SIMILARITY,
+    )]
 
     # Mock execute to return different results based on query
     def mock_execute(query, params):

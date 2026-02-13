@@ -139,6 +139,17 @@ class RAGAnalystService:
             log.error("rag_answer_generation_failed", error=str(e))
             raise
 
+    def _clamp_similarity(self, score: float) -> float:
+        """Clamp similarity score to valid range [0.0, 1.0].
+        
+        Args:
+            score: Raw similarity score
+            
+        Returns:
+            Clamped score between 0.0 and 1.0
+        """
+        return max(0.0, min(1.0, score))
+
     async def _retrieve_context(self, question: str, db: Session) -> list[dict]:
         """Retrieve relevant context entities using pgvector similarity search.
 
@@ -222,7 +233,7 @@ class RAGAnalystService:
                     "certifications": row[4],
                     "altitude_m": row[5],
                     "varieties": row[6],
-                    "similarity_score": max(0.0, min(1.0, row[7])),
+                    "similarity_score": self._clamp_similarity(row[7]),
                 }
             )
 
@@ -236,7 +247,7 @@ class RAGAnalystService:
                     "peru_focus": row[4],
                     "specialty_focus": row[5],
                     "price_position": row[6],
-                    "similarity_score": max(0.0, min(1.0, row[7])),
+                    "similarity_score": self._clamp_similarity(row[7]),
                 }
             )
 
