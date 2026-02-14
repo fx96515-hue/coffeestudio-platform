@@ -78,14 +78,7 @@ export interface Shipment {
   status_updated_at: string | null;
   delay_hours: number;
   notes: string | null;
-  // Legacy fields for backward compatibility
-  reference?: string;
-  eta?: string | null;
-  carrier?: string | null;
-  created_at?: string;
-  updated_at?: string;
   tracking_events: any[] | null;
-  notes: string | null;
   created_at: string;
   updated_at: string;
   // Legacy/alias fields for compatibility
