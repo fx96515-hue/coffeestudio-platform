@@ -20,7 +20,12 @@ XSS_PATTERNS = [
 
 
 def _validate_xss(value: Optional[str], field_name: str) -> Optional[str]:
-    """Shared XSS validation logic for text fields."""
+    """Shared XSS validation logic for text fields.
+    
+    Returns None for empty/whitespace-only strings.
+    Returns stripped string for valid input.
+    Raises ValueError for XSS patterns detected.
+    """
     if value is None:
         return value
     if not value.strip():
