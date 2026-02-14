@@ -6,8 +6,9 @@ Create Date: 2026-02-12
 
 """
 
+import warnings
+
 from alembic import op
-import sqlalchemy as sa
 
 
 revision = "0013_add_pgvector_embeddings"
@@ -17,42 +18,27 @@ depends_on = None
 
 
 def upgrade():
-    # Enable pgvector extension
-    op.execute("CREATE EXTENSION IF NOT EXISTS vector")
+    # Try to enable pgvector - skip gracefully if not available (CI environment)
+    try:
+        op.execute("CREATE EXTENSION IF NOT EXISTS vector")
+    except Exception:
+        warnings.warn(
+            "pgvector extension not available - skipping vector columns and indexes"
+        )
+        return
 
-    # Add embedding column to cooperatives table
+    # Add embedding columns and indexes only if extension is available
     op.execute(
-        """
-        ALTER TABLE cooperatives 
-        ADD COLUMN IF NOT EXISTS embedding vector(1536)
-        """
+        """ALTER TABLE cooperatives ADD COLUMN IF NOT EXISTS embedding vector(1536)"""
     )
-
-    # Add embedding column to roasters table
     op.execute(
-        """
-        ALTER TABLE roasters 
-        ADD COLUMN IF NOT EXISTS embedding vector(1536)
-        """
+        """ALTER TABLE roasters ADD COLUMN IF NOT EXISTS embedding vector(1536)"""
     )
-
-    # Create HNSW index for cooperatives embeddings (cosine distance)
-    # HNSW is better for high-dimensional vectors than IVFFlat
     op.execute(
-        """
-        CREATE INDEX IF NOT EXISTS ix_cooperatives_embedding_cosine 
-        ON cooperatives 
-        USING hnsw (embedding vector_cosine_ops)
-        """
+        """CREATE INDEX IF NOT EXISTS ix_cooperatives_embedding_cosine ON cooperatives USING hnsw (embedding vector_cosine_ops)"""
     )
-
-    # Create HNSW index for roasters embeddings (cosine distance)
     op.execute(
-        """
-        CREATE INDEX IF NOT EXISTS ix_roasters_embedding_cosine 
-        ON roasters 
-        USING hnsw (embedding vector_cosine_ops)
-        """
+        """CREATE INDEX IF NOT EXISTS ix_roasters_embedding_cosine ON roasters USING hnsw (embedding vector_cosine_ops)"""
     )
 
 

@@ -53,6 +53,23 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str | None = None
     EMBEDDING_MODEL: str = "text-embedding-3-small"
 
+    # --- RAG AI Analyst (Multi-Provider) ---
+    RAG_PROVIDER: str = "ollama"  # ollama | openai | groq
+    RAG_LLM_MODEL: str = "llama3.1:8b"  # Provider-specific model
+    RAG_EMBEDDING_PROVIDER: str = "openai"  # Separate from LLM provider
+    RAG_EMBEDDING_MODEL: str = (
+        "text-embedding-3-small"  # Or "nomic-embed-text" for Ollama
+    )
+    RAG_MAX_CONTEXT_ENTITIES: int = 10
+    RAG_MAX_CONVERSATION_HISTORY: int = 20
+    RAG_TEMPERATURE: float = 0.3
+
+    # --- Ollama (local LLM server) ---
+    OLLAMA_BASE_URL: str = "http://localhost:11434"
+
+    # --- Groq (optional cloud provider) ---
+    GROQ_API_KEY: str | None = None
+
     def cors_origins_list(self) -> List[str]:
         return [s.strip() for s in self.CORS_ORIGINS.split(",") if s.strip()]
 

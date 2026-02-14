@@ -89,3 +89,15 @@ def require_role(*roles: str):
         return user
 
     return _check
+
+
+# Alias for authenticated access without role check
+# Returns dict with user info for endpoints that just need auth
+def require_auth(user: User = Depends(get_current_user)) -> dict:
+    """Require authenticated user (any role).
+
+    Returns dict with user info for logging/audit purposes.
+    This is a convenience wrapper around get_current_user that returns
+    a dict instead of User object for endpoints using _: dict = Depends(require_auth).
+    """
+    return {"user": user, "email": user.email, "role": user.role}
