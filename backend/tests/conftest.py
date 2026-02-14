@@ -9,12 +9,15 @@ from sqlalchemy.pool import StaticPool
 # Set test environment variables before importing app
 os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 os.environ.setdefault("REDIS_URL", "redis://localhost:6379/1")
-os.environ.setdefault("JWT_SECRET", "test_jwt_secret_key_for_testing_only")
+os.environ.setdefault(
+    "JWT_SECRET",
+    "test_jwt_secret_key_for_testing_only_must_be_at_least_32_chars",
+)
 os.environ.setdefault("JWT_ISSUER", "coffeestudio-test")
 os.environ.setdefault("JWT_AUDIENCE", "coffeestudio-test")
 os.environ.setdefault("CORS_ORIGINS", "http://localhost:3000")
 os.environ.setdefault("BOOTSTRAP_ADMIN_EMAIL", "admin@test.com")
-os.environ.setdefault("BOOTSTRAP_ADMIN_PASSWORD", "test_admin_password")
+os.environ.setdefault("BOOTSTRAP_ADMIN_PASSWORD", "TestAdminP@ss123!")
 
 # Import after env vars are set
 from app.db.session import get_db, Base
@@ -101,7 +104,7 @@ def test_user(db):
     """Create a test user for authentication."""
     user = User(
         email="test@example.com",
-        password_hash=hash_password("test_password"),
+        password_hash=hash_password("TestP@ss123!"),
         role="admin",
         is_active=True,
     )
@@ -116,7 +119,7 @@ def test_analyst_user(db):
     """Create a test analyst user."""
     user = User(
         email="analyst@example.com",
-        password_hash=hash_password("analyst_password"),
+        password_hash=hash_password("AnalystP@ss123!"),
         role="analyst",
         is_active=True,
     )
@@ -131,7 +134,7 @@ def test_viewer_user(db):
     """Create a test viewer user."""
     user = User(
         email="viewer@example.com",
-        password_hash=hash_password("viewer_password"),
+        password_hash=hash_password("ViewerP@ss123!"),
         role="viewer",
         is_active=True,
     )

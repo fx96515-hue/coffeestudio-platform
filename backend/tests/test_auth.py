@@ -5,7 +5,7 @@ from app.core.security import hash_password
 def test_login_success(client, test_user):
     """Test successful login with valid credentials."""
     response = client.post(
-        "/auth/login", json={"email": "test@example.com", "password": "test_password"}
+        "/auth/login", json={"email": "test@example.com", "password": "TestP@ss123!"}
     )
     assert response.status_code == 200
     data = response.json()
@@ -16,7 +16,7 @@ def test_login_success(client, test_user):
 def test_login_invalid_password(client, test_user):
     """Test login with invalid password."""
     response = client.post(
-        "/auth/login", json={"email": "test@example.com", "password": "wrong_password"}
+        "/auth/login", json={"email": "test@example.com", "password": "WrongP@ss123!"}
     )
     assert response.status_code == 401
     data = response.json()
@@ -28,7 +28,7 @@ def test_login_invalid_email(client):
     """Test login with non-existent email."""
     response = client.post(
         "/auth/login",
-        json={"email": "nonexistent@example.com", "password": "any_password"},
+        json={"email": "nonexistent@example.com", "password": "AnyP@ss123!"},
     )
     assert response.status_code == 401
     data = response.json()
@@ -40,7 +40,7 @@ def test_login_inactive_user(client, db):
     """Test login with inactive user account."""
     inactive_user = User(
         email="inactive@example.com",
-        password_hash=hash_password("test_password"),
+        password_hash=hash_password("InactiveP@ss123!"),
         role="admin",
         is_active=False,
     )
@@ -49,7 +49,7 @@ def test_login_inactive_user(client, db):
 
     response = client.post(
         "/auth/login",
-        json={"email": "inactive@example.com", "password": "test_password"},
+        json={"email": "inactive@example.com", "password": "InactiveP@ss123!"},
     )
     assert response.status_code == 401
 
@@ -87,7 +87,7 @@ def test_protected_route_with_malformed_token(client):
 def test_token_contains_user_info(client, test_user):
     """Test that login token contains correct user information."""
     response = client.post(
-        "/auth/login", json={"email": "test@example.com", "password": "test_password"}
+        "/auth/login", json={"email": "test@example.com", "password": "TestP@ss123!"}
     )
     assert response.status_code == 200
 
@@ -122,7 +122,7 @@ def test_viewer_role_restrictions(client, viewer_auth_headers):
 
 def test_login_missing_email(client):
     """Test login with missing email field."""
-    response = client.post("/auth/login", json={"password": "test_password"})
+    response = client.post("/auth/login", json={"password": "TestP@ss123!"})
     assert response.status_code == 422  # Validation error
 
 
