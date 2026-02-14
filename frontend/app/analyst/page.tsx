@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { apiFetch } from "../../lib/api";
 
 // Constants
 const MAX_QUESTION_LENGTH = 1000; // Must match backend RAGQuestion.question max_length
@@ -47,38 +48,16 @@ export default function AnalystPage() {
 
   const checkServiceStatus = useCallback(async () => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        router.push("/login");
-        return;
-      }
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/analyst/status`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.status === 401) {
-        router.push("/login");
-        return;
-      }
-
-      if (!response.ok) {
-        setServiceStatus(null);
-        setError("Service nicht verfügbar");
-        return;
-      }
-
-      const data: ServiceStatus = await response.json();
+      const data = await apiFetch<ServiceStatus>("/analyst/status");
       setServiceStatus(data);
       if (!data.available) {
         setError(getProviderErrorMessage(data.provider));
       }
-    } catch {
+    } catch (error: any) {
+      if (error.message?.includes("401")) {
+        router.push("/login");
+        return;
+      }
       setServiceStatus(null);
       setError("Fehler beim Verbinden mit dem Service");
     }
@@ -130,49 +109,21 @@ export default function AnalystPage() {
     setInput("");
 
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        router.push("/login");
-        return;
-      }
-
       const conversationHistory = messages.map((m) => ({
         role: m.role,
         content: m.content,
       }));
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/analyst/ask`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            question: question,
-            conversation_history: conversationHistory,
-          }),
-        }
-      );
-
-      if (response.status === 401) {
-        router.push("/login");
-        return;
-      }
-
-      if (response.status === 503) {
-        const errorData = await response.json();
-        setError(errorData.detail || "Service nicht verfügbar.");
-        setMessages((prev) => prev.slice(0, -1));
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await apiFetch<{
+        answer: string;
+        sources?: Source[];
+      }>("/analyst/ask", {
+        method: "POST",
+        body: JSON.stringify({
+          question: question,
+          conversation_history: conversationHistory,
+        }),
+      });
 
       const assistantMessage: Message = {
         role: "assistant",
@@ -180,8 +131,16 @@ export default function AnalystPage() {
         sources: data.sources || [],
       };
       setMessages((prev) => [...prev, assistantMessage]);
-    } catch {
-      setError("Fehler beim Senden der Nachricht.");
+    } catch (error: any) {
+      if (error.message?.includes("401")) {
+        router.push("/login");
+        return;
+      }
+      if (error.message?.includes("503")) {
+        setError("Service nicht verfügbar.");
+      } else {
+        setError("Fehler beim Senden der Nachricht.");
+      }
       setMessages((prev) => prev.slice(0, -1));
     } finally {
       setLoading(false);

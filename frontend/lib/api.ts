@@ -28,6 +28,18 @@ export function setToken(token?: string | null) {
 }
 
 export function apiBaseUrl(): string {
+  // Priority order:
+  // 1. NEXT_PUBLIC_API_URL environment variable (set at build time in Next.js)
+  //    - In docker-compose.yml, this is set to http://localhost:8000
+  //    - This value is baked into the frontend bundle at build time
+  // 2. If running server-side (SSR/SSG), use http://localhost:8000
+  // 3. If browser is on Traefik hostname (ui.localhost), use Traefik API (api.localhost)
+  // 4. Fallback to direct port access (http://localhost:8000)
+  //
+  // Note: The apiFetch function also has a fallback mechanism that will retry
+  // with http://localhost:8000 if api.localhost fails, providing resilience
+  // for local development scenarios.
+  
   const env = process.env.NEXT_PUBLIC_API_URL;
   if (env) return env;
 
