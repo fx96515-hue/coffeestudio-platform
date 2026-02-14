@@ -126,7 +126,7 @@ jobs:
           file: ./backend/coverage.xml
           flags: backend
           name: backend-coverage
-          token: ${{ secrets.CODECOV_TOKEN }}
+          token: ${{ secrets.CODECOV_TOKEN
         continue-on-error: true
       
       - name: Upload Coverage Report
@@ -140,7 +140,7 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: py-cov-action/python-coverage-comment-action@v3
         with:
-          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token
         continue-on-error: true
 
   integration-tests:

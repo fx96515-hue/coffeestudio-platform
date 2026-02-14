@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     # Only run after successful production deployment, on schedule, or manual trigger
     # This won't block CI since it doesn't run on push/PR
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     
     steps:
       - name: Check if production is configured
@@ -150,7 +150,7 @@ jobs:
           # Production Health Check Report
           
           **Timestamp:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
-          **Trigger:** ${{ github.event_name }}
+          **Trigger:** ${{ github.event_name
           
           ## Health Status
           
@@ -176,7 +176,7 @@ jobs:
       - name: Upload Health Report
         uses: actions/upload-artifact@v4
         with:
-          name: health-report-${{ github.run_number }}
+          name: health-report-${{ github.run_number
           path: health-report.md
         if: always()
       
@@ -190,11 +190,11 @@ jobs:
             ## Critical Alert: Production Health Check Failed
             
             **Timestamp:** ${new Date().toISOString()}
-            **Workflow Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            **Workflow Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id
             
             ### Failed Checks
-            - API Health: ${{ steps.api_health.outputs.status }}
-            - Frontend: ${{ steps.frontend_health.outputs.status }}
+            - API Health: ${{ steps.api_health.outputs.status
+            - Frontend: ${{ steps.frontend_health.outputs.status
             
             ### Action Required
             1. Check server status
@@ -227,10 +227,10 @@ jobs:
         continue-on-error: true
       
       - name: Notify Team on Failure
-        if: ${{ steps.api_health.outputs.status == 'failure' && secrets.SLACK_WEBHOOK != '' }}
+        if: ${{ steps.api_health.outputs.status == 'failure' && secrets.SLACK_WEBHOOK != ''
         uses: slackapi/slack-github-action@v1
         with:
-          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+          webhook-url: ${{ secrets.SLACK_WEBHOOK
           payload: |
             {
               "text": "🚨 CRITICAL: Production Health Check Failed",

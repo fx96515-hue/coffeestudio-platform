@@ -24,12 +24,12 @@ jobs:
         id: deployment
         uses: chrnorm/deployment-action@v2
         with:
-          token: ${{ github.token }}
+          token: ${{ github.token
           environment: staging
           description: 'Deploying ${{ github.sha }} to staging'
       
       - name: Configure SSH
-        if: ${{ secrets.STAGING_SSH_KEY != '' }}
+        if: secrets.STAGING_SSH_KEY != ''
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.STAGING_SSH_KEY }}" > ~/.ssh/id_rsa
@@ -37,7 +37,7 @@ jobs:
           ssh-keyscan -H ${{ secrets.STAGING_HOST }} >> ~/.ssh/known_hosts
       
       - name: Deploy via SSH
-        if: ${{ secrets.STAGING_SSH_KEY != '' }}
+        if: secrets.STAGING_SSH_KEY != ''
         run: |
           ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << 'EOF'
             set -e
@@ -54,7 +54,7 @@ jobs:
           EOF
       
       - name: Deploy (No SSH - Placeholder)
-        if: ${{ secrets.STAGING_SSH_KEY == '' }}
+        if: secrets.STAGING_SSH_KEY == ''
         run: |
           echo "⚠️ STAGING_SSH_KEY not configured"
           echo "This is a placeholder deployment step"
@@ -89,7 +89,7 @@ jobs:
         continue-on-error: true
       
       - name: Run Smoke Tests
-        if: ${{ secrets.STAGING_HOST != '' }}
+        if: secrets.STAGING_HOST != ''
         run: |
           echo "Running smoke tests..."
           curl -f https://staging.coffeestudio.example.com/health
@@ -100,8 +100,8 @@ jobs:
         if: success()
         uses: chrnorm/deployment-status@v2
         with:
-          token: ${{ github.token }}
-          deployment-id: ${{ steps.deployment.outputs.deployment_id }}
+          token: ${{ github.token
+          deployment-id: ${{ steps.deployment.outputs.deployment_id
           state: 'success'
           environment-url: https://staging.coffeestudio.example.com
       
@@ -109,15 +109,15 @@ jobs:
         if: failure()
         uses: chrnorm/deployment-status@v2
         with:
-          token: ${{ github.token }}
-          deployment-id: ${{ steps.deployment.outputs.deployment_id }}
+          token: ${{ github.token
+          deployment-id: ${{ steps.deployment.outputs.deployment_id
           state: 'failure'
       
       - name: Notify Slack
-        if: ${{ always() && secrets.SLACK_WEBHOOK != '' }}
+        if: ${{ always() && secrets.SLACK_WEBHOOK != ''
         uses: slackapi/slack-github-action@v1
         with:
-          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+          webhook-url: ${{ secrets.SLACK_WEBHOOK
           payload: |
             {
               "text": "Staging Deployment: ${{ job.status }}",

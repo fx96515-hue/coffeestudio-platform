@@ -134,7 +134,7 @@ jobs:
       - name: Run Snyk to check for vulnerabilities (Backend)
         uses: snyk/actions/python-3.10@master
         env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN
         with:
           args: --severity-threshold=high --file=backend/requirements.txt
         continue-on-error: true
@@ -142,7 +142,7 @@ jobs:
       - name: Run Snyk to check for vulnerabilities (Frontend)
         uses: snyk/actions/node@master
         env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN
         with:
           args: --severity-threshold=high --file=frontend/package.json
         continue-on-error: true
@@ -162,7 +162,7 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
-          languages: ${{ matrix.language }}
+          languages: ${{ matrix.language
           queries: security-extended,security-and-quality
       
       - name: Autobuild
