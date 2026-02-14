@@ -72,7 +72,7 @@ jobs:
         with:
           context: ./backend
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}${{ steps.meta-dockerhub.outcome == 'success' && format(',{0}', steps.meta-dockerhub.outputs.tags) || '' }}
+          tags: ${{ steps.meta.outputs.tags }}${{ (secrets.DOCKER_USERNAME != '' && github.event_name != 'pull_request') && format(',{0}', steps.meta-dockerhub.outputs.tags) || '' }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -140,7 +140,7 @@ jobs:
         with:
           context: ./frontend
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}${{ steps.meta-dockerhub.outcome == 'success' && format(',{0}', steps.meta-dockerhub.outputs.tags) || '' }}
+          tags: ${{ steps.meta.outputs.tags }}${{ (secrets.DOCKER_USERNAME != '' && github.event_name != 'pull_request') && format(',{0}', steps.meta-dockerhub.outputs.tags) || '' }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

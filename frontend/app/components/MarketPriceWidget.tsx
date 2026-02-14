@@ -14,6 +14,9 @@ interface MarketSnapshot {
   [key: string]: MarketPoint | null;
 }
 
+// Default reference price when live data unavailable
+const FALLBACK_COFFEE_PRICE = 2.50;
+
 export default function MarketPriceWidget() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -44,7 +47,6 @@ export default function MarketPriceWidget() {
 
   const coffeePrice = market?.["COFFEE_C:USD_LB"] ?? null;
   const eurUsd = market?.["EUR_USD"] ?? null;
-  const FALLBACK_COFFEE_PRICE = 2.50; // Default reference price when live data unavailable
 
   const formatDate = (dateStr?: string | null) => {
     if (!dateStr) return "–";
