@@ -23,7 +23,7 @@ class Settings(BaseSettings):
         if len(v) < 32:
             raise ValueError(
                 "JWT_SECRET must be at least 32 characters for security. "
-                "Generate a strong secret: openssl rand -hex 32"
+                "Generate a strong secret: openssl rand -hex 16"
             )
         if len(v) < 64:
             logger = logging.getLogger(__name__)
