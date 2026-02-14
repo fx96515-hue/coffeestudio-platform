@@ -223,7 +223,8 @@ export default function ShipmentsDashboard() {
           <div className="grid gridCols3" style={{ gap: "12px" }}>
             {arrivingSoon.map((shipment) => {
               const eta = shipment.estimated_arrival || shipment.eta;
-              const daysUntilArrival = differenceInDays(new Date(eta!), new Date());
+              if (!eta) return null; // Extra safety check
+              const daysUntilArrival = differenceInDays(new Date(eta), new Date());
               return (
                 <div
                   key={shipment.id}
@@ -244,7 +245,7 @@ export default function ShipmentsDashboard() {
                     {daysUntilArrival} Tage
                   </div>
                   <div style={{ fontSize: "12px", color: "var(--muted)" }}>
-                    ETA: {format(new Date(eta!), "dd. MMM yyyy")}
+                    ETA: {format(new Date(eta), "dd. MMM yyyy")}
                   </div>
                 </div>
               );
