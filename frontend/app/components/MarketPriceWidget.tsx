@@ -44,6 +44,7 @@ export default function MarketPriceWidget() {
 
   const coffeePrice = market?.["COFFEE_C:USD_LB"] ?? null;
   const eurUsd = market?.["EUR_USD"] ?? null;
+  const FALLBACK_COFFEE_PRICE = 2.50; // Default reference price when live data unavailable
 
   const formatDate = (dateStr?: string | null) => {
     if (!dateStr) return "–";
@@ -66,7 +67,7 @@ export default function MarketPriceWidget() {
           <div className="cardValue">
             {coffeePrice 
               ? `$${coffeePrice.value.toFixed(2)}/lb` 
-              : `$${fallbackCoffeePrice.toFixed(2)}/lb`}
+              : `$${FALLBACK_COFFEE_PRICE.toFixed(2)}/lb`}
           </div>
           <div className="cardHint">
             {coffeePrice 
@@ -82,7 +83,7 @@ export default function MarketPriceWidget() {
           
           {!coffeePrice && (
             <div style={{ fontSize: "11px", color: "var(--muted)", marginTop: "8px", fontStyle: "italic" }}>
-              Keine Live-Daten · Referenzwert: ${fallbackCoffeePrice}/lb
+              Keine Live-Daten · Referenzwert: ${FALLBACK_COFFEE_PRICE}/lb
             </div>
           )}
         </>
