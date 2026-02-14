@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { apiFetch } from "../../lib/api";
+import { apiFetch, getToken, apiBaseUrl } from "../../lib/api";
 
 // Constants
 const MAX_QUESTION_LENGTH = 1000; // Must match backend RAGQuestion.question max_length
@@ -48,11 +48,20 @@ export default function AnalystPage() {
 
   const checkServiceStatus = useCallback(async () => {
     try {
+      const token = getToken();
+      if (!token) {
+        router.push("/login");
+        return;
+      }
+
+      const data: ServiceStatus = await apiFetch<ServiceStatus>("/analyst/status");
       const data = await apiFetch<ServiceStatus>("/analyst/status");
       setServiceStatus(data);
       if (!data.available) {
         setError(getProviderErrorMessage(data.provider));
       }
+    } catch (err: unknown) {
+      if (err instanceof Error && err.message?.includes("401")) {
     } catch (error: any) {
       if (error.message?.includes("401")) {
         router.push("/login");
@@ -109,6 +118,12 @@ export default function AnalystPage() {
     setInput("");
 
     try {
+      const token = getToken();
+      if (!token) {
+        router.push("/login");
+        return;
+      }
+
       const conversationHistory = messages.map((m) => ({
         role: m.role,
         content: m.content,
@@ -117,6 +132,16 @@ export default function AnalystPage() {
       const data = await apiFetch<{
         answer: string;
         sources?: Source[];
+      }>(
+        "/analyst/ask",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            question: question,
+            conversation_history: conversationHistory,
+          }),
+        }
+      );
       }>("/analyst/ask", {
         method: "POST",
         body: JSON.stringify({
@@ -131,6 +156,16 @@ export default function AnalystPage() {
         sources: data.sources || [],
       };
       setMessages((prev) => [...prev, assistantMessage]);
+    } catch (err: unknown) {
+      if (err instanceof Error && err.message?.includes("401")) {
+        router.push("/login");
+        return;
+      }
+      
+      const errorMessage = err instanceof Error && err.message?.includes("503") 
+        ? "Service nicht verfügbar." 
+        : "Fehler beim Senden der Nachricht.";
+      setError(errorMessage);
     } catch (error: any) {
       if (error.message?.includes("401")) {
         router.push("/login");

@@ -1,5 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "../../lib/api";
+import { Shipment, ShipmentFilters, Paged } from "../types";
+
+// Fetch Shipments with filters
+export function useShipments(filters?: ShipmentFilters & { limit?: number; page?: number }) {
 import { Shipment, ShipmentFilters } from "../types";
 
 // Fetch Shipments with filters
@@ -8,6 +12,11 @@ export function useShipments(filters?: ShipmentFilters & { limit?: number }) {
   if (filters) {
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
+        if (Array.isArray(value)) {
+          value.forEach((v) => params.append(key, String(v)));
+        } else {
+          params.set(key, String(value));
+        }
         params.set(key, String(value));
       }
     });
@@ -17,6 +26,35 @@ export function useShipments(filters?: ShipmentFilters & { limit?: number }) {
     queryKey: ["shipments", filters],
     queryFn: async () => {
       const response = await apiFetch<Shipment[]>(`/shipments?${params.toString()}`);
+      // Backend returns flat list
+      if (Array.isArray(response)) {
+        return { items: response, total: response.length } as Paged<Shipment>;
+      }
+      return response as Paged<Shipment>;
+    },
+  });
+}
+
+// Fetch single Shipment
+export function useShipment(id: number) {
+  return useQuery({
+    queryKey: ["shipment", id],
+    queryFn: async () => {
+      const data = await apiFetch<Shipment>(`/shipments/${id}`);
+      return data;
+    },
+    enabled: !!id,
+  });
+}
+
+// Fetch active shipments (in_transit)
+export function useActiveShipments() {
+  return useQuery({
+    queryKey: ["shipments", "active"],
+    queryFn: async () => {
+      const response = await apiFetch<Shipment[]>("/shipments/active");
+      return response;
+    },
       return response;
     },
   });
@@ -49,6 +87,7 @@ export function useShipment(id: number) {
 export function useCreateShipment() {
   const queryClient = useQueryClient();
   return useMutation({
+    mutationFn: async (data: Partial<Shipment>) => {
     mutationFn: async (data: {
       lot_id?: number | null;
       cooperative_id?: number | null;
@@ -78,6 +117,7 @@ export function useCreateShipment() {
 export function useUpdateShipment() {
   const queryClient = useQueryClient();
   return useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: Partial<Shipment> }) => {
     mutationFn: async ({
       id,
       data,
