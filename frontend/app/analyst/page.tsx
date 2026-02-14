@@ -59,8 +59,8 @@ export default function AnalystPage() {
       if (!data.available) {
         setError(getProviderErrorMessage(data.provider));
       }
-    } catch (err: any) {
-      if (err.message?.includes("401")) {
+    } catch (err: unknown) {
+      if (err instanceof Error && err.message?.includes("401")) {
         router.push("/login");
         return;
       }
@@ -146,13 +146,16 @@ export default function AnalystPage() {
         sources: data.sources || [],
       };
       setMessages((prev) => [...prev, assistantMessage]);
-    } catch (err: any) {
-      if (err.message?.includes("401")) {
+    } catch (err: unknown) {
+      if (err instanceof Error && err.message?.includes("401")) {
         router.push("/login");
         return;
       }
       
-      setError(err.message?.includes("503") ? "Service nicht verfügbar." : "Fehler beim Senden der Nachricht.");
+      const errorMessage = err instanceof Error && err.message?.includes("503") 
+        ? "Service nicht verfügbar." 
+        : "Fehler beim Senden der Nachricht.";
+      setError(errorMessage);
       setMessages((prev) => prev.slice(0, -1));
     } finally {
       setLoading(false);

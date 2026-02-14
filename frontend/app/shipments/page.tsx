@@ -298,7 +298,11 @@ export default function ShipmentsDashboard() {
                   </div>
 
                   <div style={{ marginTop: "12px", paddingTop: "12px", borderTop: "1px solid var(--border)" }}>
-                    <Link href={`/shipments/${shipment.id}`} className="btn" style={{ width: "100%", fontSize: "12px", display: "block", textAlign: "center", textDecoration: "none" }}>
+                    <Link 
+                      href={`/shipments/${shipment.id}`} 
+                      className="btn" 
+                      style={{ width: "100%", fontSize: "12px", display: "block", textAlign: "center" }}
+                    >
                       Details anzeigen →
                     </Link>
                   </div>
