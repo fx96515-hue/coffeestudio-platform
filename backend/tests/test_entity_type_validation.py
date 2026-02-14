@@ -33,11 +33,12 @@ def test_enrich_cooperative_valid_type(client: TestClient, auth_headers, db):
         json={"url": "https://testcoop.com"},
         headers=auth_headers,
     )
-    # Should either succeed or fail with 404/400, not 422 (validation error)
+    # Should not be a validation error (422) for valid entity_type
+    assert response.status_code != 422, (
+        f"Valid entity_type 'cooperative' should not return 422: {response.json()}"
+    )
+    # Should be one of these expected status codes
     assert response.status_code in [200, 400, 404, 503]  # 503 if no API key
-    if response.status_code == 422:
-        # Should not be validation error for valid entity_type
-        assert False, f"Valid entity_type 'cooperative' should not return 422: {response.json()}"
 
 
 def test_enrich_roaster_valid_type(client: TestClient, auth_headers, db):
@@ -57,11 +58,12 @@ def test_enrich_roaster_valid_type(client: TestClient, auth_headers, db):
         json={"url": "https://testroaster.com"},
         headers=auth_headers,
     )
-    # Should either succeed or fail with 404/400, not 422 (validation error)
+    # Should not be a validation error (422) for valid entity_type
+    assert response.status_code != 422, (
+        f"Valid entity_type 'roaster' should not return 422: {response.json()}"
+    )
+    # Should be one of these expected status codes
     assert response.status_code in [200, 400, 404, 503]  # 503 if no API key
-    if response.status_code == 422:
-        # Should not be validation error for valid entity_type
-        assert False, f"Valid entity_type 'roaster' should not return 422: {response.json()}"
 
 
 def test_auto_outreach_suggestions_invalid_entity_type(client: TestClient, auth_headers):
@@ -80,10 +82,12 @@ def test_auto_outreach_suggestions_cooperative_valid(client: TestClient, auth_he
         "/auto-outreach/suggestions?entity_type=cooperative&limit=10",
         headers=auth_headers,
     )
+    # Should not be a validation error (422) for valid entity_type
+    assert response.status_code != 422, (
+        f"Valid entity_type 'cooperative' should not return 422: {response.json()}"
+    )
     # Should succeed (200) or fail with non-validation error
     assert response.status_code in [200, 500]
-    if response.status_code == 422:
-        assert False, f"Valid entity_type 'cooperative' should not return 422: {response.json()}"
 
 
 def test_auto_outreach_suggestions_roaster_valid(client: TestClient, auth_headers):
@@ -92,10 +96,12 @@ def test_auto_outreach_suggestions_roaster_valid(client: TestClient, auth_header
         "/auto-outreach/suggestions?entity_type=roaster&limit=10",
         headers=auth_headers,
     )
+    # Should not be a validation error (422) for valid entity_type
+    assert response.status_code != 422, (
+        f"Valid entity_type 'roaster' should not return 422: {response.json()}"
+    )
     # Should succeed (200) or fail with non-validation error
     assert response.status_code in [200, 500]
-    if response.status_code == 422:
-        assert False, f"Valid entity_type 'roaster' should not return 422: {response.json()}"
 
 
 def test_auto_outreach_status_invalid_entity_type(client: TestClient, auth_headers):
@@ -123,10 +129,12 @@ def test_auto_outreach_status_cooperative_valid(client: TestClient, auth_headers
         f"/auto-outreach/status/cooperative/{coop.id}",
         headers=auth_headers,
     )
+    # Should not be a validation error (422) for valid entity_type
+    assert response.status_code != 422, (
+        f"Valid entity_type 'cooperative' should not return 422: {response.json()}"
+    )
     # Should succeed (200) or fail with non-validation error
     assert response.status_code in [200, 500]
-    if response.status_code == 422:
-        assert False, f"Valid entity_type 'cooperative' should not return 422: {response.json()}"
 
 
 def test_auto_outreach_status_roaster_valid(client: TestClient, auth_headers, db):
@@ -144,10 +152,12 @@ def test_auto_outreach_status_roaster_valid(client: TestClient, auth_headers, db
         f"/auto-outreach/status/roaster/{roaster.id}",
         headers=auth_headers,
     )
+    # Should not be a validation error (422) for valid entity_type
+    assert response.status_code != 422, (
+        f"Valid entity_type 'roaster' should not return 422: {response.json()}"
+    )
     # Should succeed (200) or fail with non-validation error
     assert response.status_code in [200, 500]
-    if response.status_code == 422:
-        assert False, f"Valid entity_type 'roaster' should not return 422: {response.json()}"
 
 
 def test_campaign_create_invalid_entity_type(client: TestClient, auth_headers):
@@ -182,10 +192,12 @@ def test_campaign_create_cooperative_valid(client: TestClient, auth_headers):
         json=payload,
         headers=auth_headers,
     )
+    # Should not be a validation error (422) for valid entity_type
+    assert response.status_code != 422, (
+        f"Valid entity_type 'cooperative' should not return 422: {response.json()}"
+    )
     # Should succeed (200) or fail with non-validation error
     assert response.status_code in [200, 400, 500]
-    if response.status_code == 422:
-        assert False, f"Valid entity_type 'cooperative' should not return 422: {response.json()}"
 
 
 def test_campaign_create_roaster_valid(client: TestClient, auth_headers):
@@ -202,7 +214,9 @@ def test_campaign_create_roaster_valid(client: TestClient, auth_headers):
         json=payload,
         headers=auth_headers,
     )
+    # Should not be a validation error (422) for valid entity_type
+    assert response.status_code != 422, (
+        f"Valid entity_type 'roaster' should not return 422: {response.json()}"
+    )
     # Should succeed (200) or fail with non-validation error
     assert response.status_code in [200, 400, 500]
-    if response.status_code == 422:
-        assert False, f"Valid entity_type 'roaster' should not return 422: {response.json()}"
