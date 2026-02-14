@@ -65,11 +65,12 @@ export default function SearchPage() {
         `/search/semantic?q=${encodeURIComponent(query)}&entity_type=${entityType}&limit=20`
       );
       setResults(response.results);
-    } catch (e: any) {
-      if (e?.message?.includes("503")) {
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      if (errorMessage.includes("503")) {
         setError("Semantische Suche ist nicht verfügbar. OpenAI API-Schlüssel nicht konfiguriert.");
       } else {
-        setError(e?.message ?? String(e));
+        setError(errorMessage);
       }
     } finally {
       setLoading(false);
@@ -87,8 +88,9 @@ export default function SearchPage() {
         ...prev,
         [key]: response.similar_entities,
       }));
-    } catch (e: any) {
-      setError(e?.message ?? String(e));
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      setError(errorMessage);
     }
   };
 
@@ -140,7 +142,7 @@ export default function SearchPage() {
             <select
               className="input"
               value={entityType}
-              onChange={(e) => setEntityType(e.target.value as any)}
+              onChange={(e) => setEntityType(e.target.value as "all" | "cooperative" | "roaster")}
             >
               <option value="all">Alle</option>
               <option value="cooperative">Kooperativen</option>
@@ -169,7 +171,7 @@ export default function SearchPage() {
             Ergebnisse: {results.length}
             {results.length > 0 && (
               <span className="muted" style={{ marginLeft: "0.5rem", fontWeight: "normal" }}>
-                für "{query}"
+                für &quot;{query}&quot;
               </span>
             )}
           </div>
@@ -209,7 +211,7 @@ export default function SearchPage() {
                             </Link>
                           </td>
                           <td>
-                            <Badge color={result.entity_type === "cooperative" ? "green" : "blue"}>
+                            <Badge tone={result.entity_type === "cooperative" ? "good" : "neutral"}>
                               {result.entity_type === "cooperative" ? "Kooperative" : "Rösterei"}
                             </Badge>
                           </td>
@@ -221,13 +223,13 @@ export default function SearchPage() {
                           </td>
                           <td>
                             {result.total_score ? (
-                              <Badge color="purple">{result.total_score.toFixed(1)}</Badge>
+                              <Badge tone="neutral">{result.total_score.toFixed(1)}</Badge>
                             ) : (
                               "–"
                             )}
                           </td>
                           <td>
-                            <Badge color="orange">{formatSimilarity(result.similarity_score)}</Badge>
+                            <Badge tone="warn">{formatSimilarity(result.similarity_score)}</Badge>
                           </td>
                           <td>
                             <button
@@ -243,7 +245,7 @@ export default function SearchPage() {
                           <tr key={`${key}-similar`}>
                             <td colSpan={7} style={{ backgroundColor: "var(--color-bg-secondary)", padding: "1rem" }}>
                               <div style={{ marginBottom: "0.5rem", fontWeight: "600" }}>
-                                Ähnliche Entitäten zu "{result.name}":
+                                Ähnliche Entitäten zu &quot;{result.name}&quot;:
                               </div>
                               <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
                                 {similar.map((sim) => (
@@ -262,7 +264,7 @@ export default function SearchPage() {
                                     }}
                                   >
                                     <span>{sim.name}</span>
-                                    <Badge color="orange" style={{ fontSize: "0.75rem" }}>
+                                    <Badge tone="warn">
                                       {formatSimilarity(sim.similarity_score)}
                                     </Badge>
                                   </Link>
