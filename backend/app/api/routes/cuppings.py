@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.api.deps import require_role
@@ -12,14 +12,14 @@ router = APIRouter()
 
 @router.get("/", response_model=list[CuppingOut])
 def list_cuppings(
-    limit: int = 200,
+    limit: int = Query(200, ge=1, le=500),
     db: Session = Depends(get_db),
     _=Depends(require_role("admin", "analyst", "viewer")),
 ):
     return (
         db.query(CuppingResult)
         .order_by(CuppingResult.occurred_at.desc().nullslast())
-        .limit(min(limit, 1000))
+        .limit(limit)
         .all()
     )
 

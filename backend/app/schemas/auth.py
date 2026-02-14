@@ -1,3 +1,4 @@
+import re
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
 
@@ -8,15 +9,57 @@ class LoginRequest(BaseModel):
     @field_validator("password")
     @classmethod
     def password_not_common(cls, v: str) -> str:
-        """Check password strength - basic common password rejection.
+        """Check password strength - comprehensive validation.
 
         For production: integrate with HaveIBeenPwned API or similar service.
-        Current check is intentionally minimal as a starting point.
         """
-        common = ["password", "12345678", "admin123", "qwerty", "letmein"]
+        # Extended list of common passwords
+        common = [
+            "password",
+            "12345678",
+            "admin123",
+            "qwerty",
+            "letmein",
+            "welcome",
+            "monkey",
+            "1234567890",
+            "abc123",
+            "password1",
+            "password123",
+            "qwerty123",
+            "welcome1",
+            "admin",
+            "administrator",
+            "root",
+            "toor",
+            "pass",
+            "test",
+            "guest",
+            "user",
+            "demo",
+            "sample",
+            "changeme",
+            "default",
+        ]
         if v.lower() in common:
             raise ValueError("Passwort ist zu schwach und leicht zu erraten")
-        # TODO: Add more comprehensive checks in future (uppercase, lowercase, numbers, special chars)
+
+        # Check for complexity requirements
+        if not re.search(r"[A-Z]", v):
+            raise ValueError(
+                "Passwort muss mindestens einen Großbuchstaben enthalten"
+            )
+        if not re.search(r"[a-z]", v):
+            raise ValueError(
+                "Passwort muss mindestens einen Kleinbuchstaben enthalten"
+            )
+        if not re.search(r"\d", v):
+            raise ValueError("Passwort muss mindestens eine Ziffer enthalten")
+        if not re.search(r"[!@#$%^&*(),.?\":{}|<>_\-+=\[\]\\\/;'`~]", v):
+            raise ValueError(
+                "Passwort muss mindestens ein Sonderzeichen enthalten"
+            )
+
         return v
 
 

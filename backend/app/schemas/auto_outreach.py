@@ -8,7 +8,7 @@ class CreateCampaignIn(BaseModel):
     """Request to create an outreach campaign."""
 
     name: str
-    entity_type: str
+    entity_type: Literal["cooperative", "roaster"]
     language: Literal["de", "en", "es"] = "de"
     purpose: Literal["sourcing_pitch", "sample_request"] = "sourcing_pitch"
     min_quality_score: float | None = None

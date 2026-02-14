@@ -1,8 +1,9 @@
+from typing import Literal
 from pydantic import BaseModel, Field
 
 
 class OutreachRequest(BaseModel):
-    entity_type: str
+    entity_type: Literal["cooperative", "roaster"]
     entity_id: int
     language: str = "de"
     purpose: str = "sourcing_pitch"
