@@ -28,11 +28,18 @@ jobs:
           echo "Security Scan: ${{ needs.security-scan.result }}"
           echo "Docker Build: ${{ needs.docker-build.result }}"
           
+          # Check for failures (success or skipped are both acceptable)
           if [ "${{ needs.backend-ci.result }}" != "success" ] || \
              [ "${{ needs.frontend-ci.result }}" != "success" ] || \
              [ "${{ needs.docker-build.result }}" != "success" ]; then
             echo "❌ CI checks failed"
             exit 1
+          fi
+          
+          # Security scan is optional - success or skipped is OK
+          if [ "${{ needs.security-scan.result }}" == "failure" ]; then
+            echo "⚠️ Security scan failed"
+            # Don't fail the overall CI for security scan failures - they should be reviewed separately
           fi
           
           echo "✅ All CI checks passed"
