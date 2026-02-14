@@ -33,7 +33,7 @@ def auth_token(wait_for_services) -> str:
     """Get authentication token for test user."""
     response = requests.post(
         f"{BASE_URL}/auth/login",
-        json={"email": "admin@coffeestudio.com", "password": "test123"},
+        json={"email": "admin@coffeestudio.com", "password": "adminadmin"},
         headers={"Content-Type": "application/json"}
     )
     assert response.status_code == 200, f"Auth failed: {response.text}"
@@ -48,18 +48,14 @@ def test_e2e_cooperative_flow(auth_token):
     coop_data = {
         "name": "E2E Test Cooperative",
         "region": "Cajamarca",
-        "contact_person": "Juan Test",
-        "email": "test@e2ecoop.com",
-        "annual_volume_kg": 50000,
-        "quality_score": 85.5,
-        "certifications": ["Organic"]
+        "contact_email": "test@e2ecoop.com",
     }
     create_resp = requests.post(
         f"{BASE_URL}/cooperatives",
         json=coop_data,
         headers=headers
     )
-    assert create_resp.status_code == 201
+    assert create_resp.status_code == 200
     coop_id = create_resp.json()["id"]
     
     # Step 2: Trigger sourcing analysis (if Peru routes exist from PR #4)
@@ -90,11 +86,7 @@ def test_e2e_roaster_flow(auth_token):
     roaster_data = {
         "name": "E2E Test Roastery",
         "city": "Hamburg",
-        "country": "Germany",
-        "contact_person": "Hans Müller",
-        "email": "test@e2eroaster.de",
-        "annual_capacity_kg": 30000,
-        "type": "specialty"
+        "contact_email": "test@e2eroaster.de",
     }
     
     create_resp = requests.post(
@@ -102,7 +94,7 @@ def test_e2e_roaster_flow(auth_token):
         json=roaster_data,
         headers=headers
     )
-    assert create_resp.status_code == 201
+    assert create_resp.status_code == 200
     roaster_id = create_resp.json()["id"]
     
     get_resp = requests.get(f"{BASE_URL}/roasters/{roaster_id}", headers=headers)
@@ -143,19 +135,21 @@ def test_e2e_margin_calculation(auth_token):
     
     # Calculate margin
     margin_data = {
-        "lot_id": lot_id,
-        "sale_price_per_kg": 7.20,
-        "freight_cost": 0.45,
-        "insurance": 0.10,
-        "other_costs": 0.15
+        "purchase_price_per_kg": 5.50,
+        "purchase_currency": "USD",
+        "landed_costs_per_kg": 0.45,
+        "roast_and_pack_costs_per_kg": 0.25,
+        "yield_factor": 0.84,
+        "selling_price_per_kg": 7.20,
+        "selling_currency": "EUR"
     }
     margin_resp = requests.post(
-        f"{BASE_URL}/margins/calculate",
+        f"{BASE_URL}/margins/calc",
         json=margin_data,
         headers=headers
     )
     assert margin_resp.status_code == 200
-    assert "margin_per_kg" in margin_resp.json()
+    assert "outputs" in margin_resp.json()
     
     # Cleanup
     requests.delete(f"{BASE_URL}/lots/{lot_id}", headers=headers)
@@ -186,6 +180,68 @@ def test_ml_predictions_available(auth_token):
             pytest.skip("ML endpoints not fully configured")
     except requests.exceptions.RequestException:
         pytest.skip("ML service not available")
+
+
+def test_e2e_shipment_flow(auth_token):
+    """Test complete shipment creation → tracking → frontend display flow."""
+    headers = {"Authorization": f"Bearer {auth_token}"}
+    
+    # Step 1: Create shipment
+    shipment_data = {
+        "container_number": "TEST1234567",
+        "bill_of_lading": "BOL-TEST-001",
+        "weight_kg": 18000,
+        "container_type": "40ft",
+        "origin_port": "Callao, Peru",
+        "destination_port": "Hamburg, Germany",
+        "departure_date": "2024-01-15",
+        "estimated_arrival": "2024-02-20"
+    }
+    create_resp = requests.post(
+        f"{BASE_URL}/shipments",
+        json=shipment_data,
+        headers=headers
+    )
+    assert create_resp.status_code == 200
+    shipment_id = create_resp.json()["id"]
+    
+    # Step 2: List all shipments
+    list_resp = requests.get(f"{BASE_URL}/shipments", headers=headers)
+    assert list_resp.status_code == 200
+    shipments = list_resp.json()
+    assert len(shipments) > 0
+    assert any(s["id"] == shipment_id for s in shipments)
+    
+    # Step 3: Get single shipment
+    get_resp = requests.get(f"{BASE_URL}/shipments/{shipment_id}", headers=headers)
+    assert get_resp.status_code == 200
+    shipment = get_resp.json()
+    assert shipment["container_number"] == "TEST1234567"
+    assert shipment["origin_port"] == "Callao, Peru"
+    
+    # Step 4: Update shipment
+    update_data = {
+        "current_location": "Panama Canal",
+        "status": "in_transit"
+    }
+    update_resp = requests.patch(
+        f"{BASE_URL}/shipments/{shipment_id}",
+        json=update_data,
+        headers=headers
+    )
+    assert update_resp.status_code == 200
+    updated = update_resp.json()
+    assert updated["current_location"] == "Panama Canal"
+    assert updated["status"] == "in_transit"
+    
+    # Step 5: List active shipments
+    active_resp = requests.get(f"{BASE_URL}/shipments/active", headers=headers)
+    assert active_resp.status_code == 200
+    active_shipments = active_resp.json()
+    assert any(s["id"] == shipment_id for s in active_shipments)
+    
+    # Cleanup
+    requests.delete(f"{BASE_URL}/shipments/{shipment_id}", headers=headers)
 
 
 def test_health_endpoints():
