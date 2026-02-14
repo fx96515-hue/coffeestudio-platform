@@ -54,9 +54,9 @@ jobs:
     if: secrets.APISEC_USERNAME != '' && secrets.APISEC_PASSWORD != ''
 
     steps:
-       - name: APIsec scan
-         uses: apisec-inc/apisec-run-scan@025432089674a28ba8fb55f8ab06c10215e772ea
-         with:
+      - name: APIsec scan
+        uses: apisec-inc/apisec-run-scan@025432089674a28ba8fb55f8ab06c10215e772ea
+        with:
           # The APIsec username with which the scans will be executed
           apisec-username: ${{ secrets.APISEC_USERNAME }}
           # The Password of the APIsec user with which the scans will be executed
@@ -65,9 +65,9 @@ jobs:
           apisec-project: "VAmPI"
           # The name of the sarif format result file The file is written only if this property is provided.
           sarif-result-file: "apisec-results.sarif"
-       - name: Import results
-         uses: github/codeql-action/upload-sarif@v3
-         with:
+      - name: Import results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
           sarif_file: ./apisec-results.sarif
   
   skip-apisec-scan:
