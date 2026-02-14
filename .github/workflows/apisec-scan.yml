@@ -73,6 +73,8 @@ jobs:
   skip-apisec-scan:
     name: APIsec Scan (Skipped - No Credentials)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     # Only run if APIsec credentials are NOT configured
     if: ${{ secrets.apisec_username == '' || secrets.apisec_password == '' }}
     

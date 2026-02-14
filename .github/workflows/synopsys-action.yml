@@ -45,6 +45,8 @@ jobs:
   skip-synopsys:
     name: Synopsys Scan (Skipped - No Credentials)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     # Only run if NO Synopsys services are configured
     if: ${{ secrets.COVERITY_URL == '' && secrets.BLACKDUCK_URL == '' && secrets.POLARIS_SERVER_URL == '' }}
     
