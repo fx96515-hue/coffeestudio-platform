@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.api.deps import require_role
@@ -14,14 +14,14 @@ router = APIRouter()
 @router.get("/", response_model=list[LotOut])
 def list_lots(
     cooperative_id: int | None = None,
-    limit: int = 200,
+    limit: int = Query(200, ge=1, le=500),
     db: Session = Depends(get_db),
     _=Depends(require_role("admin", "analyst", "viewer")),
 ):
     q = db.query(Lot)
     if cooperative_id is not None:
         q = q.filter(Lot.cooperative_id == cooperative_id)
-    return q.order_by(Lot.created_at.desc()).limit(min(limit, 1000)).all()
+    return q.order_by(Lot.created_at.desc()).limit(limit).all()
 
 
 @router.post("/", response_model=LotOut)

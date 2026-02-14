@@ -1,3 +1,4 @@
+from typing import Literal
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -12,7 +13,7 @@ router = APIRouter()
 
 @router.post("/{entity_type}/{entity_id}", response_model=EnrichResponse)
 def enrich(
-    entity_type: str,
+    entity_type: Literal["cooperative", "roaster"],
     entity_id: int,
     payload: EnrichRequest,
     db: Session = Depends(get_db),

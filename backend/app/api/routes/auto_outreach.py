@@ -1,5 +1,6 @@
 """Auto-outreach API routes."""
 
+from typing import Literal
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
@@ -50,7 +51,7 @@ def create_campaign(
 
 @router.get("/suggestions", response_model=list[OutreachSuggestionOut])
 def get_suggestions(
-    entity_type: str,
+    entity_type: Literal["cooperative", "roaster"],
     limit: int = Query(20, le=100),
     db: Session = Depends(get_db),
     _=Depends(require_role("admin", "analyst")),
@@ -72,7 +73,7 @@ def get_suggestions(
 
 @router.get("/status/{entity_type}/{entity_id}", response_model=EntityOutreachStatusOut)
 def get_entity_status(
-    entity_type: str,
+    entity_type: Literal["cooperative", "roaster"],
     entity_id: int,
     db: Session = Depends(get_db),
     _=Depends(require_role("admin", "analyst")),

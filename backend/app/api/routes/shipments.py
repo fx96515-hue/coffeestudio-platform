@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from datetime import datetime
 
@@ -22,7 +22,7 @@ def list_shipments(
     status: str | None = None,
     origin_port: str | None = None,
     destination_port: str | None = None,
-    limit: int = 200,
+    limit: int = Query(200, ge=1, le=500),
     db: Session = Depends(get_db),
     _=Depends(require_role("admin", "analyst", "viewer")),
 ):
@@ -34,7 +34,7 @@ def list_shipments(
         q = q.filter(Shipment.origin_port == origin_port)
     if destination_port:
         q = q.filter(Shipment.destination_port == destination_port)
-    return q.order_by(Shipment.created_at.desc()).limit(min(limit, 1000)).all()
+    return q.order_by(Shipment.created_at.desc()).limit(limit).all()
 
 
 @router.get("/active", response_model=list[ShipmentOut])

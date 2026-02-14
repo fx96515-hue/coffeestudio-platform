@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.api.deps import require_role
@@ -47,7 +47,7 @@ def calc_and_store_for_lot(
 @router.get("/lots/{lot_id}/runs", response_model=list[MarginRunOut])
 def list_runs(
     lot_id: int,
-    limit: int = 50,
+    limit: int = Query(50, ge=1, le=500),
     db: Session = Depends(get_db),
     _=Depends(require_role("admin", "analyst", "viewer")),
 ):
@@ -55,6 +55,6 @@ def list_runs(
         db.query(MarginRun)
         .filter(MarginRun.lot_id == lot_id)
         .order_by(MarginRun.computed_at.desc())
-        .limit(min(limit, 200))
+        .limit(limit)
         .all()
     )

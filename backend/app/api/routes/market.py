@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from celery.result import AsyncResult
@@ -17,16 +17,14 @@ router = APIRouter()
 @router.get("/observations", response_model=list[MarketObservationOut])
 def list_observations(
     key: str | None = None,
-    limit: int = 200,
+    limit: int = Query(200, ge=1, le=500),
     db: Session = Depends(get_db),
     _=Depends(require_role("admin", "analyst", "viewer")),
 ):
     q = db.query(MarketObservation)
     if key:
         q = q.filter(MarketObservation.key == key)
-    return (
-        q.order_by(MarketObservation.observed_at.desc()).limit(min(limit, 1000)).all()
-    )
+    return q.order_by(MarketObservation.observed_at.desc()).limit(limit).all()
 
 
 @router.post("/observations", response_model=MarketObservationOut)
@@ -82,7 +80,7 @@ def latest_snapshot(
 @router.get("/series")
 def series(
     key: str,
-    limit: int = 365,
+    limit: int = Query(365, ge=1, le=500),
     db: Session = Depends(get_db),
     _=Depends(require_role("admin", "analyst", "viewer")),
 ):
@@ -91,7 +89,7 @@ def series(
         db.query(MarketObservation)
         .filter(MarketObservation.key == key)
         .order_by(MarketObservation.observed_at.desc())
-        .limit(min(limit, 2000))
+        .limit(limit)
         .all()
     )
     return [

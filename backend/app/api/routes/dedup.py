@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.api.deps import require_role
@@ -19,7 +19,7 @@ router = APIRouter()
 def suggest(
     entity_type: str,
     threshold: float = 90.0,
-    limit: int = 50,
+    limit: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
     _=Depends(require_role("admin", "analyst")),
 ):
@@ -53,7 +53,7 @@ def merge(
 @router.get("/history", response_model=list[MergeHistoryOut])
 def history(
     entity_type: str,
-    limit: int = 50,
+    limit: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
     _=Depends(require_role("admin", "analyst")),
 ):

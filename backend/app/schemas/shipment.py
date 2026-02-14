@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional, List
 
 
@@ -14,29 +14,133 @@ class ShipmentCreate(BaseModel):
     cooperative_id: Optional[int] = None
     roaster_id: Optional[int] = None
     container_number: str = Field(..., min_length=5, max_length=50)
-    bill_of_lading: str
+    bill_of_lading: str = Field(..., min_length=3, max_length=100)
     weight_kg: float = Field(..., gt=0)
     container_type: str = Field(..., pattern="^(20ft|40ft|40ft_hc)$")
-    origin_port: str
-    destination_port: str
+    origin_port: str = Field(..., max_length=100)
+    destination_port: str = Field(..., max_length=100)
     departure_date: Optional[str] = None
     estimated_arrival: Optional[str] = None
-    notes: Optional[str] = None
+    notes: Optional[str] = Field(None, max_length=2000)
+
+    @field_validator("origin_port", "destination_port")
+    @classmethod
+    def validate_port(cls, v: str) -> str:
+        """Validate port names for XSS prevention."""
+        if not v or not v.strip():
+            raise ValueError("Port name cannot be empty")
+        # Prevent XSS attempts
+        if any(
+            pattern in v.lower() for pattern in ["<script", "<iframe", "javascript:"]
+        ):
+            raise ValueError("Invalid characters in port name")
+        return v.strip()
+
+    @field_validator("bill_of_lading")
+    @classmethod
+    def validate_bol(cls, v: str) -> str:
+        """Validate bill of lading for XSS prevention."""
+        if not v or not v.strip():
+            raise ValueError("Bill of lading cannot be empty")
+        # Prevent XSS attempts
+        if any(
+            pattern in v.lower() for pattern in ["<script", "<iframe", "javascript:"]
+        ):
+            raise ValueError("Invalid characters in bill of lading")
+        return v.strip()
+
+    @field_validator("notes")
+    @classmethod
+    def validate_notes(cls, v: Optional[str]) -> Optional[str]:
+        """Validate notes for XSS prevention."""
+        if v is None:
+            return v
+        # Prevent XSS attempts
+        if any(
+            pattern in v.lower() for pattern in ["<script", "<iframe", "javascript:"]
+        ):
+            raise ValueError("Invalid characters in notes")
+        return v.strip() if v else None
 
 
 class ShipmentUpdate(BaseModel):
-    current_location: Optional[str] = None
+    current_location: Optional[str] = Field(None, max_length=200)
     status: Optional[str] = None
     actual_arrival: Optional[str] = None
     delay_hours: Optional[int] = None
-    notes: Optional[str] = None
+    notes: Optional[str] = Field(None, max_length=2000)
+
+    @field_validator("current_location")
+    @classmethod
+    def validate_current_location(cls, v: Optional[str]) -> Optional[str]:
+        """Validate current location for XSS prevention."""
+        if v is None:
+            return v
+        # Prevent XSS attempts
+        if any(
+            pattern in v.lower() for pattern in ["<script", "<iframe", "javascript:"]
+        ):
+            raise ValueError("Invalid characters in current location")
+        return v.strip() if v else None
+
+    @field_validator("notes")
+    @classmethod
+    def validate_notes(cls, v: Optional[str]) -> Optional[str]:
+        """Validate notes for XSS prevention."""
+        if v is None:
+            return v
+        # Prevent XSS attempts
+        if any(
+            pattern in v.lower() for pattern in ["<script", "<iframe", "javascript:"]
+        ):
+            raise ValueError("Invalid characters in notes")
+        return v.strip() if v else None
 
 
 class TrackingEventCreate(BaseModel):
     timestamp: str
-    location: str
-    event: str
-    details: Optional[str] = None
+    location: str = Field(..., max_length=200)
+    event: str = Field(..., max_length=100)
+    details: Optional[str] = Field(None, max_length=500)
+
+    @field_validator("location")
+    @classmethod
+    def validate_location(cls, v: str) -> str:
+        """Validate location for XSS prevention."""
+        if not v or not v.strip():
+            raise ValueError("Location cannot be empty")
+        # Prevent XSS attempts
+        if any(
+            pattern in v.lower() for pattern in ["<script", "<iframe", "javascript:"]
+        ):
+            raise ValueError("Invalid characters in location")
+        return v.strip()
+
+    @field_validator("event")
+    @classmethod
+    def validate_event(cls, v: str) -> str:
+        """Validate event for XSS prevention."""
+        if not v or not v.strip():
+            raise ValueError("Event cannot be empty")
+        # Prevent XSS attempts
+        if any(
+            pattern in v.lower() for pattern in ["<script", "<iframe", "javascript:"]
+        ):
+            raise ValueError("Invalid characters in event")
+        return v.strip()
+
+    @field_validator("details")
+    @classmethod
+    def validate_details(cls, v: Optional[str]) -> Optional[str]:
+        """Validate details for XSS prevention."""
+        if v is None:
+            return v
+        # Prevent XSS attempts
+        if any(
+            pattern in v.lower() for pattern in ["<script", "<iframe", "javascript:"]
+        ):
+            raise ValueError("Invalid characters in details")
+        return v.strip() if v else None
 
 
 class ShipmentOut(BaseModel):

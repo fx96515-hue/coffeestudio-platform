@@ -1,6 +1,7 @@
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import List
+import logging
 
 
 class Settings(BaseSettings):
@@ -9,11 +10,28 @@ class Settings(BaseSettings):
     # Required settings that must come from environment
     DATABASE_URL: str = Field(default="", min_length=1)
     REDIS_URL: str = Field(default="", min_length=1)
-    JWT_SECRET: str = Field(default="", min_length=1)
+    JWT_SECRET: str = Field(default="", min_length=32)
     JWT_ISSUER: str = "coffeestudio"
     JWT_AUDIENCE: str = "coffeestudio-web"
     CORS_ORIGINS: str = "http://localhost:3000"
     TZ: str = "Europe/Berlin"
+
+    @field_validator("JWT_SECRET")
+    @classmethod
+    def validate_jwt_secret_strength(cls, v: str) -> str:
+        """Validate JWT secret strength for production security."""
+        if len(v) < 32:
+            raise ValueError(
+                "JWT_SECRET must be at least 32 characters for security. "
+                "Generate a strong secret: openssl rand -hex 32"
+            )
+        if len(v) < 64:
+            logger = logging.getLogger(__name__)
+            logger.warning(
+                "JWT_SECRET is less than 64 characters. "
+                "For production, use at least 64 characters: openssl rand -hex 32"
+            )
+        return v
 
     # Dev bootstrap (only used by /auth/dev/bootstrap)
     # Must be a *valid* email (no .local/.test special-use).
