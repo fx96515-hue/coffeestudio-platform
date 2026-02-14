@@ -55,12 +55,15 @@ export default function AnalystPage() {
       }
 
       const data: ServiceStatus = await apiFetch<ServiceStatus>("/analyst/status");
+      const data = await apiFetch<ServiceStatus>("/analyst/status");
       setServiceStatus(data);
       if (!data.available) {
         setError(getProviderErrorMessage(data.provider));
       }
     } catch (err: unknown) {
       if (err instanceof Error && err.message?.includes("401")) {
+    } catch (error: any) {
+      if (error.message?.includes("401")) {
         router.push("/login");
         return;
       }
@@ -139,6 +142,13 @@ export default function AnalystPage() {
           }),
         }
       );
+      }>("/analyst/ask", {
+        method: "POST",
+        body: JSON.stringify({
+          question: question,
+          conversation_history: conversationHistory,
+        }),
+      });
 
       const assistantMessage: Message = {
         role: "assistant",
@@ -156,6 +166,16 @@ export default function AnalystPage() {
         ? "Service nicht verfügbar." 
         : "Fehler beim Senden der Nachricht.";
       setError(errorMessage);
+    } catch (error: any) {
+      if (error.message?.includes("401")) {
+        router.push("/login");
+        return;
+      }
+      if (error.message?.includes("503")) {
+        setError("Service nicht verfügbar.");
+      } else {
+        setError("Fehler beim Senden der Nachricht.");
+      }
       setMessages((prev) => prev.slice(0, -1));
     } finally {
       setLoading(false);

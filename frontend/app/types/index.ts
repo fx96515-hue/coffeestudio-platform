@@ -84,6 +84,14 @@ export interface Shipment {
   carrier?: string | null;
   created_at?: string;
   updated_at?: string;
+  tracking_events: any[] | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+  // Legacy/alias fields for compatibility
+  eta?: string | null;
+  reference?: string;
+  carrier?: string | null;
 }
 
 export interface ShipmentEvent {

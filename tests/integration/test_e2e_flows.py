@@ -31,9 +31,23 @@ def wait_for_services() -> Generator[None, None, None]:
 @pytest.fixture(scope="module")
 def auth_token(wait_for_services) -> str:
     """Get authentication token for test user."""
+    # First, bootstrap admin user
+    bootstrap_resp = requests.post(
+        f"{BASE_URL}/auth/dev/bootstrap",
+        headers={"Content-Type": "application/json"}
+    )
+    # Bootstrap may return 200 if already exists or newly created
+    assert bootstrap_resp.status_code == 200, f"Bootstrap failed: {bootstrap_resp.text}"
+    
+    # Login with correct password (adminadmin or from env)
+    import os
+    password = os.environ.get("BOOTSTRAP_ADMIN_PASSWORD", "adminadmin")
+    email = os.environ.get("BOOTSTRAP_ADMIN_EMAIL", "admin@coffeestudio.com")
+    
     response = requests.post(
         f"{BASE_URL}/auth/login",
         json={"email": "admin@coffeestudio.com", "password": "adminadmin"},
+        json={"email": email, "password": password},
         headers={"Content-Type": "application/json"}
     )
     assert response.status_code == 200, f"Auth failed: {response.text}"
@@ -133,7 +147,7 @@ def test_e2e_margin_calculation(auth_token):
     assert lot_resp.status_code == 201
     lot_id = lot_resp.json()["id"]
     
-    # Calculate margin
+    # Calculate margin - using correct endpoint and schema
     margin_data = {
         "purchase_price_per_kg": 5.50,
         "purchase_currency": "USD",
@@ -145,11 +159,21 @@ def test_e2e_margin_calculation(auth_token):
     }
     margin_resp = requests.post(
         f"{BASE_URL}/margins/calc",
+        "roast_and_pack_costs_per_kg": 1.20,
+        "yield_factor": 0.84,
+        "selling_price_per_kg": 12.0,
+        "selling_currency": "EUR"
+    }
+    margin_resp = requests.post(
+        f"{BASE_URL}/margins/calc",  # Fixed endpoint
         json=margin_data,
         headers=headers
     )
     assert margin_resp.status_code == 200
     assert "outputs" in margin_resp.json()
+    result = margin_resp.json()
+    assert "outputs" in result
+    assert "gross_margin_per_kg" in result["outputs"]
     
     # Cleanup
     requests.delete(f"{BASE_URL}/lots/{lot_id}", headers=headers)
@@ -253,3 +277,69 @@ def test_health_endpoints():
     metrics = requests.get(f"{BASE_URL}/metrics")
     assert metrics.status_code == 200
     assert "http_requests_total" in metrics.text or "python" in metrics.text
+
+
+def test_shipments_api_integration(auth_token):
+    """Test shipments API endpoints."""
+    headers = {"Authorization": f"Bearer {auth_token}"}
+    
+    # Create a shipment
+    shipment_data = {
+        "container_number": "TEST1234567",
+        "bill_of_lading": "BOL-TEST-001",
+        "weight_kg": 18000.0,
+        "container_type": "40ft",
+        "origin_port": "Callao, Peru",
+        "destination_port": "Hamburg, Germany",
+        "departure_date": "2024-01-15",
+        "estimated_arrival": "2024-03-01",
+        "notes": "E2E test shipment"
+    }
+    
+    create_resp = requests.post(
+        f"{BASE_URL}/shipments",
+        json=shipment_data,
+        headers=headers
+    )
+    assert create_resp.status_code == 201
+    shipment_id = create_resp.json()["id"]
+    
+    # List shipments
+    list_resp = requests.get(f"{BASE_URL}/shipments", headers=headers)
+    assert list_resp.status_code == 200
+    shipments = list_resp.json()
+    assert len(shipments) > 0
+    
+    # Get single shipment
+    get_resp = requests.get(f"{BASE_URL}/shipments/{shipment_id}", headers=headers)
+    assert get_resp.status_code == 200
+    assert get_resp.json()["container_number"] == "TEST1234567"
+    
+    # Update shipment
+    update_data = {
+        "current_location": "Panama Canal",
+        "status": "in_transit"
+    }
+    update_resp = requests.patch(
+        f"{BASE_URL}/shipments/{shipment_id}",
+        json=update_data,
+        headers=headers
+    )
+    assert update_resp.status_code == 200
+    assert update_resp.json()["current_location"] == "Panama Canal"
+    
+    # Cleanup
+    requests.delete(f"{BASE_URL}/shipments/{shipment_id}", headers=headers)
+
+
+def test_frontend_accessibility():
+    """Verify frontend is accessible at port 3000."""
+    try:
+        # Try to access frontend
+        response = requests.get("http://localhost:3000", timeout=5)
+        # Frontend should return 200 for the home page or redirect (3xx)
+        assert response.status_code in [200, 301, 302, 307, 308], \
+            f"Frontend returned unexpected status: {response.status_code}"
+    except requests.exceptions.ConnectionError:
+        pytest.skip("Frontend not accessible (may not be running or configured differently)")
+
