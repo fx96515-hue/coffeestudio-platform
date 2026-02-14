@@ -127,7 +127,7 @@ jobs:
         with:
           sarif_file: 'trivy-frontend-results.sarif'
           category: 'trivy-frontend'
-        if: always() && hashFiles('trivy-frontend-results.sarif') != ''
+        if: steps.build_frontend.outcome == 'success' && hashFiles('trivy-frontend-results.sarif') != ''
         continue-on-error: true
 
   snyk:
