@@ -61,20 +61,30 @@ export interface Roaster {
 // Shipments/Logistics
 export interface Shipment {
   id: number;
-  reference: string;
   lot_id: number | null;
+  cooperative_id: number | null;
+  roaster_id: number | null;
+  container_number: string;
+  bill_of_lading: string;
+  weight_kg: number;
+  container_type: string;
   origin_port: string;
   destination_port: string;
+  current_location: string | null;
   departure_date: string | null;
-  eta: string | null;
+  estimated_arrival: string | null;
   actual_arrival: string | null;
   status: string;
-  carrier: string | null;
-  container_number: string | null;
-  weight_kg: number | null;
+  status_updated_at: string | null;
+  delay_hours: number;
+  tracking_events: any[] | null;
   notes: string | null;
   created_at: string;
   updated_at: string;
+  // Legacy/alias fields for compatibility
+  eta?: string | null;
+  reference?: string;
+  carrier?: string | null;
 }
 
 export interface ShipmentEvent {

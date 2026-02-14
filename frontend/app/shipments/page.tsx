@@ -3,94 +3,99 @@
 import { useState } from "react";
 import Link from "next/link";
 import { format, differenceInDays } from "date-fns";
+import { useShipments, useActiveShipments, useCreateShipment } from "../hooks/useShipments";
 
 export default function ShipmentsDashboard() {
-  // Helper function to format date for API (YYYY-MM-DD)
-  const formatDate = (date: Date) => date.toISOString().split("T")[0];
-  
-  const today = new Date();
-  
-  // Shipment 1: departed 15 days ago, arrives in 20 days
-  const shipment1Departure = new Date(today);
-  shipment1Departure.setDate(today.getDate() - 15);
-  const shipment1Eta = new Date(today);
-  shipment1Eta.setDate(today.getDate() + 20);
-  
-  // Shipment 2: departed 10 days ago, arrives in 25 days
-  const shipment2Departure = new Date(today);
-  shipment2Departure.setDate(today.getDate() - 10);
-  const shipment2Eta = new Date(today);
-  shipment2Eta.setDate(today.getDate() + 25);
-  
-  // Shipment 3: departed 60 days ago, arrived 55 days ago (completed)
-  const shipment3Departure = new Date(today);
-  shipment3Departure.setDate(today.getDate() - 60);
-  const shipment3Eta = new Date(today);
-  shipment3Eta.setDate(today.getDate() - 55);
-  const shipment3Arrival = new Date(today);
-  shipment3Arrival.setDate(today.getDate() - 55);
-  
-  // Mock shipments data - in real implementation, this would come from an API
-  const mockShipments = [
-    {
-      id: 1,
-      reference: "SHP-2024-001",
-      origin_port: "Callao, Peru",
-      destination_port: "Hamburg, Germany",
-      departure_date: formatDate(shipment1Departure),
-      eta: formatDate(shipment1Eta),
-      status: "in_transit",
-      carrier: "Maersk Line",
-      container_number: "MSCU1234567",
-      weight_kg: 18000,
-      current_location: "Pacific Ocean",
-      progress: 65,
-    },
-    {
-      id: 2,
-      reference: "SHP-2024-002",
-      origin_port: "Callao, Peru",
-      destination_port: "Rotterdam, Netherlands",
-      departure_date: formatDate(shipment2Departure),
-      eta: formatDate(shipment2Eta),
-      status: "in_transit",
-      carrier: "MSC",
-      container_number: "MSCU7654321",
-      weight_kg: 20000,
-      current_location: "Panama Canal",
-      progress: 45,
-    },
-    {
-      id: 3,
-      reference: "SHP-2024-003",
-      origin_port: "Callao, Peru",
-      destination_port: "Hamburg, Germany",
-      departure_date: formatDate(shipment3Departure),
-      eta: formatDate(shipment3Eta),
-      actual_arrival: formatDate(shipment3Arrival),
-      status: "arrived",
-      carrier: "Hapag-Lloyd",
-      container_number: "HLCU9876543",
-      weight_kg: 19000,
-      current_location: "Hamburg Port",
-      progress: 100,
-    },
-  ];
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createForm, setCreateForm] = useState({
+    container_number: "",
+    bill_of_lading: "",
+    weight_kg: 18000,
+    container_type: "40ft",
+    origin_port: "Callao, Peru",
+    destination_port: "Hamburg, Germany",
+    departure_date: "",
+    estimated_arrival: "",
+    notes: "",
+  });
 
-  const [shipments] = useState(mockShipments);
+  const { data: shipments, isLoading, error } = useShipments({ limit: 200 });
+  const createShipment = useCreateShipment();
+
+  const { data: shipments, isLoading, error } = useShipments({ limit: 200 });
+  const createShipment = useCreateShipment();
+
+  const handleCreateSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await createShipment.mutateAsync({
+        ...createForm,
+        weight_kg: Number(createForm.weight_kg),
+        departure_date: createForm.departure_date || null,
+        estimated_arrival: createForm.estimated_arrival || null,
+        notes: createForm.notes || null,
+      });
+      setShowCreateModal(false);
+      setCreateForm({
+        container_number: "",
+        bill_of_lading: "",
+        weight_kg: 18000,
+        container_type: "40ft",
+        origin_port: "Callao, Peru",
+        destination_port: "Hamburg, Germany",
+        departure_date: "",
+        estimated_arrival: "",
+        notes: "",
+      });
+    } catch (error) {
+      console.error("Failed to create shipment:", error);
+    }
+  };
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="page">
+        <div className="pageHeader">
+          <div className="h1">Sendungsverfolgung</div>
+        </div>
+        <div className="panel" style={{ padding: "40px", textAlign: "center" }}>
+          <div>Laden...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="page">
+        <div className="pageHeader">
+          <div className="h1">Sendungsverfolgung</div>
+        </div>
+        <div className="panel" style={{ padding: "40px", textAlign: "center", color: "var(--danger)" }}>
+          <div>Fehler beim Laden der Sendungen</div>
+          <div style={{ fontSize: "14px", marginTop: "8px" }}>{String(error)}</div>
+        </div>
+      </div>
+    );
+  }
+
+  const shipmentsData = shipments || [];
 
   // Calculate stats
   const stats = {
-    total: shipments.length,
-    inTransit: shipments.filter((s) => s.status === "in_transit").length,
-    arrived: shipments.filter((s) => s.status === "arrived").length,
-    totalWeight: shipments.reduce((sum, s) => sum + s.weight_kg, 0),
+    total: shipmentsData.length,
+    inTransit: shipmentsData.filter((s) => s.status === "in_transit").length,
+    arrived: shipmentsData.filter((s) => s.status === "delivered" || s.status === "arrived").length,
+    totalWeight: shipmentsData.reduce((sum, s) => sum + (s.weight_kg || 0), 0),
   };
 
   // Shipments arriving soon (within 7 days)
-  const arrivingSoon = shipments.filter((s) => {
-    if (s.status !== "in_transit" || !s.eta) return false;
-    const daysUntilArrival = differenceInDays(new Date(s.eta), new Date());
+  const arrivingSoon = shipmentsData.filter((s) => {
+    const eta = s.estimated_arrival || s.eta;
+    if (s.status !== "in_transit" || !eta) return false;
+    const daysUntilArrival = differenceInDays(new Date(eta), new Date());
     return daysUntilArrival >= 0 && daysUntilArrival <= 7;
   });
 
@@ -117,7 +122,13 @@ export default function ShipmentsDashboard() {
           </div>
         </div>
         <div className="actions">
-          <button type="button" className="btn btnPrimary">Sendung hinzufügen</button>
+          <button 
+            type="button" 
+            className="btn btnPrimary"
+            onClick={() => setShowCreateModal(true)}
+          >
+            Sendung hinzufügen
+          </button>
         </div>
       </div>
 
@@ -154,7 +165,8 @@ export default function ShipmentsDashboard() {
           </div>
           <div className="grid gridCols3" style={{ gap: "12px" }}>
             {arrivingSoon.map((shipment) => {
-              const daysUntilArrival = differenceInDays(new Date(shipment.eta!), new Date());
+              const eta = shipment.estimated_arrival || shipment.eta;
+              const daysUntilArrival = differenceInDays(new Date(eta!), new Date());
               return (
                 <div
                   key={shipment.id}
@@ -166,7 +178,7 @@ export default function ShipmentsDashboard() {
                   }}
                 >
                   <div style={{ fontWeight: "700", marginBottom: "6px" }}>
-                    {shipment.reference}
+                    {shipment.container_number || `ID-${shipment.id}`}
                   </div>
                   <div style={{ fontSize: "13px", color: "var(--muted)", marginBottom: "8px" }}>
                     {shipment.origin_port} → {shipment.destination_port}
@@ -175,7 +187,7 @@ export default function ShipmentsDashboard() {
                     {daysUntilArrival} Tage
                   </div>
                   <div style={{ fontSize: "12px", color: "var(--muted)" }}>
-                    ETA: {format(new Date(shipment.eta!), "dd. MMM yyyy")}
+                    ETA: {format(new Date(eta!), "dd. MMM yyyy")}
                   </div>
                 </div>
               );
@@ -191,10 +203,22 @@ export default function ShipmentsDashboard() {
           Aktuell in Transit
         </div>
         <div className="grid gridCols2" style={{ gap: "14px" }}>
-          {shipments
+          {shipmentsData
             .filter((s) => s.status === "in_transit")
             .map((shipment) => {
               const statusColors = getStatusColor(shipment.status);
+              // Calculate progress based on dates if available
+              let progress = 50; // default
+              const eta = shipment.estimated_arrival || shipment.eta;
+              if (shipment.departure_date && eta) {
+                const departure = new Date(shipment.departure_date);
+                const etaDate = new Date(eta);
+                const now = new Date();
+                const totalDuration = etaDate.getTime() - departure.getTime();
+                const elapsed = now.getTime() - departure.getTime();
+                progress = Math.min(100, Math.max(0, (elapsed / totalDuration) * 100));
+              }
+              
               return (
                 <div
                   key={shipment.id}
@@ -208,10 +232,10 @@ export default function ShipmentsDashboard() {
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "12px" }}>
                     <div>
                       <div style={{ fontWeight: "700", fontSize: "16px", marginBottom: "4px" }}>
-                        {shipment.reference}
+                        {shipment.container_number || `ID-${shipment.id}`}
                       </div>
                       <div style={{ fontSize: "13px", color: "var(--muted)" }}>
-                        {shipment.carrier}
+                        {shipment.carrier || "Carrier"}
                       </div>
                     </div>
                     <span className="badge" style={{ background: statusColors.bg, borderColor: statusColors.border }}>
@@ -224,19 +248,19 @@ export default function ShipmentsDashboard() {
                       <strong>Route:</strong> {shipment.origin_port} → {shipment.destination_port}
                     </div>
                     <div style={{ fontSize: "13px", color: "var(--muted)" }}>
-                      Aktuell: {shipment.current_location}
+                      {shipment.current_location || "In Transit"}
                     </div>
                   </div>
 
                   <div style={{ marginBottom: "12px" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "6px" }}>
                       <span>Fortschritt</span>
-                      <span>{Math.min(100, Math.max(0, shipment.progress))}%</span>
+                      <span>{Math.round(progress)}%</span>
                     </div>
                     <div style={{ width: "100%", height: "6px", background: "rgba(0,0,0,0.2)", borderRadius: "999px", overflow: "hidden" }}>
                       <div
                         style={{
-                          width: `${Math.min(100, Math.max(0, shipment.progress))}%`,
+                          width: `${progress}%`,
                           height: "100%",
                           background: "rgba(200,149,108,0.8)",
                           transition: "width 0.3s ease",
@@ -249,13 +273,13 @@ export default function ShipmentsDashboard() {
                     <div>
                       <div style={{ color: "var(--muted)" }}>Abfahrt</div>
                       <div style={{ fontWeight: "600" }}>
-                        {format(new Date(shipment.departure_date), "dd. MMM")}
+                        {shipment.departure_date ? format(new Date(shipment.departure_date), "dd. MMM") : "–"}
                       </div>
                     </div>
                     <div>
                       <div style={{ color: "var(--muted)" }}>ETA</div>
                       <div style={{ fontWeight: "600" }}>
-                        {shipment.eta ? format(new Date(shipment.eta), "dd. MMM") : "–"}
+                        {eta ? format(new Date(eta), "dd. MMM") : "–"}
                       </div>
                     </div>
                   </div>
@@ -294,25 +318,25 @@ export default function ShipmentsDashboard() {
               </tr>
             </thead>
             <tbody>
-              {shipments.map((shipment) => {
+              {shipmentsData.map((shipment) => {
                 const statusColors = getStatusColor(shipment.status);
                 return (
                   <tr key={shipment.id}>
-                    <td style={{ fontWeight: "600" }}>{shipment.reference}</td>
+                    <td style={{ fontWeight: "600" }}>{shipment.container_number || `ID-${shipment.id}`}</td>
                     <td>
                       {shipment.origin_port} → {shipment.destination_port}
                     </td>
-                    <td>{shipment.carrier}</td>
+                    <td>{shipment.carrier || "–"}</td>
                     <td className="mono" style={{ fontSize: "12px" }}>
-                      {shipment.container_number}
+                      {shipment.container_number || "–"}
                     </td>
-                    <td>{shipment.weight_kg.toLocaleString()}</td>
-                    <td>{format(new Date(shipment.departure_date), "MMM dd, yyyy")}</td>
+                    <td>{shipment.weight_kg ? shipment.weight_kg.toLocaleString() : "–"}</td>
+                    <td>{shipment.departure_date ? format(new Date(shipment.departure_date), "MMM dd, yyyy") : "–"}</td>
                     <td>
                       {shipment.actual_arrival
                         ? format(new Date(shipment.actual_arrival), "MMM dd, yyyy")
-                        : shipment.eta
-                        ? format(new Date(shipment.eta), "MMM dd, yyyy")
+                        : shipment.estimated_arrival || shipment.eta
+                        ? format(new Date(shipment.estimated_arrival || shipment.eta!), "MMM dd, yyyy")
                         : "–"}
                     </td>
                     <td>
@@ -327,7 +351,7 @@ export default function ShipmentsDashboard() {
                       </span>
                     </td>
                     <td>
-                      <Link href={`/lots/${shipment.id}`} className="link">Ansehen →</Link>
+                      <Link href={`/shipments/${shipment.id}`} className="link">Ansehen →</Link>
                     </td>
                   </tr>
                 );
@@ -336,6 +360,197 @@ export default function ShipmentsDashboard() {
           </table>
         </div>
       </div>
+
+      {/* Create Shipment Modal */}
+      {showCreateModal && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}
+          onClick={() => setShowCreateModal(false)}
+        >
+          <div
+            className="panel"
+            style={{ 
+              width: "90%", 
+              maxWidth: "600px", 
+              padding: "24px",
+              maxHeight: "90vh",
+              overflowY: "auto",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+              <h2 style={{ margin: 0 }}>Neue Sendung erstellen</h2>
+              <button
+                type="button"
+                className="btn"
+                onClick={() => setShowCreateModal(false)}
+                style={{ padding: "4px 12px" }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateSubmit}>
+              <div style={{ marginBottom: "16px" }}>
+                <label style={{ display: "block", marginBottom: "6px", fontWeight: "600" }}>
+                  Container-Nummer *
+                </label>
+                <input
+                  type="text"
+                  className="input"
+                  value={createForm.container_number}
+                  onChange={(e) => setCreateForm({ ...createForm, container_number: e.target.value })}
+                  required
+                  minLength={5}
+                  maxLength={50}
+                  placeholder="MSCU1234567"
+                />
+              </div>
+
+              <div style={{ marginBottom: "16px" }}>
+                <label style={{ display: "block", marginBottom: "6px", fontWeight: "600" }}>
+                  Bill of Lading *
+                </label>
+                <input
+                  type="text"
+                  className="input"
+                  value={createForm.bill_of_lading}
+                  onChange={(e) => setCreateForm({ ...createForm, bill_of_lading: e.target.value })}
+                  required
+                  minLength={3}
+                  maxLength={100}
+                  placeholder="BOL-2024-001"
+                />
+              </div>
+
+              <div className="grid gridCols2" style={{ gap: "16px", marginBottom: "16px" }}>
+                <div>
+                  <label style={{ display: "block", marginBottom: "6px", fontWeight: "600" }}>
+                    Gewicht (kg) *
+                  </label>
+                  <input
+                    type="number"
+                    className="input"
+                    value={createForm.weight_kg}
+                    onChange={(e) => setCreateForm({ ...createForm, weight_kg: Number(e.target.value) })}
+                    required
+                    min={1}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: "block", marginBottom: "6px", fontWeight: "600" }}>
+                    Container-Typ *
+                  </label>
+                  <select
+                    className="input"
+                    value={createForm.container_type}
+                    onChange={(e) => setCreateForm({ ...createForm, container_type: e.target.value })}
+                    required
+                  >
+                    <option value="20ft">20ft</option>
+                    <option value="40ft">40ft</option>
+                    <option value="40ft_hc">40ft HC</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ marginBottom: "16px" }}>
+                <label style={{ display: "block", marginBottom: "6px", fontWeight: "600" }}>
+                  Ursprungshafen *
+                </label>
+                <input
+                  type="text"
+                  className="input"
+                  value={createForm.origin_port}
+                  onChange={(e) => setCreateForm({ ...createForm, origin_port: e.target.value })}
+                  required
+                  maxLength={100}
+                />
+              </div>
+
+              <div style={{ marginBottom: "16px" }}>
+                <label style={{ display: "block", marginBottom: "6px", fontWeight: "600" }}>
+                  Zielhafen *
+                </label>
+                <input
+                  type="text"
+                  className="input"
+                  value={createForm.destination_port}
+                  onChange={(e) => setCreateForm({ ...createForm, destination_port: e.target.value })}
+                  required
+                  maxLength={100}
+                />
+              </div>
+
+              <div className="grid gridCols2" style={{ gap: "16px", marginBottom: "16px" }}>
+                <div>
+                  <label style={{ display: "block", marginBottom: "6px", fontWeight: "600" }}>
+                    Abfahrtsdatum
+                  </label>
+                  <input
+                    type="date"
+                    className="input"
+                    value={createForm.departure_date}
+                    onChange={(e) => setCreateForm({ ...createForm, departure_date: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: "block", marginBottom: "6px", fontWeight: "600" }}>
+                    Voraussichtliche Ankunft
+                  </label>
+                  <input
+                    type="date"
+                    className="input"
+                    value={createForm.estimated_arrival}
+                    onChange={(e) => setCreateForm({ ...createForm, estimated_arrival: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div style={{ marginBottom: "20px" }}>
+                <label style={{ display: "block", marginBottom: "6px", fontWeight: "600" }}>
+                  Notizen
+                </label>
+                <textarea
+                  className="input"
+                  value={createForm.notes}
+                  onChange={(e) => setCreateForm({ ...createForm, notes: e.target.value })}
+                  rows={3}
+                  maxLength={2000}
+                />
+              </div>
+
+              <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end" }}>
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={() => setShowCreateModal(false)}
+                >
+                  Abbrechen
+                </button>
+                <button
+                  type="submit"
+                  className="btn btnPrimary"
+                  disabled={createShipment.isPending}
+                >
+                  {createShipment.isPending ? "Erstellen..." : "Sendung erstellen"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
