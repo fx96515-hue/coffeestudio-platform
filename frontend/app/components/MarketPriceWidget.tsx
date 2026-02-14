@@ -45,9 +45,6 @@ export default function MarketPriceWidget() {
   const coffeePrice = market?.["COFFEE_C:USD_LB"] ?? null;
   const eurUsd = market?.["EUR_USD"] ?? null;
 
-  // Fallback reference prices
-  const fallbackCoffeePrice = 3.50; // USD/lb
-
   const formatDate = (dateStr?: string | null) => {
     if (!dateStr) return "–";
     const d = new Date(dateStr);
