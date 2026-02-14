@@ -22,9 +22,6 @@ export default function ShipmentsDashboard() {
   const { data: shipments, isLoading, error } = useShipments({ limit: 200 });
   const createShipment = useCreateShipment();
 
-  const { data: shipments, isLoading, error } = useShipments({ limit: 200 });
-  const createShipment = useCreateShipment();
-
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -285,7 +282,12 @@ export default function ShipmentsDashboard() {
                   </div>
 
                   <div style={{ marginTop: "12px", paddingTop: "12px", borderTop: "1px solid var(--border)" }}>
-                    <button type="button" className="btn" style={{ width: "100%", fontSize: "12px" }}>
+                    <button 
+                      type="button" 
+                      className="btn" 
+                      style={{ width: "100%", fontSize: "12px" }}
+                      onClick={() => alert(`Shipment details page coming soon (ID: ${shipment.id})`)}
+                    >
                       Details anzeigen →
                     </button>
                   </div>
@@ -351,7 +353,14 @@ export default function ShipmentsDashboard() {
                       </span>
                     </td>
                     <td>
-                      <Link href={`/shipments/${shipment.id}`} className="link">Ansehen →</Link>
+                      <button 
+                        type="button" 
+                        className="link"
+                        style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}
+                        onClick={() => alert(`Shipment details page coming soon (ID: ${shipment.id})`)}
+                      >
+                        Details →
+                      </button>
                     </td>
                   </tr>
                 );
