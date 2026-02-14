@@ -1,83 +1,44 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { format, differenceInDays } from "date-fns";
+import { useShipments, useActiveShipments } from "../hooks/useShipments";
+import { Shipment } from "../types";
 
 export default function ShipmentsDashboard() {
-  // Helper function to format date for API (YYYY-MM-DD)
-  const formatDate = (date: Date) => date.toISOString().split("T")[0];
-  
-  const today = new Date();
-  
-  // Shipment 1: departed 15 days ago, arrives in 20 days
-  const shipment1Departure = new Date(today);
-  shipment1Departure.setDate(today.getDate() - 15);
-  const shipment1Eta = new Date(today);
-  shipment1Eta.setDate(today.getDate() + 20);
-  
-  // Shipment 2: departed 10 days ago, arrives in 25 days
-  const shipment2Departure = new Date(today);
-  shipment2Departure.setDate(today.getDate() - 10);
-  const shipment2Eta = new Date(today);
-  shipment2Eta.setDate(today.getDate() + 25);
-  
-  // Shipment 3: departed 60 days ago, arrived 55 days ago (completed)
-  const shipment3Departure = new Date(today);
-  shipment3Departure.setDate(today.getDate() - 60);
-  const shipment3Eta = new Date(today);
-  shipment3Eta.setDate(today.getDate() - 55);
-  const shipment3Arrival = new Date(today);
-  shipment3Arrival.setDate(today.getDate() - 55);
-  
-  // Mock shipments data - in real implementation, this would come from an API
-  const mockShipments = [
-    {
-      id: 1,
-      reference: "SHP-2024-001",
-      origin_port: "Callao, Peru",
-      destination_port: "Hamburg, Germany",
-      departure_date: formatDate(shipment1Departure),
-      eta: formatDate(shipment1Eta),
-      status: "in_transit",
-      carrier: "Maersk Line",
-      container_number: "MSCU1234567",
-      weight_kg: 18000,
-      current_location: "Pacific Ocean",
-      progress: 65,
-    },
-    {
-      id: 2,
-      reference: "SHP-2024-002",
-      origin_port: "Callao, Peru",
-      destination_port: "Rotterdam, Netherlands",
-      departure_date: formatDate(shipment2Departure),
-      eta: formatDate(shipment2Eta),
-      status: "in_transit",
-      carrier: "MSC",
-      container_number: "MSCU7654321",
-      weight_kg: 20000,
-      current_location: "Panama Canal",
-      progress: 45,
-    },
-    {
-      id: 3,
-      reference: "SHP-2024-003",
-      origin_port: "Callao, Peru",
-      destination_port: "Hamburg, Germany",
-      departure_date: formatDate(shipment3Departure),
-      eta: formatDate(shipment3Eta),
-      actual_arrival: formatDate(shipment3Arrival),
-      status: "arrived",
-      carrier: "Hapag-Lloyd",
-      container_number: "HLCU9876543",
-      weight_kg: 19000,
-      current_location: "Hamburg Port",
-      progress: 100,
-    },
-  ];
+  // Fetch data from real API
+  const { data: shipmentsData, isLoading, error } = useShipments();
+  const { data: activeShipments, isLoading: isLoadingActive } = useActiveShipments();
 
-  const [shipments] = useState(mockShipments);
+  const shipments = shipmentsData?.items || [];
+  
+  // Calculate progress from dates
+  const calculateProgress = (shipment: Shipment): number => {
+    if (shipment.status === "arrived" || shipment.actual_arrival) return 100;
+    const eta = shipment.estimated_arrival || shipment.eta;
+    if (!shipment.departure_date || !eta) return 0;
+    
+    const departure = new Date(shipment.departure_date).getTime();
+    const etaTime = new Date(eta).getTime();
+    const now = Date.now();
+    
+    if (now < departure) return 0;
+    if (now >= etaTime) return 100;
+    
+    const totalDuration = etaTime - departure;
+    const elapsed = now - departure;
+    return Math.round((elapsed / totalDuration) * 100);
+  };
+
+  // Get reference (bill_of_lading or legacy reference)
+  const getReference = (shipment: Shipment): string => {
+    return shipment.reference || shipment.bill_of_lading || `SHP-${shipment.id}`;
+  };
+
+  // Get ETA (estimated_arrival or legacy eta)
+  const getEta = (shipment: Shipment): string | null => {
+    return shipment.estimated_arrival || shipment.eta || null;
+  };
 
   // Calculate stats
   const stats = {
@@ -89,8 +50,10 @@ export default function ShipmentsDashboard() {
 
   // Shipments arriving soon (within 7 days)
   const arrivingSoon = shipments.filter((s) => {
-    if (s.status !== "in_transit" || !s.eta) return false;
-    const daysUntilArrival = differenceInDays(new Date(s.eta), new Date());
+    if (s.status !== "in_transit") return false;
+    const eta = getEta(s);
+    if (!eta) return false;
+    const daysUntilArrival = differenceInDays(new Date(eta), new Date());
     return daysUntilArrival >= 0 && daysUntilArrival <= 7;
   });
 
@@ -106,6 +69,78 @@ export default function ShipmentsDashboard() {
         return { bg: "rgba(255,255,255,0.02)", border: "var(--border)" };
     }
   };
+
+  // Loading state
+  if (isLoading || isLoadingActive) {
+    return (
+      <div className="page">
+        <div className="pageHeader">
+          <div>
+            <div className="h1">Sendungsverfolgung</div>
+            <div className="muted">
+              Verfolgen Sie Kaffeesendungen von Peru nach Deutschland und Europa
+            </div>
+          </div>
+        </div>
+        <div style={{ padding: "40px", textAlign: "center" }}>
+          <div style={{ fontSize: "16px", color: "var(--muted)" }}>Lade Sendungen...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="page">
+        <div className="pageHeader">
+          <div>
+            <div className="h1">Sendungsverfolgung</div>
+            <div className="muted">
+              Verfolgen Sie Kaffeesendungen von Peru nach Deutschland und Europa
+            </div>
+          </div>
+        </div>
+        <div style={{ padding: "40px", textAlign: "center" }}>
+          <div style={{ fontSize: "16px", color: "#ff5555", marginBottom: "12px" }}>
+            ⚠️ Fehler beim Laden der Sendungen
+          </div>
+          <div style={{ fontSize: "14px", color: "var(--muted)" }}>
+            {error instanceof Error ? error.message : "Unbekannter Fehler"}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Empty state
+  if (shipments.length === 0) {
+    return (
+      <div className="page">
+        <div className="pageHeader">
+          <div>
+            <div className="h1">Sendungsverfolgung</div>
+            <div className="muted">
+              Verfolgen Sie Kaffeesendungen von Peru nach Deutschland und Europa
+            </div>
+          </div>
+          <div className="actions">
+            <button type="button" className="btn btnPrimary">Sendung hinzufügen</button>
+          </div>
+        </div>
+        <div style={{ padding: "60px 40px", textAlign: "center" }}>
+          <div style={{ fontSize: "48px", marginBottom: "16px" }}>📦</div>
+          <div style={{ fontSize: "18px", fontWeight: "600", marginBottom: "8px" }}>
+            Keine Sendungen vorhanden
+          </div>
+          <div style={{ fontSize: "14px", color: "var(--muted)", marginBottom: "20px" }}>
+            Erstellen Sie Ihre erste Sendung, um mit dem Tracking zu beginnen
+          </div>
+          <button type="button" className="btn btnPrimary">Erste Sendung erstellen</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="page">
@@ -154,7 +189,8 @@ export default function ShipmentsDashboard() {
           </div>
           <div className="grid gridCols3" style={{ gap: "12px" }}>
             {arrivingSoon.map((shipment) => {
-              const daysUntilArrival = differenceInDays(new Date(shipment.eta!), new Date());
+              const eta = getEta(shipment);
+              const daysUntilArrival = eta ? differenceInDays(new Date(eta), new Date()) : 0;
               return (
                 <div
                   key={shipment.id}
@@ -166,7 +202,7 @@ export default function ShipmentsDashboard() {
                   }}
                 >
                   <div style={{ fontWeight: "700", marginBottom: "6px" }}>
-                    {shipment.reference}
+                    {getReference(shipment)}
                   </div>
                   <div style={{ fontSize: "13px", color: "var(--muted)", marginBottom: "8px" }}>
                     {shipment.origin_port} → {shipment.destination_port}
@@ -175,7 +211,7 @@ export default function ShipmentsDashboard() {
                     {daysUntilArrival} Tage
                   </div>
                   <div style={{ fontSize: "12px", color: "var(--muted)" }}>
-                    ETA: {format(new Date(shipment.eta!), "dd. MMM yyyy")}
+                    ETA: {eta ? format(new Date(eta), "dd. MMM yyyy") : "–"}
                   </div>
                 </div>
               );
@@ -195,6 +231,7 @@ export default function ShipmentsDashboard() {
             .filter((s) => s.status === "in_transit")
             .map((shipment) => {
               const statusColors = getStatusColor(shipment.status);
+              const progress = calculateProgress(shipment);
               return (
                 <div
                   key={shipment.id}
@@ -208,10 +245,10 @@ export default function ShipmentsDashboard() {
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "12px" }}>
                     <div>
                       <div style={{ fontWeight: "700", fontSize: "16px", marginBottom: "4px" }}>
-                        {shipment.reference}
+                        {getReference(shipment)}
                       </div>
                       <div style={{ fontSize: "13px", color: "var(--muted)" }}>
-                        {shipment.carrier}
+                        {shipment.carrier || shipment.container_type || "–"}
                       </div>
                     </div>
                     <span className="badge" style={{ background: statusColors.bg, borderColor: statusColors.border }}>
@@ -224,19 +261,19 @@ export default function ShipmentsDashboard() {
                       <strong>Route:</strong> {shipment.origin_port} → {shipment.destination_port}
                     </div>
                     <div style={{ fontSize: "13px", color: "var(--muted)" }}>
-                      Aktuell: {shipment.current_location}
+                      {shipment.current_location ? `Aktuell: ${shipment.current_location}` : "Position wird ermittelt"}
                     </div>
                   </div>
 
                   <div style={{ marginBottom: "12px" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "6px" }}>
                       <span>Fortschritt</span>
-                      <span>{Math.min(100, Math.max(0, shipment.progress))}%</span>
+                      <span>{progress}%</span>
                     </div>
                     <div style={{ width: "100%", height: "6px", background: "rgba(0,0,0,0.2)", borderRadius: "999px", overflow: "hidden" }}>
                       <div
                         style={{
-                          width: `${Math.min(100, Math.max(0, shipment.progress))}%`,
+                          width: `${progress}%`,
                           height: "100%",
                           background: "rgba(200,149,108,0.8)",
                           transition: "width 0.3s ease",
@@ -249,21 +286,21 @@ export default function ShipmentsDashboard() {
                     <div>
                       <div style={{ color: "var(--muted)" }}>Abfahrt</div>
                       <div style={{ fontWeight: "600" }}>
-                        {format(new Date(shipment.departure_date), "dd. MMM")}
+                        {shipment.departure_date ? format(new Date(shipment.departure_date), "dd. MMM") : "–"}
                       </div>
                     </div>
                     <div>
                       <div style={{ color: "var(--muted)" }}>ETA</div>
                       <div style={{ fontWeight: "600" }}>
-                        {shipment.eta ? format(new Date(shipment.eta), "dd. MMM") : "–"}
+                        {getEta(shipment) ? format(new Date(getEta(shipment)!), "dd. MMM") : "–"}
                       </div>
                     </div>
                   </div>
 
                   <div style={{ marginTop: "12px", paddingTop: "12px", borderTop: "1px solid var(--border)" }}>
-                    <button type="button" className="btn" style={{ width: "100%", fontSize: "12px" }}>
+                    <Link href={`/shipments/${shipment.id}`} className="btn" style={{ width: "100%", fontSize: "12px", display: "block", textAlign: "center", textDecoration: "none" }}>
                       Details anzeigen →
-                    </button>
+                    </Link>
                   </div>
                 </div>
               );
@@ -296,23 +333,24 @@ export default function ShipmentsDashboard() {
             <tbody>
               {shipments.map((shipment) => {
                 const statusColors = getStatusColor(shipment.status);
+                const eta = getEta(shipment);
                 return (
                   <tr key={shipment.id}>
-                    <td style={{ fontWeight: "600" }}>{shipment.reference}</td>
+                    <td style={{ fontWeight: "600" }}>{getReference(shipment)}</td>
                     <td>
                       {shipment.origin_port} → {shipment.destination_port}
                     </td>
-                    <td>{shipment.carrier}</td>
+                    <td>{shipment.carrier || "–"}</td>
                     <td className="mono" style={{ fontSize: "12px" }}>
                       {shipment.container_number}
                     </td>
                     <td>{shipment.weight_kg.toLocaleString()}</td>
-                    <td>{format(new Date(shipment.departure_date), "MMM dd, yyyy")}</td>
+                    <td>{shipment.departure_date ? format(new Date(shipment.departure_date), "MMM dd, yyyy") : "–"}</td>
                     <td>
                       {shipment.actual_arrival
                         ? format(new Date(shipment.actual_arrival), "MMM dd, yyyy")
-                        : shipment.eta
-                        ? format(new Date(shipment.eta), "MMM dd, yyyy")
+                        : eta
+                        ? format(new Date(eta), "MMM dd, yyyy")
                         : "–"}
                     </td>
                     <td>
@@ -327,7 +365,7 @@ export default function ShipmentsDashboard() {
                       </span>
                     </td>
                     <td>
-                      <Link href={`/lots/${shipment.id}`} className="link">Ansehen →</Link>
+                      <Link href={`/shipments/${shipment.id}`} className="link">Ansehen →</Link>
                     </td>
                   </tr>
                 );
