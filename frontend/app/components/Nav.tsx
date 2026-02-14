@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { getToken, setToken } from "../../lib/api";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -26,12 +26,8 @@ function NavLink({ href, label }: { href: string; label: string }) {
 }
 
 export default function Nav() {
-  const [hasToken, setHasToken] = useState(false);
+  const [hasToken] = useState(() => !!getToken());
   const router = useRouter();
-
-  useEffect(() => {
-    setHasToken(!!getToken());
-  }, []);
 
   if (!hasToken) return null;
 

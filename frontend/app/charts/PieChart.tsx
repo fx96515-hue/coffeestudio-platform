@@ -10,7 +10,7 @@ import {
 } from "recharts";
 
 interface PieChartProps {
-  data: any[];
+  data: Record<string, unknown>[];
   dataKey: string;
   nameKey: string;
   title?: string;

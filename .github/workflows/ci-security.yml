@@ -68,6 +68,7 @@ jobs:
           sarif_file: 'trivy-fs-results.sarif'
           category: 'trivy-fs'
         if: always()
+        continue-on-error: true
 
   trivy-backend-image:
     name: Trivy (Backend Container)
@@ -95,6 +96,7 @@ jobs:
           sarif_file: 'trivy-backend-results.sarif'
           category: 'trivy-backend'
         if: always()
+        continue-on-error: true
 
   trivy-frontend-image:
     name: Trivy (Frontend Container)
@@ -122,6 +124,7 @@ jobs:
           sarif_file: 'trivy-frontend-results.sarif'
           category: 'trivy-frontend'
         if: always()
+        continue-on-error: true
 
   snyk:
     name: Snyk (Dependency Security)
@@ -199,6 +202,7 @@ jobs:
           sarif_file: semgrep-results.sarif
           category: 'semgrep'
         if: always()
+        continue-on-error: true
       
       - name: Upload Semgrep Artifact
         uses: actions/upload-artifact@v4
