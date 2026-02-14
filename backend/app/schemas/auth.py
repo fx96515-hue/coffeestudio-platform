@@ -1,6 +1,9 @@
 import re
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
+# Special characters required in passwords
+SPECIAL_CHARS_PATTERN = r"[!@#$%^&*(),.?\":{}|<>_\-+=\[\]\\\/;'`~]"
+
 
 class LoginRequest(BaseModel):
     email: EmailStr
@@ -55,7 +58,7 @@ class LoginRequest(BaseModel):
             )
         if not re.search(r"\d", v):
             raise ValueError("Passwort muss mindestens eine Ziffer enthalten")
-        if not re.search(r"[!@#$%^&*(),.?\":{}|<>_\-+=\[\]\\\/;'`~]", v):
+        if not re.search(SPECIAL_CHARS_PATTERN, v):
             raise ValueError(
                 "Passwort muss mindestens ein Sonderzeichen enthalten"
             )
