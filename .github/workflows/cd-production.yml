@@ -26,18 +26,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.version || github.ref }}
+          ref: ${{ inputs.version || github.ref
       
       - name: Create Deployment
         id: deployment
         uses: chrnorm/deployment-action@v2
         with:
-          token: ${{ github.token }}
+          token: ${{ github.token
           environment: production
           description: 'Deploying ${{ inputs.version || github.ref_name }} to production'
       
       - name: Configure SSH
-        if: ${{ secrets.PRODUCTION_SSH_KEY != '' }}
+        if: secrets.PRODUCTION_SSH_KEY != ''
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.PRODUCTION_SSH_KEY }}" > ~/.ssh/id_rsa
@@ -45,7 +45,7 @@ jobs:
           ssh-keyscan -H ${{ secrets.PRODUCTION_HOST }} >> ~/.ssh/known_hosts
       
       - name: Backup Database
-        if: ${{ secrets.PRODUCTION_SSH_KEY != '' }}
+        if: secrets.PRODUCTION_SSH_KEY != ''
         run: |
           ssh ${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }} << 'EOF'
             set -e
@@ -57,7 +57,7 @@ jobs:
         continue-on-error: true
       
       - name: Deploy to Production
-        if: ${{ secrets.PRODUCTION_SSH_KEY != '' }}
+        if: secrets.PRODUCTION_SSH_KEY != ''
         run: |
           ssh ${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }} << 'EOF'
             set -e
@@ -65,7 +65,7 @@ jobs:
             echo "Fetching latest tags..."
             git fetch --tags
             echo "Checking out version ${{ inputs.version || github.ref_name }}..."
-            git checkout ${{ inputs.version || github.ref_name }}
+            git checkout ${{ inputs.version || github.ref_name
             echo "Pulling Docker images..."
             docker compose pull
             echo "Starting services..."
@@ -76,7 +76,7 @@ jobs:
           EOF
       
       - name: Deploy (No SSH - Placeholder)
-        if: ${{ secrets.PRODUCTION_SSH_KEY == '' }}
+        if: secrets.PRODUCTION_SSH_KEY == ''
         run: |
           echo "⚠️ PRODUCTION_SSH_KEY not configured"
           echo "This is a placeholder deployment step"
@@ -112,7 +112,7 @@ jobs:
         continue-on-error: false
       
       - name: Rollback on Failure
-        if: ${{ failure() && steps.health.outcome == 'failure' && secrets.PRODUCTION_SSH_KEY != '' }}
+        if: ${{ failure() && steps.health.outcome == 'failure' && secrets.PRODUCTION_SSH_KEY != ''
         run: |
           echo "⚠️ Health check failed, initiating rollback..."
           ssh ${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }} << 'EOF'
@@ -127,7 +127,7 @@ jobs:
           EOF
       
       - name: Verify Rollback
-        if: ${{ failure() && steps.health.outcome == 'failure' && secrets.PRODUCTION_SSH_KEY != '' }}
+        if: ${{ failure() && steps.health.outcome == 'failure' && secrets.PRODUCTION_SSH_KEY != ''
         run: |
           sleep 30
           echo "Verifying rollback..."
@@ -147,8 +147,8 @@ jobs:
         if: success()
         uses: chrnorm/deployment-status@v2
         with:
-          token: ${{ github.token }}
-          deployment-id: ${{ steps.deployment.outputs.deployment_id }}
+          token: ${{ github.token
+          deployment-id: ${{ steps.deployment.outputs.deployment_id
           state: 'success'
           environment-url: https://coffeestudio.example.com
       
@@ -156,15 +156,15 @@ jobs:
         if: failure()
         uses: chrnorm/deployment-status@v2
         with:
-          token: ${{ github.token }}
-          deployment-id: ${{ steps.deployment.outputs.deployment_id }}
+          token: ${{ github.token
+          deployment-id: ${{ steps.deployment.outputs.deployment_id
           state: 'failure'
       
       - name: Notify Team
-        if: ${{ always() && secrets.SLACK_WEBHOOK != '' }}
+        if: ${{ always() && secrets.SLACK_WEBHOOK != ''
         uses: slackapi/slack-github-action@v1
         with:
-          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+          webhook-url: ${{ secrets.SLACK_WEBHOOK
           payload: |
             {
               "text": "🚨 Production Deployment: ${{ job.status }}",
