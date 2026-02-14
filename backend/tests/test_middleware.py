@@ -125,3 +125,34 @@ def test_cors_configuration():
     assert response.status_code == 200
     # Note: TestClient doesn't process CORS middleware the same as a real browser
     # but we can verify the middleware is configured in main.py
+
+
+def test_cors_options_request():
+    """Test that OPTIONS requests are handled correctly."""
+    headers = {
+        "Origin": "http://localhost:3000",
+        "Access-Control-Request-Method": "POST",
+        "Access-Control-Request-Headers": "Content-Type,Authorization",
+    }
+    response = client.options("/health", headers=headers)
+    
+    # OPTIONS should be allowed
+    assert response.status_code in [200, 204]
+
+
+def test_cors_allowed_methods():
+    """Test that only allowed methods are configured."""
+    # This is a smoke test to ensure CORS middleware is properly configured
+    # The actual method restriction is tested in integration/E2E tests
+    from app.main import app
+    
+    # Find CORS middleware
+    cors_middleware = None
+    for middleware in app.user_middleware:
+        if "CORSMiddleware" in str(middleware):
+            cors_middleware = middleware
+            break
+    
+    # CORS middleware should be configured
+    assert cors_middleware is not None, "CORS middleware should be configured"
+
