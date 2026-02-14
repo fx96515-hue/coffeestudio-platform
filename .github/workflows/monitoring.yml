@@ -19,10 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     # Only run after successful production deployment, on schedule, or manual trigger
     # Skip if this is being triggered by CI/CD on main branch (not after production deployment)
-    if: |
-      github.event_name == 'workflow_dispatch' || 
-      github.event_name == 'schedule' ||
-      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+    if: "github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')"
     
     steps:
       - name: Check if production is configured
