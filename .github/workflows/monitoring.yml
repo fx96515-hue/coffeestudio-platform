@@ -17,9 +17,18 @@ jobs:
   monitor-production:
     name: Monitor Production Health
     runs-on: ubuntu-latest
+    # Only run after successful production deployment, on schedule, or manual trigger
+    # This won't block CI since it doesn't run on push/PR
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
     
     steps:
+      - name: Check if production is configured
+        id: check_config
+        run: |
+          echo "ℹ️ Monitoring production environment: https://coffeestudio.example.com"
+          echo "⚠️ Note: This workflow is expected to fail if production is not deployed"
+          echo "This is normal during development and does not block CI/CD"
+      
       - name: Wait for services to stabilize
         if: github.event_name == 'workflow_run'
         run: sleep 120

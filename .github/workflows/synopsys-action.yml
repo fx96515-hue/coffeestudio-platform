@@ -19,6 +19,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    # Only run if at least one Synopsys service is configured
+    if: ${{ secrets.COVERITY_URL != '' || secrets.BLACKDUCK_URL != '' || secrets.POLARIS_SERVER_URL != '' }}
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -38,5 +41,30 @@ jobs:
           polaris_server_url: ${{ secrets.POLARIS_SERVER_URL }}
           polaris_access_token: ${{ secrets.POLARIS_ACCESS_TOKEN }}
           polaris_assessment_types: "SCA,SAST"
+  
+  skip-synopsys:
+    name: Synopsys Scan (Skipped - No Credentials)
+    runs-on: ubuntu-latest
+    # Only run if NO Synopsys services are configured
+    if: ${{ secrets.COVERITY_URL == '' && secrets.BLACKDUCK_URL == '' && secrets.POLARIS_SERVER_URL == '' }}
+    
+    steps:
+      - name: Skip Synopsys Scan
+        run: |
+          echo "⚠️ Synopsys security scan skipped - credentials not configured"
+          echo "To enable Synopsys scanning, configure secrets for at least one service:"
+          echo ""
+          echo "Coverity (SAST):"
+          echo "  - COVERITY_URL: Coverity server URL"
+          echo "  - COVERITY_USER: Coverity username"
+          echo "  - COVERITY_PASSPHRASE: Coverity passphrase"
+          echo ""
+          echo "Black Duck (SCA):"
+          echo "  - BLACKDUCK_URL: Black Duck server URL"
+          echo "  - BLACKDUCK_API_TOKEN: Black Duck API token"
+          echo ""
+          echo "Polaris (SAST/SCA):"
+          echo "  - POLARIS_SERVER_URL: Polaris server URL"
+          echo "  - POLARIS_ACCESS_TOKEN: Polaris access token"
 
 
